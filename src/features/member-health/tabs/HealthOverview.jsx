@@ -250,7 +250,19 @@ export default function HealthOverview() {
             <div className="text-sm font-semibold text-swoop-text">
               {allMembers.length} members imported: connect golf and dining data to protect at-risk dues
             </div>
-            <div className="text-xs text-swoop-text-muted mt-1 leading-relaxed">
+            {(() => {
+              const totalAnnualDues = allMembers.reduce((sum, m) => sum + (m.memberValueAnnual || m.duesAnnual || 0), 0);
+              return totalAnnualDues > 0 ? (
+                <div className="mt-2 flex items-center gap-4 flex-wrap">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">Total Annual Dues in Roster</span>
+                    <span className="text-xl font-bold font-mono text-success-500">${totalAnnualDues.toLocaleString()}</span>
+                    <span className="text-[10px] text-swoop-text-muted">across {allMembers.length} members — at-risk share quantified after activity data flows in</span>
+                  </div>
+                </div>
+              ) : null;
+            })()}
+            <div className="text-xs text-swoop-text-muted mt-2 leading-relaxed">
               Detect 82→61 health score drops, track the cross-domain decay sequence, and protect at-risk annual dues before members resign (NGCOA pilot average: $32K+ retained per saved member, based on avg $800/mo dues over 40-month member tenure*).
             </div>
             <div className="text-[10px] text-swoop-text-ghost mt-1.5">* Based on Swoop 2023–2024 pilot data across 12 private clubs.</div>

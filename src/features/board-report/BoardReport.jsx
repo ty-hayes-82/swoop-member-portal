@@ -170,6 +170,9 @@ export default function BoardReport() {
   const dist = getHealthDistribution();
   // Use getMemberSummary for at-risk counts so Board Report matches Members page
   const memberSummaryForCount = getMemberSummary();
+  // Single at-risk count source for both the top signal card and the narrative text —
+  // eliminates the 62 vs 57 mismatch between different data sources (P0 #5)
+  const atRiskCount = (dist.find(d => d.level === 'At Risk')?.count || 0) + (dist.find(d => d.level === 'Critical')?.count || 0);
 
   const totalDues = memberSaves.reduce((sum, m) => sum + (m.duesAtRisk || 0), 0);
   const totalOpsRevenue = operationalSaves.reduce((sum, o) => sum + (o.revenueProtected || 0), 0);
@@ -287,12 +290,11 @@ export default function BoardReport() {
 
       {/* Top 3 Signals — GM-first summary before any raw KPIs */}
       {(() => {
-        const distAtRiskCount = (dist.find(d => d.level === 'At Risk')?.count || 0) + (dist.find(d => d.level === 'Critical')?.count || 0);
         const signals = [
           memberSaves.length > 0
             ? { icon: '🛡️', color: '#22c55e', label: `${memberSaves.length} member${memberSaves.length !== 1 ? 's' : ''} retained`, sub: `$${totalDues.toLocaleString()} in annual dues protected through early intervention` }
-            : (distAtRiskCount > 0)
-              ? { icon: '⚠️', color: '#ef4444', label: `${distAtRiskCount} member${distAtRiskCount !== 1 ? 's' : ''} at risk`, sub: 'Proactive outreach recommended before dues renewal window' }
+            : (atRiskCount > 0)
+              ? { icon: '⚠️', color: '#ef4444', label: `${atRiskCount} member${atRiskCount !== 1 ? 's' : ''} at risk`, sub: 'Proactive outreach recommended before dues renewal window' }
               : null,
           operationalSaves.length > 0
             ? { icon: '⚡', color: '#60a5fa', label: `${operationalSaves.length} operational issue${operationalSaves.length !== 1 ? 's' : ''} prevented`, sub: `$${totalOpsRevenue.toLocaleString()} in operational revenue protected` }
@@ -426,7 +428,7 @@ export default function BoardReport() {
                 successfully re-engaged, demonstrating the value of early detection and personal outreach.</>
               ) : (
                 <>We are actively monitoring <strong>{kpis.find(k => k.label === 'Active Members')?.value ?? kpis[0]?.value ?? 0} members</strong> for engagement signals.
-                {(kpis.find(k => k.label === 'At Risk')?.value ?? 0) > 0 && <> <strong>{kpis.find(k => k.label === 'At Risk').value} members</strong> have been flagged as at-risk and prioritized for outreach.</>}
+                {atRiskCount > 0 && <> <strong>{atRiskCount} members</strong> have been flagged as at-risk and prioritized for outreach.</>}
                 {' '}Early detection is live: intervention opportunities surface in the Action Inbox as patterns emerge.</>
               )}
             </p>
@@ -743,6 +745,9 @@ export default function BoardReport() {
                         <div className="text-xs text-swoop-text-muted">POS Transactions</div>
                         <div className="text-[10px] text-swoop-text-label mt-1">spend patterns mapped</div>
                       </div>
+                    </div>
+                    <div className="rounded-lg border border-brand-500/20 bg-brand-500/[0.06] px-3.5 py-2.5 text-xs text-swoop-text-muted leading-relaxed">
+                      <span className="font-semibold text-brand-400">Recommended action:</span> Tighten tee sheet intervals on slow-pace days and station a beverage cart at the turn to recover dining conversion on rounds over 4 hours.
                     </div>
                   </div>
                 );

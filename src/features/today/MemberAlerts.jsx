@@ -141,6 +141,22 @@ export default function MemberAlerts() {
   const { navigate } = useNavigation();
   const members = buildPriorityList();
   const [bulkApproved, setBulkApproved] = useState(false);
+  const [rowStates, setRowStates] = useState({}); // memberId -> 'approved' | 'dismissed'
+
+  const handleRowAction = (memberId, action, memberName, memberAction) => {
+    setRowStates(prev => ({ ...prev, [memberId]: action }));
+    if (action === 'approved') {
+      trackAction({
+        actionType: 'approve',
+        actionSubtype: 'member_alert',
+        memberId,
+        memberName,
+        referenceType: 'priority_member',
+        referenceId: `alert_${memberId}`,
+        description: `Approved outreach: ${memberAction}`,
+      });
+    }
+  };
 
   const handleBulkApprove = () => {
     if (members.length === 0) return;
@@ -242,14 +258,19 @@ export default function MemberAlerts() {
       <div className="flex flex-col gap-2">
         {members.map((m) => {
           // Canonical §2.8 tint pair: severity color drives background + border.
-          // Bulk-approved rows shift to green success tint.
-          const severityRgb = bulkApproved
+          // Bulk-approved rows shift to green success tint; individually approved/dismissed rows too.
+          const rowState = rowStates[m.memberId];
+          const isRowApproved = bulkApproved || rowState === 'approved';
+          const isRowDismissed = rowState === 'dismissed';
+          const severityRgb = isRowApproved
             ? '34,197,94'
+            : isRowDismissed
+            ? '100,100,120'
             : m.score < 30 ? '239,68,68'
             : m.score < 50 ? '243,146,45'
             : '245,158,11';
           const severityColor = `rgb(${severityRgb})`;
-          const severityLabel = bulkApproved ? 'APPROVED' : healthTierLabel(m.score).toUpperCase();
+          const severityLabel = isRowApproved ? 'APPROVED' : isRowDismissed ? 'DISMISSED' : healthTierLabel(m.score).toUpperCase();
           const teeTime = getTeeTimeForMember(m.memberId);
 
           const metaParts = [
@@ -268,7 +289,7 @@ export default function MemberAlerts() {
                 borderColor: `rgba(${severityRgb},0.18)`,
                 flexDirection: 'column',
                 gap: 0,
-                opacity: bulkApproved ? 0.7 : 1,
+                opacity: isRowApproved || isRowDismissed ? 0.6 : 1,
               }}
             >
               {/* Header strip */}
@@ -310,13 +331,41 @@ export default function MemberAlerts() {
                   </span>
                 )}
                 <span style={{ flex: '1 1 0%' }} />
-                <button
-                  type="button"
-                  onClick={() => navigate('members')}
-                  className="swoop-action-btn"
-                >
-                  View →
-                </button>
+                {/* Approve / Dismiss / View segmented control */}
+                <div className="flex items-center gap-1 shrink-0">
+                  {rowStates[m.memberId] === 'approved' ? (
+                    <span className="text-[10px] font-bold text-success-500 px-2">✓ Approved</span>
+                  ) : rowStates[m.memberId] === 'dismissed' ? (
+                    <span className="text-[10px] font-bold text-swoop-text-muted px-2">Dismissed</span>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => handleRowAction(m.memberId, 'approved', m.name, m.action)}
+                        className="px-2.5 py-1 rounded-l-md text-[10px] font-bold bg-success-500/15 text-success-500 border border-success-500/30 hover:bg-success-500/25 transition-colors"
+                        title="Approve recommended outreach"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRowAction(m.memberId, 'dismissed', m.name, m.action)}
+                        className="px-2.5 py-1 text-[10px] font-bold bg-swoop-row text-swoop-text-muted border-y border-swoop-border hover:bg-swoop-border transition-colors"
+                        title="Dismiss this alert"
+                      >
+                        Dismiss
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => navigate('members')}
+                        className="px-2.5 py-1 rounded-r-md text-[10px] font-bold bg-brand-500/10 text-brand-400 border border-brand-500/25 hover:bg-brand-500/20 transition-colors"
+                        title="View member profile"
+                      >
+                        View →
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
 
               {/* Divider + 2-col body */}
@@ -344,7 +393,7 @@ export default function MemberAlerts() {
                     Recommended Action
                   </div>
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)' }}>
-                    {bulkApproved && '✓ '}{m.action}
+                    {isRowApproved && '✓ '}{m.action}
                   </div>
                   {m.duesAnnual > 0 && (
                     <div style={{ fontSize: 11, color: severityColor, fontWeight: 700, marginTop: 4 }}>
