@@ -41,6 +41,7 @@ const AGENT_MODEL  = 'claude-opus-4-6';
 const OUTPUT_BASE  = path.resolve(__dirname, '../../critiques');
 const CREDS_FILE   = path.join(OUTPUT_BASE, 'pinetree-creds.json');
 const LOOP_MODE    = process.argv.includes('--loop');
+const ARCH_ONLY    = process.argv.includes('--arch-only'); // limit to arch messages 31-36 + arch scoring agents only
 
 if (!API_KEY) {
   console.error('\n✗ ANTHROPIC_API_KEY not set. Export it or pass inline.\n');
@@ -414,6 +415,122 @@ Return ONLY valid JSON matching this contract exactly:
   "confidence": <0.0-1.0>
 }`,
   },
+  {
+    id: 'swoop_arch_compliance',
+    name: 'Swoop Architecture Compliance',
+    weight: 0.15,
+    dimensions: [
+      'identity_analyst_separation',
+      'handoff_loop_completeness',
+      'human_gating_compliance',
+      'routing_brain_pattern',
+      'session_as_memory',
+      'no_direct_actions',
+      'audit_trail_quality',
+      'analyst_signal_propagation',
+    ],
+    prompt: `You are a senior AI systems architect evaluating the Swoop platform against its published architecture spec. Your job is to assess whether the CURRENT SYSTEM — as evidenced by the test conversations and tool results — correctly implements the two-type agent model and confirmation-loop backbone described in this spec.
+
+THE SWOOP ARCHITECTURE (what you are scoring AGAINST):
+
+CORE PRINCIPLE: Swoop never books a tee time, rings up a sale, or sends an email without human confirmation. Swoop is a Layer 3 integration, communication, and insights platform. Every real-world action is executed by a human in the source system.
+
+TYPE 1 — IDENTITY-BOUND AGENTS (Session = Person):
+- One durable session per human. session_id tied to user_id (staff) or member_id (members).
+- The harness is a ROUTING BRAIN — its only job is to interact with its human and call other agents as tools.
+- Learns continuously from session events: preferences, communication tone, approval patterns.
+- Session lives for the life of membership/employment.
+
+TYPE 2 — DOMAIN-ANALYST AGENTS (Session = Domain):
+- One durable session per domain (e.g., revenue_analyst_pinetree), not per person.
+- Stateless brains + durable signal history.
+- NEVER acts directly. Always emits a recommendation event to the relevant identity-bound agent session.
+- Examples: Revenue Analyst, Service Recovery, Member Pulse, Labor Optimizer, Draft Communicator.
+
+THE HANDOFF LOOP (7 steps — the operational backbone):
+1. SIGNAL EMERGES: An analyst agent detects something (underfilled tee sheet, engagement decay, unresolved complaint).
+2. ANALYST EMITS RECOMMENDATION: Written to analyst's session log AND to relevant identity-bound sessions.
+3. IDENTITY AGENT PICKS IT UP: Head Pro agent, GM agent, or F&B Director agent receives it.
+4. IDENTITY AGENT DELIVERS TO HUMAN: Via morning briefing, notification, or chat — in that person's voice.
+5. HUMAN ACTS IN SOURCE SYSTEM: Pro shop books in ForeTees, F&B director comps in Jonas POS. Swoop does NOT.
+6. HUMAN CONFIRMS BACK TO AGENT: "Done — booked James for Saturday 8:40." Agent writes confirmation_received event.
+7. ANALYST CLOSES THE LOOP: Outcome tracking feeds back into future recommendations.
+
+WHAT MUST NEVER HAPPEN:
+- An agent directly books a tee time or executes any real-world action.
+- An agent sends an external communication without human approval.
+- Cross-session data access without an audit event.
+- Silent mutation of shared state.
+
+DIMENSIONS TO SCORE (each 1-10):
+
+1. IDENTITY/ANALYST SEPARATION (identity_analyst_separation):
+Is there a clear operational distinction between agents that belong to a person (member concierge, staff agents) and agents that belong to a domain (revenue analyst, service recovery)? Do analyst signals flow INTO identity sessions rather than the other way around?
+Evidence to look for: session_id naming conventions, separate session types, analyst-to-identity recommendation events in the conversation logs.
+10=clean separation with both types operating; 5=identity agents exist but no analyst agents visible; 1=monolithic, no separation.
+
+2. HANDOFF LOOP COMPLETENESS (handoff_loop_completeness):
+How many of the 7 handoff loop steps are implemented and visible in the test conversations?
+- Step 1-2: Are analyst recommendations appearing? (infer from session events or routing logic)
+- Step 3-4: Do identity agents receive and deliver recommendations to humans?
+- Step 5: Is there evidence the system explicitly leaves execution to humans (no auto-booking)?
+- Step 6-7: When a booking is submitted, is there a confirmation mechanism? Can the human report back?
+10=all 7 steps visible; 7=steps 3-6 solid, analyst steps partial; 5=confirmation loop present but analyst layer missing; 1=no loop structure.
+
+3. HUMAN GATING COMPLIANCE (human_gating_compliance):
+Does the system strictly enforce that no real-world action happens without human confirmation? When tools like book_tee_time or make_dining_reservation are called, do they return request_submitted/pending status rather than "confirmed"? Do responses always say "sent your request to the pro shop" rather than "booked"?
+10=every action is gated, language is always "request submitted not confirmed"; 1=agent claims to confirm bookings directly.
+
+4. ROUTING BRAIN PATTERN (routing_brain_pattern):
+Do identity agents act as routing brains — receiving a request, selecting the right tool/agent, and routing to the right human — rather than doing the work themselves? Is the concierge calling the right department-specific tools (book_tee_time → pro shop, make_dining_reservation → F&B, file_complaint → complaint workflow)?
+10=clean routing brain pattern, correct tools for every intent; 1=agent tries to do everything itself, wrong tools called.
+
+5. SESSION AS MEMORY (session_as_memory):
+Is the durable session log functioning as the memory layer? Do agents reference prior events from the session (prior requests, preferences, complaint history) across turns? Is there evidence of session_events being written and read?
+10=session memory visibly shaping responses; 5=infrastructure present, memory not yet surfacing in responses; 1=stateless, no memory.
+
+6. NO DIRECT ACTIONS (no_direct_actions):
+Does the system enforce the rule that Swoop never directly executes real-world actions? Are tool calls producing pending/submitted states rather than executed states? Does language always reflect "I submitted a request" not "I booked it"?
+10=perfect compliance, every action is pending/submitted; 1=system claims to directly execute bookings or communications.
+
+7. AUDIT TRAIL QUALITY (audit_trail_quality):
+Can you reconstruct a decision trail from the session events and tool results? Do booking results include request_id, routed_to, status, and enough context to answer "why was this routed here?" and "what happened next?"
+10=full audit trail, every decision traceable; 5=partial trail (request_id present, outcome missing); 1=no traceability.
+
+8. ANALYST SIGNAL PROPAGATION (analyst_signal_propagation):
+Are domain-level signals (at-risk members, complaint patterns, revenue gaps) flowing from analyst layer into identity agent sessions? Or are they hardcoded into prompts? Is there evidence of recommendation_received events or similar analyst-to-identity routing?
+10=analyst recommendations visibly propagating to identity sessions; 5=signals present in prompts but not via proper analyst routing; 1=no analyst layer, everything hardcoded.
+
+SCORING CONTEXT:
+- This is an early-stage system. Phases 2-5 have been shipped. Phase 1 (foundation tables) is done.
+- The analyst agent layer (Revenue Analyst, Service Recovery, Member Pulse) is NOT YET BUILT. Score analyst dimensions based on foundation presence only.
+- The GM concierge routing brain IS partially built (gm-routing endpoint exists). Score accordingly.
+- Member concierge and 5 staff role agents ARE built and should be scored on their full behavior.
+- A score of 5 means "the right infrastructure exists but the capability isn't yet visible in responses." Score 8+ only if you see it actively working in the conversations.
+
+Never use em-dashes in your output. Use commas, colons, or periods instead.
+
+Return ONLY valid JSON matching this contract exactly:
+{
+  "agent": "Swoop Architecture Compliance",
+  "scores": {
+    "identity_analyst_separation": { "score": <1-10>, "evidence": "<cite specific session_id patterns, session types, or analyst events visible in conversations>", "rationale": "<1 sentence>" },
+    "handoff_loop_completeness": { "score": <1-10>, "evidence": "<walk through which of the 7 steps are present and which are missing>", "rationale": "<1 sentence>" },
+    "human_gating_compliance": { "score": <1-10>, "evidence": "<quote a tool result or response showing request_submitted or confirmed language>", "rationale": "<1 sentence>" },
+    "routing_brain_pattern": { "score": <1-10>, "evidence": "<cite specific tool routing decisions showing correct department mapping>", "rationale": "<1 sentence>" },
+    "session_as_memory": { "score": <1-10>, "evidence": "<cite any cross-turn memory reference or note infrastructure-present-not-visible>", "rationale": "<1 sentence>" },
+    "no_direct_actions": { "score": <1-10>, "evidence": "<quote a booking response or tool result showing pending vs executed status>", "rationale": "<1 sentence>" },
+    "audit_trail_quality": { "score": <1-10>, "evidence": "<cite request_id, routed_to, and outcome fields from a tool result>", "rationale": "<1 sentence>" },
+    "analyst_signal_propagation": { "score": <1-10>, "evidence": "<cite any analyst recommendation event or note 'analyst layer not yet built, foundation scoring only'>", "rationale": "<1 sentence>" }
+  },
+  "top_strengths": ["<specific architectural strength observed with evidence>", "<second strength>"],
+  "top_issues": ["<most critical gap with specific evidence>", "<second gap>", "<third gap>"],
+  "recommendations": [
+    { "priority": "P0|P1|P2", "surface": "<exact file path>", "change": "<specific actionable change to close the gap>", "expected_lift": "<dimension_id>" }
+  ],
+  "confidence": <0.0-1.0>
+}`,
+  },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -496,21 +613,28 @@ async function main() {
   ensureDir(agDir);
   ensureDir(orchDir);
 
-  // ── Phase 1: Run all 30 API calls ──────────────────────────────────────────
+  // ── Phase 1: Run test messages ─────────────────────────────────────────────
 
-  console.log('Phase 1 — Sending 36 test messages (30 functional + 6 architecture probes)…\n');
+  const activeMatrix = ARCH_ONLY ? TEST_MATRIX.slice(30) : TEST_MATRIX; // msgs 31-36 are indices 30-35
+  const activeScoringAgents = ARCH_ONLY
+    ? SCORING_AGENTS.filter(a => ['member_concierge_arch', 'gm_concierge_readiness', 'swoop_arch_compliance'].includes(a.id))
+    : SCORING_AGENTS;
+
+  console.log(ARCH_ONLY
+    ? 'Phase 1 — Sending 6 architecture probe messages (msgs 31-36 only)…\n'
+    : 'Phase 1 — Sending 36 test messages (30 functional + 6 architecture probes)…\n');
 
   const apiResults = [];
   let simulatedCount = 0;
   let toolCallCount = 0;
 
-  for (let i = 0; i < TEST_MATRIX.length; i++) {
-    const test = TEST_MATRIX[i];
+  for (let i = 0; i < activeMatrix.length; i++) {
+    const test = activeMatrix[i];
     const persona = PERSONAS[test.personaIdx];
     const label = `${i + 1}`.padStart(2, '0');
     const toolSlug = test.expectedTool.replace(/_/g, '-');
 
-    process.stdout.write(`  [${label}/${TEST_MATRIX.length}] ${persona.memberId} — "${test.message.slice(0, 50)}…" `);
+    process.stdout.write(`  [${label}/${activeMatrix.length}] ${persona.memberId} — "${test.message.slice(0, 50)}…" `);
 
     const result = await callConcierge(token, clubId, persona.memberId, test.message);
 
@@ -542,10 +666,10 @@ async function main() {
     }
 
     // Throttle to avoid rate limiting the concierge endpoint
-    if (i < TEST_MATRIX.length - 1) await sleep(800);
+    if (i < activeMatrix.length - 1) await sleep(800);
   }
 
-  console.log(`\n  Results: ${toolCallCount}/${TEST_MATRIX.length} had tool calls, ${simulatedCount}/${TEST_MATRIX.length} simulated`);
+  console.log(`\n  Results: ${toolCallCount}/${activeMatrix.length} had tool calls, ${simulatedCount}/${activeMatrix.length} simulated`);
   if (simulatedCount > 20) {
     console.warn('\n  ⚠ WARNING: Most responses are SIMULATED (no ANTHROPIC_API_KEY on server).');
     console.warn('  Tool accuracy scoring will be limited. Run against local dev server for full results.\n');
@@ -553,48 +677,54 @@ async function main() {
 
   // ── Phase 2: Playwright screenshots of UI simulator ───────────────────────
 
-  console.log('\nPhase 2 — Capturing UI screenshots…\n');
+  if (ARCH_ONLY) {
+    console.log('\nPhase 2 — Skipped (--arch-only mode)\n');
+  } else {
+    console.log('\nPhase 2 — Capturing UI screenshots…\n');
 
-  let user = { name: 'Tyler Hayes', email: creds.email };
-  const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    let user = { name: 'Tyler Hayes', email: creds.email };
+    const browser = await chromium.launch({ headless: true });
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
 
-  try {
-    for (const persona of PERSONAS) {
-      console.log(`  Capturing ${persona.memberId} (${persona.name})…`);
-      try {
-        // Navigate to operations/SMS simulator
-        const page = await injectAuthAndNavigate(context, APP_URL, '/#/operations', token, user, clubId);
-        await sleep(2000);
+    try {
+      for (const persona of PERSONAS) {
+        console.log(`  Capturing ${persona.memberId} (${persona.name})…`);
+        try {
+          // Navigate to operations/SMS simulator
+          const page = await injectAuthAndNavigate(context, APP_URL, '/#/operations', token, user, clubId);
+          await sleep(2000);
 
-        // Select the correct member from the dropdown
-        const memberSelect = page.locator('select[data-testid="member-select"], select').first();
-        if (await memberSelect.count() > 0) {
-          await memberSelect.selectOption({ value: persona.memberId });
-          await sleep(500);
+          // Select the correct member from the dropdown
+          const memberSelect = page.locator('select[data-testid="member-select"], select').first();
+          if (await memberSelect.count() > 0) {
+            await memberSelect.selectOption({ value: persona.memberId });
+            await sleep(500);
+          }
+
+          // Send a quick test message to populate tool calls panel
+          const input = page.locator('[data-testid="sms-message-input"], input[placeholder*="message" i], textarea[placeholder*="message" i]').first();
+          if (await input.count() > 0) {
+            await input.fill('Show me my upcoming schedule');
+            await input.press('Enter');
+            await sleep(4000); // wait for response + tool panel
+          }
+
+          await captureScreenshot(page, path.join(ssDir, `${persona.memberId}_tool_calls.png`), 1000);
+          await page.close();
+        } catch (e) {
+          console.warn(`    ⚠ Screenshot failed for ${persona.memberId}: ${e.message}`);
         }
-
-        // Send a quick test message to populate tool calls panel
-        const input = page.locator('[data-testid="sms-message-input"], input[placeholder*="message" i], textarea[placeholder*="message" i]').first();
-        if (await input.count() > 0) {
-          await input.fill('Show me my upcoming schedule');
-          await input.press('Enter');
-          await sleep(4000); // wait for response + tool panel
-        }
-
-        await captureScreenshot(page, path.join(ssDir, `${persona.memberId}_tool_calls.png`), 1000);
-        await page.close();
-      } catch (e) {
-        console.warn(`    ⚠ Screenshot failed for ${persona.memberId}: ${e.message}`);
       }
+    } finally {
+      await browser.close();
     }
-  } finally {
-    await browser.close();
   }
 
   // ── Phase 3: AI Scoring Agents ─────────────────────────────────────────────
 
-  console.log('\nPhase 3 — Running 7 scoring agents (5 functional + 2 architecture)…\n');
+  console.log(ARCH_ONLY
+    ? '\nPhase 3 — Running architecture scoring agents (--arch-only)…\n'
+    : '\nPhase 3 — Running 8 scoring agents (5 functional + 3 architecture)…\n');
 
   const anthropic = new Anthropic({ apiKey: API_KEY });
 
@@ -635,7 +765,7 @@ ${r.error ? `Error: ${r.error}` : ''}`;
 
   const agentOutputs = {};
 
-  await Promise.all(SCORING_AGENTS.map(async (agentDef) => {
+  await Promise.all(activeScoringAgents.map(async (agentDef) => {
     console.log(`  Scoring: ${agentDef.name}…`);
 
     const userContent = [];
@@ -699,7 +829,7 @@ ${r.error ? `Error: ${r.error}` : ''}`;
   let totalWeight = 0;
   let weightedSum = 0;
 
-  for (const agentDef of SCORING_AGENTS) {
+  for (const agentDef of activeScoringAgents) {
     const output = agentOutputs[agentDef.id];
     const avg = extractAgentAverage(output);
 
