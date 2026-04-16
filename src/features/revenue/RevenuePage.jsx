@@ -69,7 +69,7 @@ export default function RevenuePage() {
       actionSubtype: 'deploy_ranger',
       referenceType: 'revenue_recommendation',
       referenceId: `ranger_hole_${hole}`,
-      description: `Deploy ranger to Hole ${hole} on weekends — projected $${estimatedRecovery.toLocaleString()}/mo recovery`,
+      description: `Deploy ranger to Hole ${hole} on weekends. Projected $${estimatedRecovery.toLocaleString()}/mo recovery.`,
     });
     setRangerDeployed(true);
     if (showToast) {
@@ -148,9 +148,9 @@ export default function RevenuePage() {
                         <div className="text-sm text-swoop-text-muted mb-3">
                           Swoop will cross-reference POS checks against tee sheet rounds, identifying which rounds skip dining and quantifying the revenue impact per slow hole.
                         </div>
-                        <div className="grid grid-cols-2 gap-3 text-center">
+                        <div className="grid grid-cols-2 gap-3 text-center mb-3">
                           {[
-                            { label: 'Industry avg leakage', value: '$8,400/mo', sub: 'benchmark: not your data yet' },
+                            { label: 'Industry avg monthly leakage', value: '$8,400/mo', sub: 'benchmark: not your data yet' },
                             { label: 'Time to insight', value: '< 2 min', sub: 'after tee sheet import' },
                           ].map(({ label, value, sub }) => (
                             <div key={label} className="rounded-lg p-3 border border-swoop-border-inset bg-swoop-row">
@@ -160,6 +160,13 @@ export default function RevenuePage() {
                             </div>
                           ))}
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => navigate('integrations')}
+                          className="w-full py-2.5 rounded-lg text-sm font-bold bg-brand-500 text-white hover:bg-brand-600 transition-colors"
+                        >
+                          Connect Tee Sheet →
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -177,7 +184,7 @@ export default function RevenuePage() {
                   <span className="text-base text-swoop-text-muted">/mo avg revenue leakage</span>
                 </div>
                 <p className="text-xs text-swoop-text-muted m-0">
-                  For a 400-member club. Swoop cross-references your tee sheet, POS, and scheduling data to tell you exactly where these dollars go — and what stops them.
+                  For a 400-member club. Swoop cross-references your tee sheet, POS, and scheduling data to tell you exactly where these dollars go and what stops them.
                 </p>
               </div>
 
@@ -187,7 +194,7 @@ export default function RevenuePage() {
                   <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">What Swoop will quantify for you</div>
                 </div>
                 {[
-                  { label: 'Pace of Play', desc: 'Slow rounds suppress F&B conversion — Swoop identifies which holes and shifts', est: '$3,200–$5,000', color: '#ef4444', icon: '⛳', source: 'Tee Sheet + POS' },
+                  { label: 'Pace of Play', desc: 'Slow rounds suppress F&B conversion. Swoop identifies which holes and shifts.', est: '$3,200–$5,000', color: '#ef4444', icon: '⛳', source: 'Tee Sheet + POS' },
                   { label: 'Understaffing', desc: 'Gaps in shift coverage drive complaints and reduce check sizes', est: '$1,800–$2,800', color: '#f59e0b', icon: '👥', source: 'Scheduling' },
                   { label: 'Weather No-Shows', desc: 'Revenue lost to cancelled rounds on adverse-weather days', est: '$800–$1,200', color: '#60a5fa', icon: '🌧️', source: 'Weather API + Tee Sheet' },
                 ].map(row => (
@@ -281,7 +288,7 @@ export default function RevenuePage() {
               })()}
             </div>
             <p className="text-sm text-swoop-text-muted mt-1">
-              Before members resign, they stop spending. Slow rounds, understaffed shifts, and missed dining — quantified across every system before it shows up in dues revenue.
+              Before members resign, they stop spending. Slow rounds, understaffed shifts, and missed dining: quantified across every system before it shows up in dues revenue.
             </p>
           </div>
           <button
@@ -311,7 +318,7 @@ export default function RevenuePage() {
             <div className="h-10 w-px bg-swoop-border hidden sm:block" />
             <div className="text-sm text-swoop-text-muted leading-relaxed max-w-md">
               Dining conversion drops from <span className="font-bold text-swoop-text">41% → 22%</span> when rounds run long.
-              Every slow round costs your F&B operation <span className="font-bold text-error-500">${dollarPerSlowRound}</span> in missed revenue — before a single member decides not to renew.
+              Every slow round costs your F&B operation <span className="font-bold text-error-500">${dollarPerSlowRound}</span> in missed revenue, before a single member decides not to renew.
             </div>
           </div>
         )}
@@ -382,7 +389,7 @@ export default function RevenuePage() {
                 $<AnimatedNumber value={leakage.STAFFING_LOSS} duration={1200} />
               </div>
               <SourceBadge system="Scheduling" size="xs" />
-              <div className="text-[11px] text-swoop-text-label mt-1.5 leading-snug group-hover:text-brand-500 transition-colors">Short-staffed Fridays drop dining conversion — same root cause as slow rounds. View staffing →</div>
+              <div className="text-[11px] text-swoop-text-label mt-1.5 leading-snug group-hover:text-brand-500 transition-colors">Short-staffed Fridays drop dining conversion: same root cause as slow rounds. View staffing →</div>
             </button>
           ) : (
             <div className="bg-swoop-row border border-dashed border-swoop-border rounded-xl p-4 opacity-70">
@@ -454,7 +461,7 @@ export default function RevenuePage() {
           </div>
           {chartDisplayData.some(d => d.locked) && (
             <div className="text-[10px] text-swoop-text-label mt-1 italic">
-              Grey bars = data source not yet connected — connect scheduling and weather to compute those leakage buckets
+              Grey bars = data source not yet connected. Connect scheduling and weather to compute those leakage buckets.
             </div>
           )}
         </Panel>
@@ -592,7 +599,7 @@ export default function RevenuePage() {
         )}
 
         <AgentUpsell
-          agentName="Understaffed Fridays — AI Fix Available"
+          agentName="Auto-Draft Server Call-ins for Understaffed Fridays"
           benefit="Staffing-Demand Agent predicts Friday coverage gaps from weather + demand and auto-drafts server call-ins to close the second root cause. Recovers"
           metric={`$${leakage.STAFFING_LOSS.toLocaleString()}/mo.`}
         />

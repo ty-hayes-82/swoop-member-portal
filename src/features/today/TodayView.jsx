@@ -113,12 +113,12 @@ function buildCheckinAlerts() {
       isVip: t.duesAnnual >= 20000,
       talkingPoints: t.healthScore < 50
         ? [
-            t.cartPrep?.note?.includes('complaint') ? 'Acknowledge recent complaint — show you\'re aware and it\'s being fixed' : 'Ask about their recent experience — listen for friction points',
-            `Playing ${t.course} course at ${t.time} — ${t.group.length > 1 ? `with ${t.group.filter(g => g !== t.name).join(', ')}` : 'solo today'}`,
+            t.cartPrep?.note?.includes('complaint') ? 'Acknowledge recent complaint: show you\'re aware and it\'s being fixed' : 'Ask about their recent experience: listen for friction points',
+            `Playing ${t.course} course at ${t.time}${t.group.length > 1 ? `, with ${t.group.filter(g => g !== t.name).join(', ')}` : ', solo today'}`,
             t.archetype === 'Declining' ? 'Invite to upcoming event to re-engage' : 'Mention a specific improvement the club has made recently',
           ]
         : [
-            `VIP member ($${(t.duesAnnual / 1000).toFixed(0)}K dues) — personal greeting at the starter`,
+            `VIP member ($${(t.duesAnnual / 1000).toFixed(0)}K dues): personal greeting at the starter`,
             `Playing ${t.course} at ${t.time} with ${t.group.filter(g => g !== t.name).join(', ') || 'group'}`,
             'Thank them for their continued membership',
           ],
@@ -206,9 +206,9 @@ function getGreeting() {
   const stored = localStorage.getItem('swoop_auth_user');
   const firstName = stored ? (() => { try { return getFirstName(JSON.parse(stored).name || ''); } catch { return ''; } })() : '';
   const nameStr = firstName ? `, ${firstName}` : '';
-  if (hour < 12) return `Good morning${nameStr} — here's what needs your attention today`;
-  if (hour < 17) return `Afternoon check-in${nameStr} — here's where things stand`;
-  return `Good evening${nameStr} — end-of-day summary`;
+  if (hour < 12) return `Good morning${nameStr}. Here's what needs your attention today.`;
+  if (hour < 17) return `Afternoon check-in${nameStr}. Here's where things stand.`;
+  return `Good evening${nameStr}. End-of-day summary.`;
 }
 
 function formatDate() {
@@ -279,9 +279,9 @@ export default function TodayView() {
     const hasTeeSheet = isGateOpen('tee-sheet');
     const hasPOS = isGateOpen('fb');
     const steps = [
-      { id: 'members', label: 'Member Roster', done: hasMembersGate, preview: "Who's going quiet and why — health scores, dues at risk, at-risk alerts" },
-      { id: 'tee-sheet', label: 'Tee Sheet', done: hasTeeSheet, preview: "Today's bookings with health scores — know which at-risk members are on the course right now" },
-      { id: 'fb', label: 'POS / F&B', done: hasPOS, preview: 'F&B leakage from slow rounds and understaffing — quantified to the dollar' },
+      { id: 'members', label: 'Member Roster', done: hasMembersGate, preview: "Who's going quiet and why: health scores, dues at risk, at-risk alerts" },
+      { id: 'tee-sheet', label: 'Tee Sheet', done: hasTeeSheet, preview: "Today's bookings with health scores. Know which at-risk members are on the course right now." },
+      { id: 'fb', label: 'POS / F&B', done: hasPOS, preview: 'F&B leakage from slow rounds and understaffing, quantified to the dollar' },
     ];
     const connectedCount = steps.filter(s => s.done).length;
     return (
@@ -318,7 +318,7 @@ export default function TodayView() {
             {connectedCount > 0 && (
               <div className="px-5 py-2.5 bg-success-50 border-t border-success-100">
                 <span className="text-xs text-success-700 font-semibold">{connectedCount} of 3 source{connectedCount !== 1 ? 's' : ''} connected</span>
-                <span className="text-xs text-swoop-text-muted"> — connect your remaining sources to activate the full briefing</span>
+                <span className="text-xs text-swoop-text-muted">: connect your remaining sources to activate the full briefing</span>
               </div>
             )}
           </div>

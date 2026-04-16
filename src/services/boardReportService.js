@@ -106,9 +106,9 @@ export const getKPIs = () => {
     const retentionPct = total > 0 ? Math.round(((total - atRisk) / total) * 100) : 0;
     const liveRetained = _liveKpis?.membersSaved > 0 ? _liveKpis.membersSaved : (healthy > 0 ? healthy : activeMembers);
     return [
-      { label: 'Active Members', value: liveRetained, unit: 'members', prefix: '', suffix: '', color: 'success', description: `${total} total — ${atRisk} at risk, ${summary.critical || 0} critical` },
+      { label: 'Active Members', value: liveRetained, unit: 'members', prefix: '', suffix: '', color: 'success', description: `${total} total, ${atRisk} at risk, ${summary.critical || 0} critical` },
       { label: 'Dues at Risk', value: Math.round((summary.potentialDuesAtRisk || 0) / 1000), unit: '$K', prefix: '$', suffix: 'K', color: 'warning', description: 'Annual dues from at-risk + critical members' },
-      { label: 'Retention Rate', value: retentionPct, unit: '%', prefix: '', suffix: '%', color: retentionPct >= 80 ? 'success' : 'warning', description: 'Non-critical members as % of total' },
+      { label: 'Non-Critical Rate', value: retentionPct, unit: '%', prefix: '', suffix: '%', color: retentionPct >= 80 ? 'success' : 'warning', description: 'Members not flagged critical, as % of total' },
       { label: 'At Risk', value: atRisk, unit: 'members', prefix: '', suffix: '', color: 'error', description: 'Members needing attention' },
     ];
   }

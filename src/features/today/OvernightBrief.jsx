@@ -43,7 +43,7 @@ function buildBullets({ memberSummary, leakage, pendingCount, briefing, teeSheet
   const duesAtRisk = memberSummary.potentialDuesAtRisk || 0;
   if (riskCount > 0) {
     const duesText = duesAtRisk > 0
-      ? ` — $${Math.round(duesAtRisk / 1000)}K in annual dues at risk`
+      ? `: $${Math.round(duesAtRisk / 1000)}K in annual dues at risk`
       : '';
     bullets.push({
       icon: '🔴',
@@ -58,7 +58,7 @@ function buildBullets({ memberSummary, leakage, pendingCount, briefing, teeSheet
   if (leakage?.TOTAL > 0) {
     bullets.push({
       icon: '💸',
-      text: `$${leakage.TOTAL.toLocaleString()}/mo in F&B leakage detected — pace, staffing, and weather gaps`,
+      text: `$${leakage.TOTAL.toLocaleString()}/mo in F&B leakage detected: pace, staffing, and weather gaps`,
       nav: 'revenue',
       navOpts: null,
       urgent: riskCount === 0,
@@ -72,7 +72,7 @@ function buildBullets({ memberSummary, leakage, pendingCount, briefing, teeSheet
       const topMember = atRiskOnSheet.sort((a, b) => (a.healthScore || 100) - (b.healthScore || 100))[0];
       bullets.push({
         icon: '⛳',
-        text: `${atRiskOnSheet.length} at-risk member${atRiskOnSheet.length === 1 ? '' : 's'} on today's tee sheet — ${topMember.name || 'a member'} tees off at ${topMember.time || 'soon'}`,
+        text: `${atRiskOnSheet.length} at-risk member${atRiskOnSheet.length === 1 ? '' : 's'} on today's tee sheet. ${topMember.name || 'A member'} tees off at ${topMember.time || 'soon'}.`,
         nav: 'tee-sheet',
         navOpts: null,
         urgent: false,
@@ -84,7 +84,7 @@ function buildBullets({ memberSummary, leakage, pendingCount, briefing, teeSheet
   if (memberSummary.watch > 0 && bullets.length < 4) {
     bullets.push({
       icon: '👁️',
-      text: `${memberSummary.watch} member${memberSummary.watch === 1 ? '' : 's'} on watch — engagement declining but not yet critical`,
+      text: `${memberSummary.watch} member${memberSummary.watch === 1 ? '' : 's'} on watch: engagement declining but not yet critical`,
       nav: 'members',
       navOpts: null,
       urgent: false,

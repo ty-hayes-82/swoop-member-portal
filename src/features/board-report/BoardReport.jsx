@@ -56,19 +56,37 @@ const KPI_SOURCES = {
   'Dues at Risk': ['Member CRM', 'Analytics'],
   'Service Consistency': ['Complaints', 'Scheduling'],
   'Operational Response': ['All Systems'],
-  'Retention Rate': ['Member CRM', 'Analytics'],
+  'Non-Critical Rate': ['Member CRM', 'Analytics'],
   'At Risk': ['Member CRM', 'Analytics'],
   'Board Confidence Score': ['All Systems'],
 };
 
 const KPI_NAV = {
   'At Risk': 'members',
-  'Retention Rate': 'members',
+  'Non-Critical Rate': 'members',
   'Dues at Risk': 'revenue',
   'Dues Protected': 'revenue',
   'Service Consistency': 'service',
   'Operational Response': 'automations',
 };
+
+// Humanize raw complaint category slugs from CSV data
+const CATEGORY_LABELS = {
+  'staff_service': 'Staff Service',
+  'food_quality': 'Food Quality',
+  'course_conditions': 'Course Conditions',
+  'pace_of_play': 'Pace of Play',
+  'facilities': 'Facilities',
+  'billing': 'Billing',
+  'communication': 'Communication',
+  'pro_shop': 'Pro Shop',
+  'locker_room': 'Locker Room',
+};
+function humanizeCategory(raw) {
+  if (!raw) return 'General';
+  return CATEGORY_LABELS[raw.toLowerCase().replace(/\s+/g, '_')] ||
+    raw.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
 
 function KPIStrip({ kpis, navigate, onDrillDown }) {
   const colorMap = {
@@ -260,7 +278,7 @@ export default function BoardReport() {
           resolutionRate > 0
             ? { icon: '✅', color: '#22c55e', label: `${resolutionRate}% complaint resolution`, sub: avgResolutionDays ? `Avg ${avgResolutionDays}-day resolution time` : 'Service quality holding this period' }
             : feedbackRecords.length === 0
-              ? { icon: '✅', color: '#22c55e', label: 'No service complaints this period', sub: 'Clean slate — operations running smoothly' }
+              ? { icon: '✅', color: '#22c55e', label: 'No service complaints this period', sub: 'Clean slate: operations running smoothly' }
               : null,
         ].filter(Boolean).slice(0, 3);
 
@@ -347,7 +365,7 @@ export default function BoardReport() {
                 in real time.
                 {resolutionRate > 0 && <> Service complaint resolution rate: <strong>{resolutionRate}%</strong>.</>}
                 {' '}As behavioral data accumulates, Swoop will identify at-risk members early and surface
-                intervention opportunities — turning insight into retention before members consider leaving.
+                intervention opportunities, turning insight into retention before members consider leaving.
               </>
             )}
           </p>
@@ -377,11 +395,11 @@ export default function BoardReport() {
               {dist.find(d => d.level === 'Healthy')?.count > 0 ? (
                 <>Member health remained strong with <strong>{dist.find(d => d.level === 'Healthy').count} members in healthy status</strong>.
                 Through proactive interventions, <strong>{memberSaves.length} members</strong> showing early disengagement signals were
-                successfully re-engaged — demonstrating the value of early detection and personal outreach.</>
+                successfully re-engaged, demonstrating the value of early detection and personal outreach.</>
               ) : (
                 <>Swoop is actively monitoring <strong>{kpis.find(k => k.label === 'Active Members')?.value ?? kpis[0]?.value ?? 0} members</strong> for engagement signals.
                 {(kpis.find(k => k.label === 'At Risk')?.value ?? 0) > 0 && <> <strong>{kpis.find(k => k.label === 'At Risk').value} members</strong> have been flagged as at-risk and are being prioritized for outreach.</>}
-                Early detection is live — intervention opportunities will appear in the Action Inbox as patterns emerge.</>
+                Early detection is live. Intervention opportunities will appear in the Action Inbox as patterns emerge.</>
               )}
             </p>
             <p className="text-swoop-text-muted leading-relaxed">
@@ -476,7 +494,7 @@ export default function BoardReport() {
             <div className="flex gap-2 flex-wrap">
               {feedbackSummary.slice(0, 4).map(cat => (
                 <div key={cat.category} className="py-1.5 px-3 rounded-lg text-xs bg-swoop-row border border-swoop-border">
-                  <span className="font-semibold text-swoop-text">{cat.category}</span>
+                  <span className="font-semibold text-swoop-text">{humanizeCategory(cat.category)}</span>
                   <span className="text-swoop-text-label">: {cat.count} total, {cat.unresolvedCount} open</span>
                 </div>
               ))}
@@ -800,7 +818,7 @@ export default function BoardReport() {
                 <div key={cat.category} className="flex items-start gap-3 p-3 bg-swoop-row border border-swoop-border rounded-lg">
                   <div className="text-2xl font-bold text-brand-500 font-mono shrink-0">{i + 1}</div>
                   <div className="flex-1">
-                    <div className="text-sm font-semibold text-swoop-text">{cat.category}</div>
+                    <div className="text-sm font-semibold text-swoop-text">{humanizeCategory(cat.category)}</div>
                     <div className="text-xs text-swoop-text-muted mt-0.5">
                       {cat.count} occurrences this month · {cat.unresolvedCount} still open
                     </div>
