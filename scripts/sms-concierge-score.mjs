@@ -4,9 +4,9 @@
  *
  * SMS Concierge functionality test + AI scoring pipeline.
  *
- * Sends 36 targeted messages across 5 member personas (30 functional + 6 architecture
- * validation probes for Managed Agents Sprint A-D benefits), captures tool_calls[],
- * takes Playwright screenshots of the UI, then scores with 7 specialist agents:
+ * Sends 42 targeted messages across 5 member personas (30 functional + 6 architecture
+ * validation probes for Managed Agents Sprint A-D + 6 GBTC demo day scenarios),
+ * captures tool_calls[], takes Playwright screenshots of the UI, then scores with 9 specialist agents:
  * 5 focused on concierge FUNCTIONALITY, 2 on ARCHITECTURE REALIZATION.
  *
  * Usage:
@@ -109,6 +109,14 @@ const TEST_MATRIX = [
   { personaIdx: 3, message: 'I need to book golf and dinner for Saturday — can you handle both?', expectedTool: 'book_tee_time', note: 'Sprint D: multi-intent routing across booking + dining brains' },
   { personaIdx: 4, message: "I haven't been around in ages — what do I need to know and what should I do first?", expectedTool: 'get_club_calendar', note: 'Sprint D: personal concierge intent + ghost re-engagement' },
   { personaIdx: 0, message: 'Set me up for next Saturday — tee time at 8 and dinner after for me and my client', expectedTool: 'book_tee_time', note: 'Sprint D: multi-request coordination across booking + dining' },
+
+  // ── GBTC Demo Day scenarios — tests live demo arc from conference showcase ──
+  { personaIdx: 0, message: 'The service at the Grill today was unacceptable. We waited 47 minutes and nobody checked on us once.', expectedTool: 'file_complaint', note: 'Demo Move 2: GBTC hero complaint — specific Grill grievance, high severity, needs escalation tone' },
+  { personaIdx: 0, message: 'Has anyone from the club followed up on my complaint about the Grill?',                              expectedTool: 'get_my_schedule', note: 'Demo Move 2 follow-up: complaint status recall from session, should reference filed complaint' },
+  { personaIdx: 1, message: "I'd love to start playing again — what tee times are available this week?",                         expectedTool: 'get_club_calendar', note: 'Demo Move 3: re-engagement opener for at-risk Anne Jordan — warm tone, specific options' },
+  { personaIdx: 3, message: 'Can you show me a summary of my preferences and what the club knows about me?',                    expectedTool: 'get_member_profile', note: 'Demo Move 3: memory compound — preferences retrieval for Sandra, proves session memory' },
+  { personaIdx: 2, message: 'I want to make a reservation but make it really nice — booth by the window if possible',           expectedTool: 'make_dining_reservation', note: 'Demo Move 3: preference recall — Robert has booth preference, concierge should surface it' },
+  { personaIdx: 4, message: 'My son wants to start golfing — what programs does the club have for kids?',                       expectedTool: 'get_club_calendar', note: 'Demo Move 5: ghost re-engagement via family angle — Linda ghost member, personal hook needed' },
 ];
 
 // ─── Scoring Agent Definitions ────────────────────────────────────────────────
@@ -527,6 +535,69 @@ Return ONLY valid JSON matching this contract exactly:
   "top_issues": ["<most critical gap with specific evidence>", "<second gap>", "<third gap>"],
   "recommendations": [
     { "priority": "P0|P1|P2", "surface": "<exact file path>", "change": "<specific actionable change to close the gap>", "expected_lift": "<dimension_id>" }
+  ],
+  "confidence": <0.0-1.0>
+}`,
+  },
+  {
+    id: 'gbtc_demo_readiness',
+    name: 'GBTC Demo Readiness',
+    weight: 0.10,
+    dimensions: ['complaint_escalation_quality', 'session_memory_recall', 'reengagement_opener_quality', 'preferences_surfaced', 'control_tower_feel'],
+    prompt: `You are evaluating whether the Swoop member concierge is ready to be demonstrated live at the GBTC golf industry conference on May 5, 2026. The demo arc has 5 moves on a phone:
+
+Move 1: GM morning briefing (automated context)
+Move 2: LIVE EVENT — James Whitfield files a Grill complaint, agents route in real time
+Move 3: Show James's session log — preferences learned from behavior, complaint history
+Move 4: Peer-role view (same event, different framing)
+Move 5: The close — "your members live in your app, imagine each with a concierge like James's"
+
+The demo MUST NOT show: direct bookings, charges, emails sent. It MUST show: routing happening, agents coordinating, memory compounding, humans staying in control.
+
+The test matrix includes 6 GBTC-specific messages (msgs 37-42 in the dataset, noted with "Demo Move" in the note field). Evaluate ONLY these 6 conversations plus any other evidence relevant to demo readiness.
+
+Score these 5 dimensions from 1-10:
+
+1. COMPLAINT ESCALATION QUALITY (complaint_escalation_quality):
+When James Whitfield says "The service at the Grill today was unacceptable. We waited 47 minutes and nobody checked on us once." — does the concierge respond with the right urgency and escalation tone? Does it: file the complaint, acknowledge the frustration specifically ("47 minutes"), promise follow-up, avoid being generic? Does it NOT claim the complaint is "resolved" or "booked"?
+10=specific acknowledgment + correct tool + escalation promise + pending language; 1=generic response, wrong tool, or claims resolution.
+
+2. SESSION MEMORY RECALL (session_memory_recall):
+When a member asks about their complaint follow-up or preferences, does the concierge reference session history? Evidence in msgs 38 (Whitfield "has anyone followed up?") and msg 40 (Sandra "show me my preferences"). Does the concierge recall filed complaints, learned preferences, booking history — or does it treat each turn as fresh?
+10=explicitly references prior session events with specifics; 5=generic acknowledgment without specifics; 1=treats follow-up as brand new request.
+
+3. RE-ENGAGEMENT OPENER QUALITY (reengagement_opener_quality):
+For Anne Jordan ("I'd love to start playing again") and Linda Leonard ("my son wants to golf") — declining/ghost members — does the concierge give warm, personalized, specific openers? Does it avoid generic "here are our programs" responses? Does the opener feel like a concierge who knows them vs a chatbot with a FAQ?
+10=warm, specific, member-aware opener with immediate actionable options; 5=warm but generic; 1=FAQ-style or cold response.
+
+4. PREFERENCES SURFACED (preferences_surfaced):
+When Robert Callahan says "make it really nice — booth by the window if possible" — does the concierge recognize and confirm booth preference? When Sandra asks about "what the club knows about me" — does the response surface any meaningful member context?
+10=concierge proactively surfaces known preferences and confirms/offers to apply them; 5=acknowledges the request but provides no personalization; 1=ignores preference context entirely.
+
+5. CONTROL TOWER FEEL (control_tower_feel):
+Across all 6 demo messages, does the overall experience feel like a "control tower routing signals to the right people" or like a "chatbot answering questions"? Would a GM watching these responses for 5 minutes think "this knows my members and routes things correctly" or "this is just another AI chat"?
+10=clear routing language, agent coordination visible, pending/submitted states, human-in-loop language throughout; 5=some routing language, mixed; 1=purely conversational with no operational routing feel.
+
+IMPORTANT:
+- Only score on evidence from the GBTC demo messages (msgs 37-42) and any other conversations that show demo-relevant behavior.
+- Note if any response would be embarrassing to show at a conference (wrong tool, claims direct action, generic opener for a named member).
+- Never use em-dashes in your output. Use commas, colons, or periods instead.
+
+Return ONLY valid JSON matching this contract exactly:
+{
+  "agent": "GBTC Demo Readiness",
+  "scores": {
+    "complaint_escalation_quality": { "score": <1-10>, "evidence": "<quote the actual response or tool call from the Whitfield Grill complaint message>", "rationale": "<1 sentence>" },
+    "session_memory_recall": { "score": <1-10>, "evidence": "<quote the response to the complaint follow-up or preferences query, noting what was or wasn't recalled>", "rationale": "<1 sentence>" },
+    "reengagement_opener_quality": { "score": <1-10>, "evidence": "<quote Anne or Linda's opener response and assess warmth/specificity>", "rationale": "<1 sentence>" },
+    "preferences_surfaced": { "score": <1-10>, "evidence": "<quote the Robert booth response or Sandra preferences response>", "rationale": "<1 sentence>" },
+    "control_tower_feel": { "score": <1-10>, "evidence": "<1-2 sentences describing whether the overall demo arc would impress a GM at a conference booth>", "rationale": "<1 sentence>" }
+  },
+  "demo_ready": <true|false>,
+  "blocking_issues": ["<any response that would embarrass the demo — wrong tool, direct action claim, generic opener for named member>"],
+  "top_strengths": ["<what would land best in the demo>", "<second strength>"],
+  "recommendations": [
+    { "priority": "P0|P1|P2", "surface": "<exact file path>", "change": "<specific fix to improve demo readiness>", "expected_lift": "<dimension_id>" }
   ],
   "confidence": <0.0-1.0>
 }`,

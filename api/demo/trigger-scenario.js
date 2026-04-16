@@ -19,6 +19,9 @@
  */
 
 import { getOrCreateAgentSession, emitAgentEvent, createHandoff } from '../agents/session-core.js';
+import { getAnthropicClient } from '../agents/managed-config.js';
+
+const FALLBACK_DRAFT = "Maya — James Whitfield flagged the Grill service today. He's been a member for over a decade. Please reach out directly and let's comp the visit. I'll follow up with him this week. Sarah";
 
 const DEMO_CLUB_ID = 'seed_pinetree';
 
@@ -48,6 +51,25 @@ async function ensureSessions(clubId) {
 // ---------------------------------------------------------------------------
 // Scenario definitions
 // ---------------------------------------------------------------------------
+
+async function generateGmDraft() {
+  try {
+    const client = getAnthropicClient();
+    const draftPromise = client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 120,
+      temperature: 0.3,
+      system: "You are Sarah Mitchell, GM of Pinetree Country Club. Write a brief 1-2 sentence message to Maya Chen (F&B Director) about a member complaint. Warm, direct tone. No em-dashes. No bullet points. No preamble — just the message itself.",
+      messages: [{ role: 'user', content: "James Whitfield, a member since 2015 paying $18K annually (health score 42, declining), filed a critical complaint about a 47-minute Grill wait with no server check-in. This is his second complaint. Draft your message to Maya." }],
+    });
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 4000));
+    const result = await Promise.race([draftPromise, timeout]);
+    const text = result.content?.find(c => c.type === 'text')?.text?.trim() || '';
+    return text || FALLBACK_DRAFT;
+  } catch (_) {
+    return FALLBACK_DRAFT;
+  }
+}
 
 async function scenario_complaint_filed(clubId) {
   const correlationId = `demo_complaint_${Date.now().toString(36)}`;
@@ -100,12 +122,16 @@ async function scenario_complaint_filed(clubId) {
   });
   events.push({ session: 'Service Recovery', type: 'recommendation_received', label: 'Service Recovery activates' });
 
-  // 4. Service Recovery drafts escalation and routes to Maya (F&B Director)
-  const handoffId = await createHandoff({
-    sourceSessionId: SESSIONS.service_recovery,
-    targetSessionId: SESSIONS.maya_fb,
-    correlationId,
-  });
+  // 4. Service Recovery drafts escalation and routes to Maya (F&B Director).
+  // Generate the draft in Sarah's voice live via Claude API (4-second timeout + fallback).
+  const [draftedResponse, handoffId] = await Promise.all([
+    generateGmDraft(),
+    createHandoff({
+      sourceSessionId: SESSIONS.service_recovery,
+      targetSessionId: SESSIONS.maya_fb,
+      correlationId,
+    }),
+  ]);
 
   await emitAgentEvent(SESSIONS.maya_fb, clubId, {
     type: 'recommendation_received',
@@ -117,7 +143,7 @@ async function scenario_complaint_filed(clubId) {
     member_name: 'James Whitfield',
     ltv_at_risk: 32000,
     context_summary: 'James Whitfield (health 42, declining) filed 2nd complaint — 47-min Grill wait. Prior complaint Jan 8 unresolved. $32K LTV at risk.',
-    drafted_response: "James, it's Maya at Pinetree. I just heard about your experience today and I'm genuinely sorry — that's not the standard we hold ourselves to. I'd love to make it right. Could we arrange a complimentary dinner for you and Erin this week?",
+    drafted_response: draftedResponse,
     action_items: [
       'Comp today\'s Grill visit',
       'Personal call from Maya within 2 hours',
@@ -137,7 +163,7 @@ async function scenario_complaint_filed(clubId) {
     handoff_id: handoffId,
   });
 
-  return { scenario: 'complaint_filed', correlation_id: correlationId, events_written: events };
+  return { scenario: 'complaint_filed', correlation_id: correlationId, events_written: events, draft_generated: draftedResponse !== FALLBACK_DRAFT };
 }
 
 async function scenario_engagement_decay(clubId) {
@@ -371,6 +397,15 @@ const SCENARIO_HANDLERS = {
   member_at_risk: scenario_member_at_risk,
 };
 
+function isAuthorized(req) {
+  const demoKey = req.headers['x-demo-key'];
+  if (demoKey && process.env.DEMO_SECRET && demoKey === process.env.DEMO_SECRET) return true;
+  if (req.auth?.role === 'swoop_admin') return true;
+  // Allow unauthenticated in non-production when DEMO_SECRET is not set
+  if (process.env.NODE_ENV !== 'production' && !process.env.DEMO_SECRET) return true;
+  return false;
+}
+
 export default async function handler(req, res) {
   if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_DEMO_ENDPOINTS) {
     return res.status(404).json({ error: 'Not found' });
@@ -378,6 +413,10 @@ export default async function handler(req, res) {
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'POST only' });
+  }
+
+  if (!isAuthorized(req)) {
+    return res.status(401).json({ error: 'Unauthorized — x-demo-key required' });
   }
 
   const { scenario, club_id } = req.body || {};
