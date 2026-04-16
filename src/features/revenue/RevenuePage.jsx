@@ -124,7 +124,7 @@ export default function RevenuePage() {
                       <SourceBadge system="POS" size="xs" />
                       <span className="text-[10px] text-swoop-text-label ml-auto">Last synced: {(() => { const d = new Date(); return `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`; })()}</span>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                       <div className="bg-swoop-panel rounded-lg p-3 border border-swoop-border">
                         <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-1">Members Imported</div>
                         <div className="text-2xl font-bold text-swoop-text font-mono">{memberSummary.total || 0}</div>
@@ -144,6 +144,11 @@ export default function RevenuePage() {
                         <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-1">Avg Check Size</div>
                         <div className="text-2xl font-bold text-brand-500 font-mono">${avgCheckSize}</div>
                         <div className="text-[11px] text-swoop-text-muted mt-0.5">per dining transaction</div>
+                      </div>
+                      <div className="bg-swoop-panel rounded-lg p-3 border border-warning-500/30 border">
+                        <div className="text-[10px] font-bold uppercase tracking-wide text-warning-500 mb-1">$0 F&B This Month</div>
+                        <div className="text-2xl font-bold text-warning-500 font-mono">{Math.max(0, (memberSummary.total || 0) - Math.round(686 / 2.5))}</div>
+                        <div className="text-[11px] text-swoop-text-muted mt-0.5">members with no dining spend</div>
                       </div>
                     </div>
                   </div>
@@ -217,7 +222,7 @@ export default function RevenuePage() {
                 </div>
                 {[
                   { label: 'Pace of Play', desc: 'Slow rounds suppress F&B conversion. Swoop identifies which holes and shifts.', est: '$3,200–$5,000', color: '#ef4444', icon: '⛳', source: 'Tee Sheet + POS' },
-                  { label: 'Understaffing', desc: 'Gaps in shift coverage drive complaints and reduce check sizes', est: '$1,800–$2,800', color: '#f59e0b', icon: '👥', source: 'Scheduling' },
+                  { label: 'Understaffing', desc: 'Gaps in shift coverage drive complaints and reduce check sizes', est: '$1,800–$2,800', color: '#f59e0b', icon: '👥', source: 'Scheduling + POS' },
                   { label: 'Weather No-Shows', desc: 'Revenue lost to cancelled rounds on adverse-weather days', est: '$800–$1,200', color: '#60a5fa', icon: '🌧️', source: 'Weather API + Tee Sheet' },
                 ].map(row => (
                   <div key={row.label} className="flex items-center gap-4 px-5 py-3.5 border-b last:border-b-0 border-gray-50">
@@ -530,7 +535,7 @@ export default function RevenuePage() {
                   ${dollarPerSlowRound}
                 </div>
                 <div className="text-xs text-swoop-text-muted mt-1">per slow round</div>
-                <div className="text-[10px] text-swoop-text-ghost mt-1 leading-snug">(41%→22% conv. drop × ${avgCheckSize} avg check × ~4 dining covers/round)</div>
+                <div className="text-[10px] text-swoop-text-ghost mt-1 leading-snug">(monthly leakage ÷ slow rounds; see pace &amp; dining breakdown above)</div>
                 <div className="text-[11px] text-swoop-text-muted mt-2 leading-snug">
                   {slowContext.slowRounds.toLocaleString()} slow rounds/month ={' '}
                   <span className="font-mono font-bold text-error-500">

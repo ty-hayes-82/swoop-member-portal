@@ -240,7 +240,9 @@ const normalizeAtRiskMembers = (source, profileMap = {}) => {
     const normalized = {
       memberId: member?.memberId ?? member?.id ?? member?.member?.id ?? `member-${index}`,
       name,
-      score: Math.max(0, Math.min(100, toNumber(member?.score ?? member?.healthScore, 0))),
+      score: (member?.score != null || member?.healthScore != null)
+        ? Math.max(0, Math.min(100, toNumber(member?.score ?? member?.healthScore, 0)))
+        : null,
       archetype: member?.archetype ?? member?.archetypeName ?? member?.segment ?? 'Unknown',
       topRisk: member?.topRisk ?? member?.primaryRisk ?? member?.primarySignal ?? member?.risk ?? 'No risk signal available',
       trend: member?.trend ?? member?.trendDirection ?? 'declining',
@@ -533,14 +535,17 @@ export const getHealthDistribution = () => {
       else if (s >= 30) counts['At Risk']++;
       else counts.Critical++;
     });
-    const total = roster.length || 1;
-    return [
-      // TODO: compute from prior-period health snapshot when available
-      { level: 'Healthy',  min: 70, count: counts.Healthy,      percentage: counts.Healthy / total,      color: '#12b76a', delta: null },
-      { level: 'Watch',    min: 50, count: counts.Watch,         percentage: counts.Watch / total,         color: '#f59e0b', delta: null },
-      { level: 'At Risk',  min: 30, count: counts['At Risk'],    percentage: counts['At Risk'] / total,    color: '#ea580c', delta: null },
-      { level: 'Critical', min: 0,  count: counts.Critical,      percentage: counts.Critical / total,      color: '#ef4444', delta: null },
-    ];
+    const scored = counts.Healthy + counts.Watch + counts['At Risk'] + counts.Critical;
+    // Fall back to static distribution if no members have computable scores
+    // (e.g. imported CSV members before engagement data is available)
+    if (scored > 0) {
+      return [
+        { level: 'Healthy',  min: 70, count: counts.Healthy,      percentage: counts.Healthy / scored,      color: '#12b76a', delta: null },
+        { level: 'Watch',    min: 50, count: counts.Watch,         percentage: counts.Watch / scored,         color: '#f59e0b', delta: null },
+        { level: 'At Risk',  min: 30, count: counts['At Risk'],    percentage: counts['At Risk'] / scored,    color: '#ea580c', delta: null },
+        { level: 'Critical', min: 0,  count: counts.Critical,      percentage: counts.Critical / scored,      color: '#ef4444', delta: null },
+      ];
+    }
   }
   const archetypes = normalizeArchetypes(_d?.memberArchetypes);
   const totalMembers = archetypes.reduce((sum, item) => sum + item.count, 0);

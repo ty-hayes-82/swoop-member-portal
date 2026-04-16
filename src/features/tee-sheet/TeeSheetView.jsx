@@ -379,7 +379,7 @@ export default function TeeSheetView() {
           <div className="flex items-center gap-2 px-1">
             <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
             <span className="text-[11px] text-error-500 font-semibold">
-              {atRiskTimes.length} at-risk member{atRiskTimes.length !== 1 ? 's' : ''} on today's sheet — health scores visible in the table below
+              {atRiskTimes.length} at-risk member{atRiskTimes.length !== 1 ? 's' : ''} on today's sheet. Health scores visible in the table below.
             </span>
           </div>
         )}

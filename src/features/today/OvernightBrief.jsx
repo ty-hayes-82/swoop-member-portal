@@ -38,30 +38,16 @@ function buildBullets({ memberSummary, leakage, pendingCount, briefing, teeSheet
     return bullets;
   }
 
-  // 1. At-risk members + dues exposure
-  const riskCount = (memberSummary.atRisk || 0) + (memberSummary.critical || 0);
-  const duesAtRisk = memberSummary.potentialDuesAtRisk || 0;
-  if (riskCount > 0) {
-    const duesText = duesAtRisk > 0
-      ? `: $${Math.round(duesAtRisk / 1000)}K in annual dues at risk`
-      : '';
-    bullets.push({
-      icon: '🔴',
-      text: `${riskCount} member${riskCount === 1 ? '' : 's'} flagged as at-risk${duesText}`,
-      nav: 'members',
-      navOpts: { tab: 'at-risk' },
-      urgent: true,
-    });
-  }
-
-  // 2. Revenue / F&B leakage — show direction only, not the exact figure (Revenue page is source of truth)
+  // 1. Revenue / F&B leakage — show direction only, not the exact figure (Revenue page is source of truth)
+  // NOTE: At-risk member COUNT is intentionally omitted here — it's already shown in the Club Status KPI tile.
+  // The unique value in the Overnight Brief is context (trends, actions, signals) not the count itself.
   if (leakage?.TOTAL > 0) {
     bullets.push({
       icon: '💸',
       text: 'F&B leakage detected: pace, staffing, and weather gaps. See Revenue for full breakdown.',
       nav: 'revenue',
       navOpts: null,
-      urgent: riskCount === 0,
+      urgent: false,
     });
   }
 
