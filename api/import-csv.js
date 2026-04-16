@@ -269,18 +269,24 @@ const FIELD_ALIASES = {
   'payment id': 'payment_id', 'settlement time': 'processed_at',
   // Membership Types
   'type code': 'type_code',
+  'f&b minimum': 'fnb_minimum', 'golf eligible': 'golf_eligible',
   // Households / Dependents
   'primary member #': 'primary_member_id', 'primary member id': 'primary_member_id',
+  'dependent count': 'dependent_count', 'home address': 'home_address',
   // Courses
   'course code': 'course_code', 'course name': 'course_name', 'interval (min)': 'interval_min',
+  'start time': 'start_time', 'end time': 'end_time',
   // Sales Areas
   'sales area id': 'sales_area_id', 'sales area description': 'description',
+  'operating hours': 'operating_hours', 'weekday covers': 'weekday_covers', 'weekend covers': 'weekend_covers',
   // POS Line Items
-  'line item id': 'line_item_id',
+  'line item id': 'line_item_id', 'line total': 'line_total',
+  // POS Payments
+  'split': 'is_split',
   // Events
   'pricing category': 'registration_fee',
   // Invoices / Aged Receivables
-  'invoice #': 'invoice_id', 'statement date': 'statement_date',
+  'invoice #': 'invoice_id', 'statement date': 'statement_date', 'due date': 'due_date',
   'billing code type': 'billing_code_type', 'aging bucket': 'aging_bucket',
   'last payment': 'last_payment', 'payment amount': 'payment_amount',
   'days past due': 'days_past_due', 'late fee': 'late_fee',
@@ -288,6 +294,8 @@ const FIELD_ALIASES = {
   'request id': 'request_id', 'booking ref': 'booking_ref', 'response time (min)': 'response_time_min',
   // Daily Close
   'close id': 'closeout_id',
+  'golf revenue': 'golf_revenue', 'f&b revenue': 'fb_revenue',
+  'total revenue': 'total_revenue', 'rounds played': 'rounds_played',
   // Communications / Feedback
   'communication id': 'feedback_id', 'complete': 'status',
 };
@@ -304,7 +312,7 @@ const IMPORT_ALIAS_OVERRIDES = {
   pos_checks: { 'member #': 'member_id', 'chk#': 'check_id' },
   line_items: { 'chk#': 'check_id', 'item description': 'item_description', 'sales category': 'sales_category', 'regular price': 'regular_price', 'qty': 'quantity', 'fire time': 'fire_time', 'comp': 'is_comp', 'void': 'is_void' },
   payments: { 'chk#': 'check_id', 'settlement method': 'payment_method' },
-  invoices: { 'member #': 'member_id', 'invoice #': 'invoice_id' },
+  invoices: { 'member #': 'member_id', 'invoice #': 'invoice_id', 'net amount': 'net_amount' },
   service_requests: { 'member #': 'member_id' },
   daily_close: { 'close id': 'closeout_id' },
 };
