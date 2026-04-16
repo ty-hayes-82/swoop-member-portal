@@ -203,18 +203,30 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
           <>
             <td className="px-3 sm:px-4 py-2">
               <div
-                className="flex items-center gap-1.5 flex-wrap cursor-help"
+                className="flex flex-col gap-0.5 cursor-help"
                 title={hasScore ? buildScoreTooltip(member) : undefined}
               >
-                <span className="font-mono font-bold text-sm" style={{ color: healthColor }}>
-                  {hasScore ? member.score : '—'}
-                </span>
-                <span
-                  className="text-[10px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap"
-                  style={{ background: healthColor + '22', color: healthColor }}
-                >
-                  {healthLevel}
-                </span>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="font-mono font-bold text-sm" style={{ color: healthColor }}>
+                    {hasScore ? member.score : '—'}
+                  </span>
+                  <span
+                    className="text-[10px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap"
+                    style={{ background: healthColor + '22', color: healthColor }}
+                  >
+                    {healthLevel}
+                  </span>
+                </div>
+                {hasScore && member.score < 70 && member.topRisk && member.topRisk !== 'No current risks' && (
+                  <SourceBadgeRow
+                    size="xs"
+                    systems={[
+                      /golf|round|tee|frequency/i.test(member.topRisk) && 'Tee Sheet',
+                      /dining|f&b|food|beverage|spend/i.test(member.topRisk) && 'POS',
+                      /email|open rate|newsletter/i.test(member.topRisk) && 'Email',
+                    ].filter(Boolean)}
+                  />
+                )}
               </div>
             </td>
             <td className="px-4 py-2 hidden md:table-cell">
@@ -412,7 +424,8 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
   const filteredHealthDist = useMemo(() => {
     const counts = { Healthy: 0, Watch: 0, 'At Risk': 0, Critical: 0 };
     filteredMembers.forEach(m => {
-      const s = m.score ?? 0;
+      if (m.score == null) return; // skip unscored members (matches memberService.getHealthDistribution)
+      const s = m.score;
       if (s >= 70) counts.Healthy++;
       else if (s >= 50) counts.Watch++;
       else if (s >= 30) counts['At Risk']++;

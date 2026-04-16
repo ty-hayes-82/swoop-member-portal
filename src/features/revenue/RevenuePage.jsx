@@ -152,7 +152,7 @@ export default function RevenuePage() {
                         </div>
                         <div className="grid grid-cols-2 gap-3 text-center mb-3">
                           {[
-                            { label: 'Industry avg monthly leakage', value: '$8,400/mo', sub: 'Industry baseline estimate' },
+                            { label: 'Est. monthly leakage for your club', value: `$${(Math.round((memberSummary.total || 400) * 21 / 100) * 100).toLocaleString()}/mo`, sub: `Based on ${memberSummary.total || 400}-member club baseline` },
                             { label: 'Time to insight', value: '< 2 min', sub: 'after tee sheet import' },
                           ].map(({ label, value, sub }) => (
                             <div key={label} className="rounded-lg p-3 border border-swoop-border-inset bg-swoop-row">
@@ -177,16 +177,25 @@ export default function RevenuePage() {
             })()
           ) : (
             /* No data at all — show a value-preview panel so the GM understands what they'll unlock */
+            (() => {
+              const memberSummary = getMemberSummary();
+              const memberCount = memberSummary.total || 0;
+              // Industry avg: $21/member/month F&B leakage, rounded to nearest $100
+              const leakageEstimate = memberCount > 0
+                ? Math.round(memberCount * 21 / 100) * 100
+                : 8400;
+              const leakageLabel = memberCount > 0 ? memberCount : 400;
+              return (
             <div className="flex flex-col gap-4">
               {/* Industry benchmark hero */}
               <div className="rounded-xl border border-swoop-border bg-swoop-panel p-5">
-                <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-1">Industry Benchmark</div>
+                <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-1">{memberCount > 0 ? 'Your Club Estimate' : 'Industry Benchmark'}</div>
                 <div className="flex items-baseline gap-2 mb-1">
-                  <span className="text-4xl font-extrabold text-swoop-text font-mono">$8,400</span>
-                  <span className="text-base text-swoop-text-muted">/mo avg revenue leakage</span>
+                  <span className="text-4xl font-extrabold text-swoop-text font-mono">${leakageEstimate.toLocaleString()}</span>
+                  <span className="text-base text-swoop-text-muted">/mo estimated leakage</span>
                 </div>
                 <p className="text-xs text-swoop-text-muted m-0">
-                  For a 400-member club. Swoop cross-references your tee sheet, POS, and scheduling data to tell you exactly where these dollars go and what stops them.
+                  For your {leakageLabel}-member club. Swoop cross-references your tee sheet, POS, and scheduling data to tell you exactly where these dollars go and what stops them.
                 </p>
               </div>
 
@@ -239,6 +248,7 @@ export default function RevenuePage() {
                 </button>
               </div>
             </div>
+            );})()
           )}
         </div>
       </PageTransition>

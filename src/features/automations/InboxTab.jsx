@@ -207,10 +207,10 @@ export default function InboxTab() {
                 <span className="text-sm shrink-0">🔴</span>
                 <div className="flex-1 min-w-0">
                   <div className="text-xs font-semibold text-swoop-text">
-                    Unresolved complaint: {c.category ? c.category.replace(/_/g, ' ') : 'Service issue'}
+                    {c.memberName || c.member || 'Member'}: {c.category ? c.category.replace(/_/g, ' ') : 'service issue'}
                   </div>
                   <div className="text-[11px] text-swoop-text-muted mt-0.5">
-                    {c.description || c.complaint || 'Member complaint awaiting resolution'}{c.date ? ` · Filed ${new Date(c.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}
+                    {c.description || c.complaint || 'Complaint awaiting resolution'}{c.date ? ` · Filed ${new Date(c.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}
                   </div>
                 </div>
                 <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-error-500/10 text-error-500">Open</span>
@@ -218,7 +218,7 @@ export default function InboxTab() {
             ))}
             {unresolvedComplaints.length > 3 && (
               <div className="text-[11px] text-swoop-text-muted pl-3">
-                +{unresolvedComplaints.length - 3} more unresolved complaint{unresolvedComplaints.length - 3 !== 1 ? 's' : ''} — see Service tab
+                +{unresolvedComplaints.length - 3} more unresolved complaint{unresolvedComplaints.length - 3 !== 1 ? 's' : ''}: see Service tab
               </div>
             )}
             {understaffedDays.length > 0 && (

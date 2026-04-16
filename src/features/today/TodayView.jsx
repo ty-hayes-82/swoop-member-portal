@@ -373,9 +373,6 @@ export default function TodayView() {
             <div className="greeting-date" style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', margin: '2px 0 0', fontWeight: 500 }}>
               {formatDate()}
             </div>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.28)', margin: '3px 0 0', letterSpacing: '0.06em', fontWeight: 600, textTransform: 'uppercase' }}>
-              See It · Fix It · Prove It
-            </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
             {(() => {

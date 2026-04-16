@@ -413,8 +413,10 @@ export default function BoardReport() {
               )}
             </p>
             <p className="text-swoop-text-muted leading-relaxed">
-              Staffing alignment and proactive scheduling adjustments prevented service gaps on high-demand days. The
-              operational response improvements continue to compound, with response times improving {responseTimeImprovement}% since launch.
+              Staffing alignment and proactive scheduling adjustments prevented service gaps on high-demand days.
+              {responseTimeImprovement > 0
+                ? ` Operational response times have improved ${responseTimeImprovement}% since launch.`
+                : ' Operational response benchmarks are being established as activity data accumulates.'}
             </p>
           </Panel>
 
@@ -471,7 +473,7 @@ export default function BoardReport() {
                 );
               })()}
               <div className="bg-swoop-canvas rounded-xl p-3.5 border border-[#2d2d44] text-center">
-                <div className="text-[28px] font-bold text-success-500">{resolutionRate > 0 ? `${resolutionRate}%` : (feedbackRecords.length > 0 ? '—' : '—')}</div>
+                <div className={`text-[28px] font-bold ${resolutionRate > 0 ? 'text-success-500' : feedbackRecords.length > 0 ? 'text-warning-500' : 'text-success-500'}`}>{resolutionRate > 0 ? `${resolutionRate}%` : (feedbackRecords.length > 0 ? feedbackRecords.length : '—')}</div>
                 <div className="text-[11px] text-[#BCC3CF]">{resolutionRate > 0 ? 'Complaint Resolution Rate' : (feedbackRecords.length > 0 ? 'Complaints Under Review' : 'No Complaints This Period')}</div>
               </div>
               {understaffedDays.length > 0 ? (
