@@ -736,7 +736,9 @@ async function chatHandler(req, res) {
   // Build conversation context (Sprint B: prefer durable event log over text summary)
   const sessionId = `mbr_${member_id}_concierge`;
   let conversationContext = '';
+  let pendingRequestsContext = '';
   try {
+    // Fetch general recent events for conversational context
     const recentEvents = await getConciergeEvents(member_id, { last: 20 });
     if (recentEvents?.length) {
       const lines = recentEvents
@@ -750,12 +752,28 @@ async function chatHandler(req, res) {
             case 'agent_response':  return `[${ts}] Concierge: ${(p.text || '').slice(0, 200)}`;
             case 'tool_call':       return `[${ts}] Tool: ${p.tool}(${JSON.stringify(p.args || {})}) → ${p.status || 'ok'}`;
             case 'staff_confirmed': return `[${ts}] CONFIRMED: ${p.text || ''}`;
+            case 'request_submitted': return `[${ts}] PENDING: ${p.request_id} via ${p.request_type} → ${p.routed_to} (${p.details || ''})`;
             case 'preference_observed': return `[${ts}] Preference: ${p.field} = ${p.value}`;
             case 'complaint_filed': return `[${ts}] Complaint: ${p.category} — ${(p.description || '').slice(0, 100)}`;
             default: return `[${ts}] ${ev.event_type}: ${JSON.stringify(p).slice(0, 100)}`;
           }
         });
       conversationContext = `\n\nPrevious interaction history (most recent ${recentEvents.length} events):\n${lines.join('\n')}`;
+    }
+
+    // For confirmation follow-up queries, surface pending requests explicitly
+    const confirmationFollowUp = /\b(did it go through|was it confirmed|has my request|did you send|did that go|was that processed|confirm|go through|get it|receive it|been processed)\b/i.test(message);
+    if (confirmationFollowUp) {
+      const pendingEvents = await getConciergeEvents(member_id, { last: 10, types: ['request_submitted', 'staff_confirmed'] });
+      if (pendingEvents?.length) {
+        const pendingLines = pendingEvents.slice().reverse().map(ev => {
+          const ts = ev.emitted_at ? new Date(ev.emitted_at).toISOString().slice(0, 16) : '';
+          const p = ev.payload || {};
+          if (ev.event_type === 'staff_confirmed') return `  ✓ CONFIRMED [${ts}]: ${p.text || ''}`;
+          return `  ⏳ PENDING [${ts}]: ${p.request_id} — ${p.request_type} sent to ${p.routed_to}. ${p.expected_response || ''}`;
+        });
+        pendingRequestsContext = `\n\nPENDING AND CONFIRMED REQUESTS (for status queries):\n${pendingLines.join('\n')}\nUse this to answer the member's follow-up question about whether their request went through.`;
+      }
     }
   } catch (_) { /* event log not available — fall through */ }
 
@@ -797,7 +815,7 @@ async function chatHandler(req, res) {
       model: 'claude-sonnet-4-20250514',
       max_tokens: 2048,
       temperature: conciergeTemperature,
-      system: systemPrompt + conversationContext,
+      system: systemPrompt + conversationContext + pendingRequestsContext,
       messages,
       tools: availableTools,
     });
@@ -838,6 +856,19 @@ async function chatHandler(req, res) {
             result_summary: JSON.stringify(toolResult).slice(0, 200),
           });
         } catch (_) { /* non-blocking */ }
+        // Emit dedicated request_submitted event for follow-up status queries (Sprint B)
+        if (toolResult?.status === 'request_submitted' && toolResult?.request_id) {
+          try {
+            await emitConciergeEvent(member_id, clubId, {
+              type: 'request_submitted',
+              request_id: toolResult.request_id,
+              request_type: toolUse.name,
+              routed_to: toolResult.routed_to,
+              details: toolResult.details,
+              expected_response: toolResult.expected_response,
+            });
+          } catch (_) { /* non-blocking */ }
+        }
         return { type: 'tool_result', tool_use_id: toolUse.id, content: JSON.stringify(toolResult) };
       }));
 
@@ -848,7 +879,7 @@ async function chatHandler(req, res) {
         model: 'claude-sonnet-4-20250514',
         max_tokens: 2048,
         temperature: conciergeTemperature,
-        system: systemPrompt + conversationContext,
+        system: systemPrompt + conversationContext + pendingRequestsContext,
         messages,
         tools: availableTools,
       });
