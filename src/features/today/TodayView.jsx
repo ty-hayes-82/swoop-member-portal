@@ -574,7 +574,7 @@ export default function TodayView() {
           </SwoopSection>
         )}
 
-        {/* Live Check-ins (pinned 3rd, expanded) */}
+        {/* Live Check-ins (pinned 3rd, collapsed by default) */}
         {(() => {
           const checkins = buildCheckinAlerts();
           if (!checkins.length) return null;
@@ -585,7 +585,7 @@ export default function TodayView() {
               titleColor={C.neutral}
               count={`${checkins.length} active`}
               peek={peek}
-              defaultOpen={true}
+              defaultOpen={false}
             >
               {checkins.map(m => {
                 const isRisk = m.isAtRisk;
@@ -746,7 +746,7 @@ export default function TodayView() {
                 { label: 'Wind Speed', value: '30–40', sub: 'mph gusts', color: C.accent },
                 { label: 'Timing', value: '2–6pm', sub: 'Saturday', color: '#fff' },
                 { label: 'Affected Tee Times', value: '32', sub: 'afternoon slots', color: C.danger },
-                { label: 'Revenue exposure', value: '$4.8K', sub: 'if unmanaged', color: C.accent },
+                { label: 'Revenue exposure', value: '$4.8K', sub: '32 slots × $150 avg green fee', color: C.accent },
               ].map((t, i) => (
                 <div key={i} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
                   <MicroLabel>{t.label}</MicroLabel>

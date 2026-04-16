@@ -77,10 +77,10 @@ export default function QualityTab() {
             </div>
             <div className="text-xs text-swoop-text-muted mt-0.5">
               {consistencyScore >= 70
-                ? 'Service is consistent — no major gaps detected'
+                ? 'Service is consistent: no major gaps detected'
                 : consistencyScore >= 50
-                  ? `Driven down by ${understaffedDays.length > 2 ? 'staffing gaps' : (totalComplaints - resolvedCount) > 3 ? 'unresolved complaints' : 'pace of play issues'} — see recommendation below`
-                  : `Critical: ${understaffedDays.length > 2 ? 'staffing gaps' : 'complaint backlog'} requires immediate attention — see recommendation below`}
+                  ? `Driven down by ${understaffedDays.length > 2 ? 'staffing gaps' : (totalComplaints - resolvedCount) > 3 ? 'unresolved complaints' : 'pace of play issues'}. See recommendation below.`
+                  : `Critical: ${understaffedDays.length > 2 ? 'staffing gaps' : 'complaint backlog'} requires immediate attention. See recommendation below.`}
             </div>
             {/* Cross-pillar bridge — link to Revenue page */}
             {consistencyScore < 80 && (
@@ -128,9 +128,9 @@ export default function QualityTab() {
         const worstOutletCount = worstOutlet ? worstOutlet[1] : openComplaints;
 
         const drivers = [
-          { score: understaffedDays.length * 10, text: `${worstOutletName} has ${understaffedDays.length} understaffed days this month — correlates with ${worstOutletCount} open complaints`, link: 'staffing', label: 'See Staffing tab for recommendation' },
-          { score: openComplaints * 8, text: `${worstOutletName}: ${openComplaints} complaints unresolved — oldest over 7 days`, link: 'complaints', label: 'See Complaints tab to prioritize resolution' },
-          { score: (100 - resolutionRate) * 0.5, text: `Resolution rate at ${resolutionRate}% — ${worstOutletName} lunch service is the biggest gap`, link: 'complaints', label: 'Prioritize the oldest open complaints to improve' },
+          { score: understaffedDays.length * 10, text: `${worstOutletName} has ${understaffedDays.length} understaffed days this month, correlating with ${worstOutletCount} open complaints`, link: 'staffing', label: 'See Staffing tab for recommendation' },
+          { score: openComplaints * 8, text: `${worstOutletName}: ${openComplaints} complaints unresolved, oldest over 7 days`, link: 'complaints', label: 'See Complaints tab to prioritize resolution' },
+          { score: (100 - resolutionRate) * 0.5, text: `Resolution rate at ${resolutionRate}%: ${worstOutletName} lunch service is the biggest gap`, link: 'complaints', label: 'Prioritize the oldest open complaints to improve' },
         ].sort((a, b) => b.score - a.score);
         const top = drivers[0];
         return (

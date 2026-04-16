@@ -100,7 +100,7 @@ export default function ComplaintsTab() {
           </div>
         </div>
         <div className="mt-2 text-[11px] text-swoop-text-muted italic leading-snug">
-          Complaints aren't random — they cluster around specific cross-domain operational gaps.
+          Complaints aren't random: they cluster around specific cross-domain operational gaps.
         </div>
       </div>
 
@@ -139,7 +139,7 @@ export default function ComplaintsTab() {
             {understaffedComplaints} of {feedbackRecords.length} complaints occurred on understaffed days
           </div>
           <div className="text-xs text-swoop-text-muted">
-            Service Speed complaints correlate with understaffed shifts — {conversionDrop}% lower dining conversion on slow-pace days
+            Service Speed complaints correlate with understaffed shifts: {conversionDrop}% lower dining conversion on slow-pace days
           </div>
         </div>
       )}
@@ -171,7 +171,7 @@ export default function ComplaintsTab() {
               const isComplaintExpanded = expandedComplaintId === complaint.id;
               const complaintRecommended = [];
               if (daysSince > 3 && complaint.status !== 'resolved') {
-                complaintRecommended.push({ key: 'escalate', icon: '🔺', label: 'Escalate to GM', type: 'staff_task', description: `${daysSince} days unresolved — needs personal attention` });
+                complaintRecommended.push({ key: 'escalate', icon: '🔺', label: 'Escalate to GM', type: 'staff_task', description: `${daysSince} days unresolved: needs personal attention` });
               }
               if (complaint.status !== 'resolved') {
                 complaintRecommended.push({ key: 'recovery-email', icon: '✉', label: 'Send Recovery Email', type: 'email', description: `Acknowledge ${complaint.category} complaint` });
@@ -276,7 +276,7 @@ export default function ComplaintsTab() {
                       context={{
                         memberId: complaint.memberId,
                         memberName: complaint.memberName,
-                        description: `${complaint.category} complaint — ${daysSince} days open`,
+                        description: `${complaint.category} complaint: ${daysSince} days open`,
                         source: 'Service Recovery',
                       }}
                       recommended={complaintRecommended}
@@ -317,7 +317,7 @@ export default function ComplaintsTab() {
                       )}
                     </div>
                     <div className="text-xs text-swoop-text-muted">
-                      {complaint.category} — Filed {new Date(complaint.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      {complaint.category}, filed {new Date(complaint.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-0.5">
@@ -337,7 +337,7 @@ export default function ComplaintsTab() {
 
       <AgentUpsell
         agentName="Service Recovery Agent"
-        benefit="Resolves complaints in 4.2 hrs avg — before members disengage."
+        benefit="Resolves complaints in 4.2 hrs avg, before members disengage."
       />
 
       {/* Understaffed Day Correlation */}

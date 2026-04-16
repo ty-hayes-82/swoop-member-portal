@@ -371,7 +371,7 @@ export default function BoardReport() {
               <>
                 <strong>{getClubName()}</strong> has{' '}
                 <strong className="text-success-600">{kpis.find(k => k.label === 'Active Members')?.value ?? kpis[0]?.value ?? 0} active members</strong>{' '}
-                being monitored. Swoop is tracking member engagement, tee sheet activity, and service quality
+                being monitored. We are tracking member engagement, tee sheet activity, and service quality
                 in real time.
                 {resolutionRate > 0 && <> Service complaint resolution rate: <strong>{resolutionRate}%</strong>.</>}
                 {' '}As behavioral data accumulates, Swoop will identify at-risk members early and surface

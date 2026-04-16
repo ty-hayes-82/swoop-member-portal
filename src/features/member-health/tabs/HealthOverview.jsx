@@ -251,7 +251,7 @@ export default function HealthOverview() {
               {allMembers.length} members imported · connect golf and dining data to calculate member health scores
             </div>
             <div className="text-xs text-swoop-text-muted mt-1 leading-relaxed">
-              Detect 82→61 health score drops, track the cross-domain decay sequence, and protect $32K+ in at-risk annual dues per member save.
+              Detect 82→61 health score drops, track the cross-domain decay sequence, and protect at-risk annual dues before members resign (industry average: $32K+ per member save).
             </div>
             <div className="mt-3 flex items-center gap-2 flex-wrap">
               <button
