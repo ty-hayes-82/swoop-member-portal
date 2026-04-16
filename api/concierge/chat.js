@@ -541,7 +541,8 @@ async function loadMemberProfile(clubId, memberId) {
       mbr_t04: {
         member_id: 'mbr_t04', name: 'Anne Jordan', first_name: 'Anne',
         email: 'anne.j@email.com', membership_type: 'Full Golf',
-        join_date: '2016-03-15', status: 'active',
+        join_date: '2016-03-15', status: 'at-risk',
+        health_score: 28,
         household: [
           { member_id: 'mbr_t04b', name: 'Marcus Jordan', membership_type: 'Full Golf' },
         ],
@@ -556,7 +557,8 @@ async function loadMemberProfile(clubId, memberId) {
       mbr_t05: {
         member_id: 'mbr_t05', name: 'Robert Callahan', first_name: 'Robert',
         email: 'robert.c@email.com', membership_type: 'Corporate',
-        join_date: '2021-06-01', status: 'active',
+        join_date: '2021-06-01', status: 'at-risk',
+        health_score: 22,
         household: [],
         preferences: {
           teeWindows: 'Weekday mornings when available',
@@ -569,7 +571,8 @@ async function loadMemberProfile(clubId, memberId) {
       mbr_t06: {
         member_id: 'mbr_t06', name: 'Sandra Chen', first_name: 'Sandra',
         email: 'sandra.c@email.com', membership_type: 'Social',
-        join_date: '2020-09-15', status: 'active',
+        join_date: '2020-09-15', status: 'at-risk',
+        health_score: 36,
         household: [
           { member_id: 'mbr_t06b', name: 'David Chen', membership_type: 'Full Golf' },
           { member_id: 'mbr_t06c', name: 'Lily Chen', membership_type: 'Junior' },
@@ -579,7 +582,7 @@ async function loadMemberProfile(clubId, memberId) {
           dining: 'Grill Room for casual lunches, Main Dining for events. Used to spend $142/visit, now $18. Loves wine tastings and social events.',
           favoriteSpots: 'Grill Room, Event lawn, Wine cellar',
           channel: 'SMS',
-          notes: 'Social Butterfly archetype. Dining cliff from $142 to $18 per visit — 87% drop. Declined 3 consecutive event invites. Health score 36. $9K dues.',
+          notes: 'Social Butterfly archetype. Dining cliff from $142 to $18 per visit, 87% drop. Declined 3 consecutive event invites. Health score 36. $9K dues. Prior unresolved complaint: slow service at the bar (March), no follow-up received.',
         },
       },
     };
