@@ -109,7 +109,7 @@ const SCORING_AGENTS = [
     name: 'Tool Selection Accuracy',
     weight: 0.30,
     dimensions: ['correct_tool_fired', 'tool_not_called_when_needed', 'wrong_tool_called', 'ambiguous_handled', 'edge_case_recovery'],
-    prompt: `You are a senior QA engineer evaluating an AI concierge for a private country club. Be precise and evidence-based. Do NOT hallucinate evidence — only cite things actually present in the conversations.
+    prompt: `You are a senior QA engineer evaluating an AI concierge for a private country club. Be precise and evidence-based. Do NOT hallucinate evidence. Only cite things actually present in the conversations. Never use em-dashes (—) in your output text: use commas, colons, or periods instead.
 
 IMPORTANT CONTEXT:
 - Bookings (tee times, dining, RSVPs, cancellations) correctly return { status: "request_submitted", pending: true, routed_to: "..." } — this is the CORRECT behavior (human-in-the-loop). Do NOT penalize for this.
@@ -147,7 +147,7 @@ Return ONLY valid JSON matching this contract exactly:
     name: 'Argument Quality',
     weight: 0.25,
     dimensions: ['required_args_present', 'date_time_resolution', 'member_id_context', 'fuzzy_input_resolved', 'party_size_inferred'],
-    prompt: `You are a senior QA engineer evaluating tool argument quality for a private club AI concierge. Be precise and evidence-based. Only cite arguments you can actually see in the tool_calls[] data.
+    prompt: `You are a senior QA engineer evaluating tool argument quality for a private club AI concierge. Be precise and evidence-based. Only cite arguments you can actually see in the tool_calls[] data. Never use em-dashes (—) in your output text: use commas, colons, or periods instead.
 
 IMPORTANT CONTEXT:
 - When simulated=true, tool_calls[] is empty — skip those conversations for argument scoring and note "simulated" in evidence.
@@ -187,11 +187,12 @@ Return ONLY valid JSON matching this contract exactly:
     name: 'Response Naturalness',
     weight: 0.20,
     dimensions: ['confirmation_clarity', 'error_messaging', 'tone_warmth', 'action_summary', 'follow_up_proactivity'],
-    prompt: `You are a hospitality expert and conversation designer evaluating an AI concierge for a private country club. Be precise and evidence-based — quote actual response text when citing evidence.
+    prompt: `You are a hospitality expert and conversation designer evaluating an AI concierge for a private country club. Be precise and evidence-based. Quote actual response text when citing evidence. Never use em-dashes (—) in your output text: use commas, colons, or periods instead.
 
 IMPORTANT CONTEXT:
 - Bookings return { status: "request_submitted", pending: true, routed_to: "Pro Shop" } — the concierge SHOULD say something like "I've sent your request to the pro shop — they'll confirm within the hour." This is correct. Penalize if it says "confirmed" without routing language.
 - Banned openers (penalize if used): "Perfect", "Great", "I'm sorry", "Certainly", "Absolutely", "Of course", "Done —", "Filed —", "I've escalated"
+- Em-dashes (—) in any response are a style violation: penalize under tone_warmth
 - Approved openers: first name, "On it!", "You got it!", "Love it!", "All set!", "Nice!", "Sending that now!", "On the way!"
 - Responses must be 2-4 sentences max and use the member's first name at least once.
 - No markdown, no bullet points, no asterisks in the response text.
@@ -227,7 +228,7 @@ Return ONLY valid JSON matching this contract exactly:
     name: 'Error Recovery',
     weight: 0.15,
     dimensions: ['fallback_message_quality', 'no_silent_failures', 'simulated_mode_handling', 'retry_suggestion', 'out_of_scope_handling'],
-    prompt: `You are a QA engineer specializing in failure modes for AI assistants. Be precise — only cite observable failures in the actual conversation data. Do not hallucinate failures that aren't present.
+    prompt: `You are a QA engineer specializing in failure modes for AI assistants. Be precise. Only cite observable failures in the actual conversation data. Do not hallucinate failures that aren't present. Never use em-dashes (—) in your output text: use commas, colons, or periods instead.
 
 IMPORTANT CONTEXT:
 - "request_submitted" with pending:true is CORRECT behavior for bookings — the concierge routes to staff rather than auto-confirming. This is NOT a failure.
@@ -266,7 +267,7 @@ Return ONLY valid JSON matching this contract exactly:
     name: 'Member Context Awareness',
     weight: 0.10,
     dimensions: ['persona_appropriate_response', 'at_risk_tone_adjustment', 'ghost_member_warmth', 'history_referenced', 'privacy_maintained'],
-    prompt: `You are a member experience director evaluating whether a club concierge treats different members appropriately. Be precise — quote actual response text as evidence. Do not invent context.
+    prompt: `You are a member experience director evaluating whether a club concierge treats different members appropriately. Be precise. Quote actual response text as evidence. Do not invent context. Never use em-dashes (—) in your output text: use commas, colons, or periods instead.
 
 IMPORTANT CONTEXT — 5 PERSONAS AND EXPECTED TREATMENT:
 - James Whitfield (mbr_t01): Active, high engagement — efficient and proactive service
