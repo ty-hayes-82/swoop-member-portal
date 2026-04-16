@@ -44,7 +44,7 @@ export default function ActionPanel({ context = {}, recommended = [], onApprove,
     } else {
       // Quick action — add to inbox then approve
       addAction({
-        description: `${action.label} — ${context.memberName || 'Member'}`,
+        description: `${action.label}: ${context.memberName || 'Member'}`,
         memberId: context.memberId,
         memberName: context.memberName,
         actionType: 'RETENTION_OUTREACH',
@@ -96,7 +96,7 @@ export default function ActionPanel({ context = {}, recommended = [], onApprove,
       skipCloudSend: true,
     };
     addAction({
-      description: `${actionDef.label} — ${context.memberName || 'Member'}`,
+      description: `${actionDef.label}: ${context.memberName || 'Member'}`,
       memberId: context.memberId,
       memberName: context.memberName,
       actionType: 'RETENTION_OUTREACH',

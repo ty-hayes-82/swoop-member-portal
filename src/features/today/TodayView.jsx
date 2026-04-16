@@ -220,7 +220,7 @@ function getGreeting(atRiskCount = 0, watchCount = 0, roundsToday = 0) {
     return `${roundsToday} rounds on the tee sheet${nameStr}. All members in good standing.`;
   }
 
-  if (hour < 12) return `Good morning${nameStr}. Here's your club health at a glance.`;
+  if (hour < 12) return `Good morning${nameStr}. Today's Briefing.`;
   if (hour < 17) return `Afternoon check-in${nameStr}. Here's where things stand.`;
   return `Good evening${nameStr}. End-of-day summary.`;
 }
@@ -516,6 +516,7 @@ export default function TodayView() {
                   <span style={{ fontSize: 24, fontWeight: 800, color: C.neutral, fontFamily: MONO, lineHeight: 1 }}>—</span>
                 </div>
                 <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>Tee Sheet not connected</div>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.28)', marginTop: 3 }}>Connect to unlock weather and staffing correlations</div>
                 <div style={{ marginTop: 6, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                   <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Jonas · ForeTees · Golf Genius · GolfNow</div>
                   <div style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, color: '#fff', background: C.accent, borderRadius: 6, padding: '4px 10px' }}>

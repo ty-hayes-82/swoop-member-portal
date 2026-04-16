@@ -74,24 +74,24 @@ function getComplaintInfo(memberId) {
 function getDifferentiatedAction(member, complaint) {
   const owner = ACTION_OWNERS[member.archetype] || 'Membership Director';
   if (complaint) {
-    return { action: `Resolve complaint — ${complaint.category}, ${complaint.days} days open`, type: 'complaint', owner: complaint.days > 14 ? 'GM' : owner };
+    return { action: `Resolve complaint: ${complaint.category}, ${complaint.days} days open`, type: 'complaint', owner: complaint.days > 14 ? 'GM' : owner };
   }
   const risk = (member.topRisk || member.signal || '').toLowerCase();
   switch (member.archetype) {
     case 'Ghost':
-      return { action: 'GM personal call — re-engagement conversation', type: 'ghost', owner: 'GM' };
+      return { action: 'GM personal call: re-engagement conversation', type: 'ghost', owner: 'GM' };
     case 'Declining':
-      return { action: 'Membership Director outreach — identify root cause of declining activity', type: 'declining', owner: 'Membership Director' };
+      return { action: 'Membership Director outreach: identify root cause of declining activity', type: 'declining', owner: 'Membership Director' };
     case 'Weekend Warrior':
       return { action: 'Priority Saturday tee time offer from Pro Shop', type: 'golf', owner: 'Pro Shop' };
     case 'Die-Hard Golfer': {
       const weeks = risk.match(/(\d+)\s*weeks?/)?.[1];
-      return { action: `Pro shop outreach — ${weeks ? `check in, last round ${weeks} weeks ago` : 'check equipment/injury/schedule'}`, type: 'golf', owner: 'Pro Shop' };
+      return { action: `Pro shop outreach: ${weeks ? `check in, last round ${weeks} weeks ago` : 'check equipment/injury/schedule'}`, type: 'golf', owner: 'Pro Shop' };
     }
     case 'Social Butterfly':
       return { action: 'Invite to upcoming wine dinner or social event', type: 'social', owner: 'Events Coordinator' };
     case 'New Member':
-      return { action: 'New member integration check-in — identify engagement gaps', type: 'new-member', owner: 'Membership Director' };
+      return { action: 'New member integration check-in: identify engagement gaps', type: 'new-member', owner: 'Membership Director' };
     case 'Snowbird':
       return { action: 'Send welcome-back package + tee time reservation', type: 'snowbird', owner: 'Front Desk' };
     default:
@@ -99,7 +99,7 @@ function getDifferentiatedAction(member, complaint) {
   }
   if (risk.includes('email') || risk.includes('open rate')) {
     const pct = risk.match(/(\d+)%/)?.[1] || '';
-    return { action: `Check-in call — email engagement dropped${pct ? ` ${pct}%` : ''}`, type: 'email', owner };
+    return { action: `Check-in call: email engagement dropped${pct ? ` ${pct}%` : ''}`, type: 'email', owner };
   }
   if (risk.includes('dining') || risk.includes('f&b')) {
     return { action: 'Invite to upcoming dinner or dining event', type: 'dining', owner: 'F&B Director' };
@@ -196,13 +196,15 @@ export default function HealthOverview() {
     if (!roster.length) return [];
     return roster
       .map(m => {
-        const score = m.score ?? m.healthScore ?? 50;
+        const rawScore = m.score ?? m.healthScore ?? null;
+        const score = rawScore ?? 50;
+        const hasScore = rawScore !== null && rawScore !== undefined;
         const complaint = getComplaintInfo(m.memberId);
         const reason = complaint
           ? `Complaint unresolved ${complaint.days} days (${complaint.category})`
           : m.topRisk || 'No current risks';
         const { action, type, owner } = getDifferentiatedAction({ ...m, score }, complaint);
-        return { ...m, score, reason, action, actionType: type, owner };
+        return { ...m, score, hasScore, reason, action, actionType: type, owner };
       })
       .sort((a, b) => a.score - b.score);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -548,10 +550,10 @@ export default function HealthOverview() {
                                   padding: '2px 5px',
                                 }}
                               >
-                                {m.score}
+                                {m.hasScore ? m.score : '—'}
                               </span>
                               <div className="flex-1" style={{ minWidth: 24, maxWidth: 40, height: 5, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.07)' }}>
-                                <div style={{ height: '100%', borderRadius: 3, width: `${Math.min(100, m.score)}%`, background: sc }} />
+                                {m.hasScore && <div style={{ height: '100%', borderRadius: 3, width: `${Math.min(100, m.score)}%`, background: sc }} />}
                               </div>
                             </div>
                           </td>

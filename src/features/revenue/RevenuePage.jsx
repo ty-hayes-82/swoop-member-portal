@@ -105,7 +105,7 @@ export default function RevenuePage() {
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-swoop-text">Revenue Leakage</h1>
             <p className="text-sm text-swoop-text-muted mt-1">
-              Revenue lost to slow rounds, understaffing, and weather: quantified in dollars.
+              Revenue lost to slow rounds, understaffing, and weather, quantified in dollars.
             </p>
           </div>
 
@@ -177,13 +177,29 @@ export default function RevenuePage() {
                         </div>
                       ))}
                     </div>
+                    <div className="mt-3 pt-2.5 border-t border-swoop-border">
+                      <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-2 flex items-center gap-1.5">
+                        <span className="opacity-40">⛳</span>
+                        <span className="opacity-40">Pace of Play</span>
+                        <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded bg-swoop-border text-swoop-text-ghost">Connect Tee Sheet to unlock</span>
+                      </div>
+                      {['Saturday', 'Sunday', 'Friday', 'Wednesday', 'Thursday', 'Tuesday', 'Monday'].map(day => (
+                        <div key={day} className="flex items-center gap-3 mb-1">
+                          <span className="text-xs text-swoop-text-ghost w-24 shrink-0 opacity-40">{day}</span>
+                          <div className="flex-1 h-1.5 bg-swoop-border rounded-full overflow-hidden">
+                            <div className="h-full rounded-full bg-swoop-text-ghost/20" style={{ width: '60%' }} />
+                          </div>
+                          <span className="text-[11px] font-mono text-swoop-text-ghost shrink-0 opacity-40">—</span>
+                        </div>
+                      ))}
+                    </div>
                     <div className="text-[10px] text-swoop-text-ghost mt-2">Connect tee sheet to correlate spend patterns with round pace and identify dining conversion gaps by day.</div>
                     {/* POS insight: highlight lowest weekday vs. best day */}
                     <div className="mt-3 flex items-start gap-2 p-2.5 rounded-lg bg-warning-500/10 border border-warning-500/25">
                       <span className="text-sm shrink-0">💡</span>
                       <div>
                         <span className="text-[11px] font-semibold text-warning-400">Tuesday avg check ($28) is 32% below Saturday ($41)</span>
-                        <span className="text-[11px] text-swoop-text-muted"> — targeted weekday promotions or staffing adjustments could recover an estimated $800–$1,200/month in F&amp;B revenue.</span>
+                        <span className="text-[11px] text-swoop-text-muted">, targeted weekday promotions or staffing adjustments could recover an estimated $800–$1,200/month in F&amp;B revenue.</span>
                       </div>
                     </div>
                   </div>

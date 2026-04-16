@@ -28,7 +28,7 @@ export default function PlaybookActionCard({
     trackAction({ actionType: 'playbook', actionSubtype: 'activate', description: playbookName || title, meta: { memberCount, impact } });
     if (playbookName) {
       dispatch({ type: 'ACTIVATE_PLAYBOOK', id: playbookName.toLowerCase().replace(/\s+/g, '-') });
-      addAction({ description: `${playbookName} activated — ${memberCount || 'targeted'} members`, actionType: 'RETENTION_OUTREACH', source: 'Playbook Engine', priority: 'high', impactMetric: impact || '' });
+      addAction({ description: `${playbookName} activated: ${memberCount || 'targeted'} members`, actionType: 'RETENTION_OUTREACH', source: 'Playbook Engine', priority: 'high', impactMetric: impact || '' });
     }
   };
 

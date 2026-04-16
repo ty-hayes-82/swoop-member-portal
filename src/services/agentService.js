@@ -171,6 +171,22 @@ export function dismissAction(id, meta = {}) {
 }
 
 /**
+ * Restores a previously approved or dismissed action back to pending.
+ * @param {string} id
+ */
+export function undoAction(id) {
+  actionStore = actionStore.map(action =>
+    action.id === id
+      ? { ...action, status: 'pending', approvedAt: null, dismissedAt: null, approvalAction: null, dismissalReason: '' }
+      : action
+  );
+  if (_d?.actions) {
+    const idx = _d.actions.findIndex(a => a.id === id);
+    if (idx >= 0) _d.actions[idx] = { ..._d.actions[idx], status: 'pending', approvedAt: null, dismissedAt: null };
+  }
+}
+
+/**
  * @param {string} agentId
  * @returns {ThoughtLogEntry[]}
  */

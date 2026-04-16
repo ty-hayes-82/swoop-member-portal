@@ -1,5 +1,5 @@
 import { createContext, useContext, useReducer, useEffect, useState, useCallback, useMemo } from 'react';
-import { getAgents, getAllActions, getPendingActions, approveAction as approveAgentServiceAction, dismissAction as dismissAgentServiceAction } from '@/services/agentService';
+import { getAgents, getAllActions, getPendingActions, approveAction as approveAgentServiceAction, dismissAction as dismissAgentServiceAction, undoAction as undoAgentServiceAction } from '@/services/agentService';
 import {
   getConfirmations as getTSOConfirmations,
   updateConfirmation as updateTSOConfirmation,
@@ -22,7 +22,7 @@ const PLAYBOOK_DEFS = {
 };
 
 const TRAIL_STEPS = {
-  'service-save': ['🚩 James Whitfield flagged at front desk', '📢 F&B Director alerted with complaint details', '✉ GM personal alert: James Whitfield — 8K member, 4-day unresolved complaint', '🎁 Comp appetizer offer queued for James Whitfield'],
+  'service-save': ['🚩 James Whitfield flagged at front desk', '📢 F&B Director alerted with complaint details', '✉ GM personal alert: James Whitfield, 8K member, 4-day unresolved complaint', '🎁 Comp appetizer offer queued for James Whitfield'],
   'new-member-90day': ['🤝 Member matched with compatible golfers', '🎉 Family event invitation sent', '📞 Concierge check-in scheduled', '📋 90-day pulse survey queued'],
   'staffing-gap': ['📊 72-hour shift gap detection enabled', '📢 Flex pool (4 staff) notified for Grill Room backup', '📅 Post-day audit report scheduled daily'],
   'engagement-decay': ['📊 Weekly health scan flagged 30 declining members', '✉ 30 personalized re-engagement emails queued', '🚩 Non-responders flagged for GM personal outreach'],
@@ -110,6 +110,14 @@ function reducer(state, action) {
               approvalAction: action.meta?.approvalAction ?? item.approvalAction ?? null,
               approvedAt: new Date().toISOString(),
             }
+          : item
+      ));
+      return { ...state, inbox, pendingCount: computePendingCount(inbox) };
+    }
+    case 'UNDO_ACTION': {
+      const inbox = state.inbox.map((item) => (
+        item.id === action.id
+          ? { ...item, status: 'pending', approvedAt: null, dismissedAt: null, approvalAction: null, dismissalReason: '' }
           : item
       ));
       return { ...state, inbox, pendingCount: computePendingCount(inbox) };
@@ -375,7 +383,7 @@ export function AppProvider({ children }) {
         showToast(`Gmail draft created for ${memberName}`, 'info');
       } catch (e) {
         console.warn('[approveAction] Gmail API draft failed:', e.message);
-        showToast('Gmail API unavailable — opening compose instead', 'warning');
+        showToast('Gmail API unavailable, opening compose instead', 'warning');
         window.open(`https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(aiTo)}&su=${encodeURIComponent(aiSubject)}&body=${encodeURIComponent(aiBody)}`, '_blank');
       }
       return;
@@ -474,9 +482,9 @@ export function AppProvider({ children }) {
         ...(demoPhone ? { demoOverridePhone: demoPhone } : {}),
       }),
     }).then(r => {
-      if (r && !r.ok) showToast('Action may not have been delivered — check status', 'error');
+      if (r && !r.ok) showToast('Action may not have been delivered, check status', 'error');
     }).catch(() => {
-      showToast('Failed to send action — please retry', 'error');
+      showToast('Failed to send action, please retry', 'error');
     });
   }, [state.inbox, dispatch, showToast]);
 
@@ -497,6 +505,11 @@ export function AppProvider({ children }) {
     });
   }, [state.inbox, dispatch]);
 
+  const undoAction = useCallback(function undoAction(id) {
+    undoAgentServiceAction(id);
+    dispatch({ type: 'UNDO_ACTION', id });
+  }, [dispatch]);
+
   return (
     <AppContext.Provider
       value={{
@@ -511,6 +524,7 @@ export function AppProvider({ children }) {
         getAgentStatus: (id, fallback) => state.agentStatuses[id] ?? fallback,
         approveAction,
         dismissAction,
+        undoAction,
         addAction: (data) => dispatch({ type: 'ADD_ACTION', ...data }),
         toggleAgent: (id, currentStatus) => dispatch({ type: 'TOGGLE_AGENT_STATUS', id, currentStatus }),
         saveAgentConfig: (id, config) => dispatch({ type: 'SAVE_AGENT_CONFIG', id, config }),

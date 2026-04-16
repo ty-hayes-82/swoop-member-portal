@@ -45,6 +45,13 @@ export default function MembersView() {
               </button>
               <button
                 type="button"
+                onClick={() => { try { localStorage.setItem('swoop_club_id', 'demo'); } catch {} window.location.reload(); }}
+                className="w-full px-5 py-2.5 rounded-lg text-sm font-semibold bg-transparent text-brand-500 border border-brand-500/40 hover:bg-brand-500/10 transition-colors"
+              >
+                Explore with Sample Data →
+              </button>
+              <button
+                type="button"
                 onClick={() => navigate('integrations')}
                 className="w-full px-5 py-2.5 rounded-lg text-sm font-semibold bg-transparent text-swoop-text-muted border border-swoop-border hover:text-swoop-text hover:border-swoop-text transition-colors"
               >

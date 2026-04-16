@@ -2,7 +2,7 @@
  * InboxTab — Full-page action inbox for the Automations hub
  * Shows pending actions with approve/dismiss, filters, and recently handled log.
  */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useCallback } from 'react';
 import { useApp } from '@/context/AppContext';
 import { getAllActions } from '@/services/agentService';
 import { getDataMode, isGateOpen } from '@/services/demoGate';
@@ -134,11 +134,38 @@ function HandledCard({ action }) {
 }
 
 export default function InboxTab() {
-  const { inbox: contextInbox, approveAction, dismissAction } = useApp();
+  const { inbox: contextInbox, approveAction, dismissAction, undoAction } = useApp();
   // Fallback: if context inbox is empty due to timing, load directly from service
   const inbox = contextInbox.length > 0 ? contextInbox : getAllActions();
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [showHandled, setShowHandled] = useState(false);
+  const [undoToast, setUndoToast] = useState(null); // { id, label, type }
+  const undoTimerRef = useRef(null);
+
+  const showUndoToast = useCallback((id, label, type) => {
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    setUndoToast({ id, label, type });
+    undoTimerRef.current = setTimeout(() => setUndoToast(null), 8000);
+  }, []);
+
+  const handleApproveWithUndo = useCallback((id, meta) => {
+    approveAction(id, meta);
+    const actionItem = (contextInbox.length > 0 ? contextInbox : getAllActions()).find(a => a.id === id);
+    showUndoToast(id, actionItem?.memberName ? `Approved for ${actionItem.memberName}` : 'Action approved', 'approve');
+  }, [approveAction, contextInbox, showUndoToast]);
+
+  const handleDismissWithUndo = useCallback((id, meta) => {
+    dismissAction(id, meta);
+    const actionItem = (contextInbox.length > 0 ? contextInbox : getAllActions()).find(a => a.id === id);
+    showUndoToast(id, actionItem?.memberName ? `Dismissed for ${actionItem.memberName}` : 'Action dismissed', 'dismiss');
+  }, [dismissAction, contextInbox, showUndoToast]);
+
+  const handleUndo = useCallback(() => {
+    if (!undoToast) return;
+    undoAction(undoToast.id);
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    setUndoToast(null);
+  }, [undoToast, undoAction]);
 
   const pending = useMemo(() => {
     const p = inbox.filter(i => i.status === 'pending');
@@ -162,12 +189,14 @@ export default function InboxTab() {
     if (!targets.length) return;
     if (!window.confirm(`Approve ${targets.length} high-priority action${targets.length === 1 ? '' : 's'}?`)) return;
     targets.forEach(a => approveAction(a.id, { executionType: 'email', memberId: a.memberId, memberName: a.memberName }));
+    showUndoToast(targets[0].id, `${targets.length} high-priority action${targets.length === 1 ? '' : 's'} approved`, 'approve');
   };
   const handleBulkApproveAll = () => {
     const targets = inbox.filter(i => i.status === 'pending');
     if (!targets.length) return;
     if (!window.confirm(`Approve all ${targets.length} pending actions?`)) return;
     targets.forEach(a => approveAction(a.id, { executionType: 'email', memberId: a.memberId, memberName: a.memberName }));
+    showUndoToast(targets[0].id, `All ${targets.length} actions approved`, 'approve');
   };
 
   // Pillar 3 PROVE IT — total dollar impact rollup
@@ -196,6 +225,21 @@ export default function InboxTab() {
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Undo toast — appears for 8 seconds after approve/dismiss */}
+      {undoToast && (
+        <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-swoop-text/[0.06] border border-swoop-border text-sm">
+          <span className="text-swoop-text-2">
+            {undoToast.type === 'approve' ? '✓' : '×'} {undoToast.label}
+          </span>
+          <button
+            type="button"
+            onClick={handleUndo}
+            className="text-brand-500 font-semibold text-xs hover:underline shrink-0"
+          >
+            Undo
+          </button>
+        </div>
+      )}
       {/* Service Recovery Alerts — surfaces unresolved complaints and staffing gaps */}
       {(unresolvedComplaints.length > 0 || understaffedDays.length > 0) && (
         <div className="rounded-xl border border-error-500/25 bg-error-500/[0.04] p-4">
@@ -230,7 +274,7 @@ export default function InboxTab() {
               const teeCount = topDay?.teeTimesCount || topDay?.teeTimes || 34;
               const mealPeriod = (topDay?.shift || topDay?.period || 'lunch').toLowerCase();
               const wx = getTomorrowForecast();
-              const wxSuffix = wx ? ` · ${wx.condition === 'sunny' || (!wx.rain && wx.high >= 70) ? `☀ ${wx.high}°F clear: strong dining demand expected` : wx.rain ? `🌧 ${wx.high}°F rain: lower demand than forecast` : `${wx.high}°F ${wx.description || wx.condition}`}` : '';
+              const wxSuffix = wx ? ` · ${wx.condition === 'sunny' || (!wx.rain && wx.high >= 70) ? `☀ ${wx.high}°F clear, strong dining demand expected` : wx.rain ? `🌧 ${wx.high}°F rain, lower demand than forecast` : `${wx.high}°F ${wx.description || wx.condition}`}` : '';
               return (
                 <div className="flex items-start gap-3 py-2 px-3 rounded-lg bg-swoop-panel border border-swoop-border">
                   <span className="text-sm shrink-0">⚠️</span>
@@ -397,8 +441,8 @@ export default function InboxTab() {
             <InboxActionCard
               key={action.id}
               action={action}
-              onApprove={approveAction}
-              onDismiss={dismissAction}
+              onApprove={handleApproveWithUndo}
+              onDismiss={handleDismissWithUndo}
             />
           ))}
         </div>

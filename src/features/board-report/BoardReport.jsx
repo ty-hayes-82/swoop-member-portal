@@ -329,7 +329,7 @@ export default function BoardReport() {
           <div className="flex-1">
             <div className="text-[10px] font-bold uppercase tracking-widest text-success-500 mb-1">Dues Saved YTD</div>
             <div className="text-3xl font-extrabold text-success-500 font-mono">${totalDues.toLocaleString()}</div>
-            <div className="text-xs text-swoop-text-muted mt-1">Annual dues recovered through early member intervention — {memberSaves.length} member{memberSaves.length !== 1 ? 's' : ''} retained before resignation window</div>
+            <div className="text-xs text-swoop-text-muted mt-1">Annual dues recovered through early member intervention: {memberSaves.length} member{memberSaves.length !== 1 ? 's' : ''} retained before resignation window</div>
           </div>
           <div className="flex flex-col items-start sm:items-end gap-1 shrink-0">
             <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">Avg per save</div>
@@ -415,7 +415,7 @@ export default function BoardReport() {
                 in real time.
                 {resolutionRate > 0 && <> Service complaint resolution rate: <strong>{resolutionRate}%</strong>.</>}
                 {' '}As behavioral data accumulates, we are identifying at-risk members early and surfacing
-                identifying issues before they impact retention.
+                root issues before they impact retention.
               </>
             )}
           </p>
@@ -516,7 +516,7 @@ export default function BoardReport() {
                     <div className={`text-[28px] font-bold ${csColorClass}`}>{consistencyScore}</div>
                     <div className="text-[11px] text-[#BCC3CF] flex items-center justify-center gap-1">
                       Service Consistency Score
-                      <InfoTooltip text="Weighted composite: complaint resolution rate (40%), staffing coverage rate (30%), and baseline service score (30%). Higher is better — 70+ is on-target." />
+                      <InfoTooltip text="Weighted composite: complaint resolution rate (40%), staffing coverage rate (30%), and baseline service score (30%). Higher is better. 70+ is on-target." />
                     </div>
                   </div>
                 );
@@ -670,9 +670,13 @@ export default function BoardReport() {
 
           {/* Member Health Overview */}
           <Panel>
-            <h2 className="text-lg font-bold text-swoop-text mb-1.5">
-              Member Health Overview
-            </h2>
+            <div className="flex items-start justify-between gap-3 mb-1.5">
+              <h2 className="text-lg font-bold text-swoop-text">Member Health Overview</h2>
+              <div className="flex gap-1 shrink-0">
+                <SourceBadge system="Member CRM" size="xs" />
+                <SourceBadge system="Analytics" size="xs" />
+              </div>
+            </div>
             <p className="text-xs text-swoop-text-muted mb-4">
               Health distribution and intervention outcomes this month.
             </p>
