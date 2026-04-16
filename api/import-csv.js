@@ -732,11 +732,15 @@ async function importCsvHandler(req, res) {
         }
         const mappedColumns = new Set(); // track which DB columns we've added
         for (const field of allFields) {
-          if (row[field] !== undefined && row[field] !== null && String(row[field]).trim() !== '') {
-            const dbColumn = columnMap[field] || field;
+          const dbColumn = columnMap[field] || field;
+          // resolveAliases may have mapped the vendor header directly to the DB
+          // column name (skipping the intermediate config field name). Fall back
+          // to dbColumn so we don't silently drop values for columns like annual_dues.
+          const rawVal = row[field] !== undefined ? row[field] : row[dbColumn];
+          if (rawVal !== undefined && rawVal !== null && String(rawVal).trim() !== '') {
             columns.push(dbColumn);
             mappedColumns.add(dbColumn);
-            let val = row[field];
+            let val = rawVal;
             // Apply value transforms (e.g., ft_pt "FT"→1, "PT"→0)
             if (config.valueTransform?.[field]) val = config.valueTransform[field](val);
             values.push(typeof val === 'string' && !isNaN(Number(val)) && field.match(/amount|fee|price|total|revenue|rate|count|hours|covers|capacity/) ? Number(val) : val);
