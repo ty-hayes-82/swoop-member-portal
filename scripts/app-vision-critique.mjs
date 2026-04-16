@@ -240,6 +240,7 @@ One sentence: is this screen worth $18K/year to a GM like you?
 - Write in first person as the GM. Not academic.
 - Be brutally honest but specific. "This is useless" without evidence is not a finding.
 - Every score must cite at least one specific visible element.
+- CRITICAL: Your score is relative to what is ACHIEVABLE at this data stage. If the user prompt says Stage 0 / no data, the maximum score is still 100 — you are grading the empty-state execution, not penalizing for the absence of data you haven't provided. A GM who sees a clean, trustworthy, well-directed empty state and gives it 5/100 is grading incorrectly.
 - Under 400 words total.`,
   },
 
@@ -1023,11 +1024,17 @@ async function critiqueWithAgent(genAI, screenshotPath, agent, pageContext) {
     generationConfig: THINKING_CONFIG,
   });
 
+  const isEmptyStage = pageContext.stageLabel?.toLowerCase().includes('stage 0') || pageContext.stageLabel?.toLowerCase().includes('empty');
+  const stageCaveat = isEmptyStage
+    ? `\n⚠️  SCORING RULE — EMPTY STATE: No data has been imported. Your score denominator is EXECUTION QUALITY at this stage, not data richness. A perfectly designed empty state with a clear CTA and credible promise earns 100/100. You MUST NOT deduct points for missing metrics, charts, or numbers that cannot exist without data. The only valid deductions are for poor UX, unclear next steps, untrustworthy design, or broken layout.`
+    : `\n⚠️  SCORING RULE: Score against what is POSSIBLE at this data stage. A screen that perfectly delivers on its current data state earns 100/100. Do not penalize for features that require data not yet imported.`;
+
   const userPrompt = `You are reviewing the **${pageContext.routeLabel}** screen of the Swoop Member Portal app.
 
 **DATA STATE:** ${pageContext.dataState}
 **STAGE:** ${pageContext.stageLabel}
 **APP URL:** ${APP_URL}
+${stageCaveat}
 
 Swoop Club Intelligence is an AI-powered member intelligence platform for private golf and country clubs.
 It turns member, tee-sheet, POS, and communication data into actionable retention and revenue insights.

@@ -6,11 +6,13 @@ import { SkeletonGrid } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import DataEmptyState from '@/components/ui/DataEmptyState';
 import { isGateOpen } from '@/services/demoGate';
+import { useNavigation } from '@/context/NavigationContext';
 import AllMembersView from '@/features/member-health/tabs/AllMembersView';
 import HealthOverview from '@/features/member-health/tabs/HealthOverview';
 
 export default function MembersView() {
   const [isLoading, setIsLoading] = useState(true);
+  const { navigate } = useNavigation();
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 600);
@@ -29,9 +31,27 @@ export default function MembersView() {
       <PageTransition>
         <DataEmptyState
           icon="👥"
-          title="No members imported yet"
-          description="Upload your member roster CSV to see health scores, archetypes, at-risk alerts, and engagement trends for every member. Start with Admin → Integrations → Open Upload Tool."
+          title="Connect your club systems to see member intelligence"
+          description="Swoop pulls members, rounds, spend, and engagement directly from Jonas, Clubessential, Northstar, and similar systems. Once connected, health scores, archetypes, and at-risk alerts populate automatically."
           dataType="members"
+          actions={
+            <>
+              <button
+                type="button"
+                onClick={() => navigate('integrations')}
+                className="px-4 py-2 rounded-md text-xs font-bold bg-brand-500 text-white hover:bg-brand-600"
+              >
+                Connect Integrations →
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('integrations/csv-import', { category: 'members' })}
+                className="px-4 py-2 rounded-md text-xs font-semibold bg-transparent text-swoop-text-muted border border-swoop-border hover:text-swoop-text"
+              >
+                Or upload a CSV
+              </button>
+            </>
+          }
         />
       </PageTransition>
     );

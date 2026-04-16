@@ -1,24 +1,25 @@
 // StoryHeadline.jsx — Story-first headline for every view.
 
+// Dark-theme tinted backgrounds — white text on bg-*-50 was invisible (WCAG fail)
 const VARIANT_CONFIG = {
   urgent: {
     borderClass: 'border-l-error-500',
-    bgClass: 'bg-error-50',
+    bgClass: 'bg-error-500/[0.10]',
     icon: '\u26A0',
   },
   warning: {
     borderClass: 'border-l-warning-500',
-    bgClass: 'bg-warning-50',
+    bgClass: 'bg-warning-500/[0.10]',
     icon: '\u25C6',
   },
   insight: {
     borderClass: 'border-l-brand-500',
-    bgClass: 'bg-brand-50',
+    bgClass: 'bg-brand-500/[0.10]',
     icon: '\u25C8',
   },
   opportunity: {
     borderClass: 'border-l-brand-500',
-    bgClass: 'bg-brand-50',
+    bgClass: 'bg-brand-500/[0.10]',
     icon: '\u25CE',
   },
 };

@@ -237,8 +237,33 @@ export default function HealthOverview() {
     return <DataEmptyState icon="👥" title="No members imported yet" description="Import your member roster to start tracking member health and engagement." dataType="members" />;
   }
 
+  const distTotal = dist.reduce((sum, d) => sum + (d.count || 0), 0);
+  const scoresMissing = allMembers.length > 0 && distTotal === 0;
+
   return (
     <div className="flex flex-col gap-6">
+
+      {scoresMissing && (
+        <div className="rounded-xl border border-warning-500/30 bg-warning-500/[0.08] px-5 py-4 flex items-start gap-3">
+          <span className="text-lg leading-none mt-0.5">◆</span>
+          <div className="flex-1">
+            <div className="text-sm font-semibold text-swoop-text">
+              {allMembers.length} members imported, but health scores haven't been computed yet.
+            </div>
+            <div className="text-xs text-swoop-text-muted mt-1">
+              Run Re-Score to populate the distribution cards below — or connect POS, tee sheet, and email sources to unlock richer signals.
+            </div>
+            <button
+              type="button"
+              onClick={handleRescore}
+              disabled={rescoring}
+              className="mt-2 px-3 py-1.5 rounded-md text-xs font-bold bg-brand-500 text-white hover:bg-brand-600 disabled:opacity-60"
+            >
+              {rescoring ? 'Computing…' : 'Re-Score Now →'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Health Distribution KPI Cards */}
       <div className="grid-responsive-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>

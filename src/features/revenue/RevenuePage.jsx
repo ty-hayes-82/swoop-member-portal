@@ -368,7 +368,9 @@ export default function RevenuePage() {
               $<AnimatedNumber value={leakage.PACE_LOSS} duration={1200} />
             </div>
             <SourceBadge system="Tee Sheet" size="xs" />
-            <div className="text-[11px] text-swoop-text-label mt-1.5 leading-snug">Slow rounds skip post-round dining — 41% → 22% conversion drop.</div>
+            <div className="text-[11px] text-swoop-text-label mt-1.5 leading-snug">
+              <span className="font-bold text-brand-500">$31 lost per slow round</span> — 41% → 22% dining conversion drop when rounds run long.
+            </div>
           </div>
           {leakage.STAFFING_LOSS > 0 ? (
             <button

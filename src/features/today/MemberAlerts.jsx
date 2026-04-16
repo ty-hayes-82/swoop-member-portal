@@ -315,9 +315,14 @@ export default function MemberAlerts() {
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)' }}>
                     {bulkApproved && '✓ '}{m.action}
                   </div>
+                  {m.duesAnnual > 0 && (
+                    <div style={{ fontSize: 11, color: severityColor, fontWeight: 700, marginTop: 4 }}>
+                      ${Math.round(m.duesAnnual / 1000)}K/yr dues at risk — save opportunity
+                    </div>
+                  )}
                   {m.owner && (
-                    <div style={{ fontSize: 11, color: severityColor, fontWeight: 600, marginTop: 4 }}>
-                      {m.owner}
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', fontWeight: 600, marginTop: 2 }}>
+                      Owner: {m.owner}
                     </div>
                   )}
                 </div>
