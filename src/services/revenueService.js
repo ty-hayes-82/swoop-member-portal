@@ -191,3 +191,9 @@ export function getSlowRoundContext() {
     weekendRate: stats?.weekendRate || 0,
   };
 }
+
+/** Average F&B check size from POS transaction data */
+export function getAvgCheckSize() {
+  const paceFB = getPaceFBImpact();
+  return Math.round(paceFB.avgCheckFast || 34);
+}

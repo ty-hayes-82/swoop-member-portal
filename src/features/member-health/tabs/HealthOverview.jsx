@@ -302,7 +302,7 @@ export default function HealthOverview() {
                 <div className="h-full rounded-sm" style={{ background: d.color, width: `${d.percentage * 100}%` }} />
               </div>
               <div className="mt-2 text-xs text-swoop-text-muted leading-snug">
-                <strong>{d.count} members</strong> {descriptor} —{' '}
+                <strong>{d.count} members</strong> {descriptor}:{' '}
                 <span style={{ color: deltaColor }}>{deltaCopy}</span>
               </div>
             </div>

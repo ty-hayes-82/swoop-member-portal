@@ -27,10 +27,10 @@ import {
   getDollarPerSlowRound,
   getBottleneckSummary,
   getSlowRoundContext,
+  getAvgCheckSize,
 } from '@/services/revenueService';
 import { isGateOpen } from '@/services/demoGate';
 import { getMemberSummary, getAtRiskMembers } from '@/services/memberService';
-import { getMonthlyRevenueSummary } from '@/services/operationsService';
 import AgentUpsell from '@/components/ui/AgentUpsell';
 
 const COLORS = {
@@ -84,7 +84,7 @@ export default function RevenuePage() {
   const bottleneck = useMemo(() => getBottleneckSummary(), []);
   const slowContext = useMemo(() => getSlowRoundContext(), []);
   const dollarPerSlowRound = useMemo(() => getDollarPerSlowRound(), []);
-  const monthlyRevenue = useMemo(() => getMonthlyRevenueSummary(), []);
+  const avgCheckSize = useMemo(() => getAvgCheckSize(), []);
 
   if (isLoading) {
     return (
@@ -135,9 +135,9 @@ export default function RevenuePage() {
                         <div className="text-[11px] text-swoop-text-muted mt-0.5">dining checks analyzed</div>
                       </div>
                       <div className="bg-swoop-panel rounded-lg p-3 border border-swoop-border">
-                        <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-1">Revenue Tracked</div>
-                        <div className="text-2xl font-bold text-brand-500 font-mono">${(monthlyRevenue.fbTotal || 0).toLocaleString()}</div>
-                        <div className="text-[11px] text-swoop-text-muted mt-0.5">F&B revenue this month</div>
+                        <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-1">Avg Check Size</div>
+                        <div className="text-2xl font-bold text-brand-500 font-mono">${avgCheckSize}</div>
+                        <div className="text-[11px] text-swoop-text-muted mt-0.5">per dining transaction</div>
                       </div>
                     </div>
                   </div>
