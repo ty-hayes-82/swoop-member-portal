@@ -9,7 +9,7 @@
  */
 import { sql } from '@vercel/postgres';
 import { withAuth, getReadClubId } from '../lib/withAuth.js';
-import { getOrCreateSession, updateSessionSummary, emitConciergeEvent, getConciergeEvents } from '../agents/concierge-session.js';
+import { getOrCreateSession, updateSessionSummary, emitConciergeEvent, getConciergeEvents, getPendingRequestDetails } from '../agents/concierge-session.js';
 import { getOrCreateAgentSession, emitAgentEvent } from '../agents/session-core.js';
 import { buildConciergePrompt } from '../../src/config/conciergePrompt.js';
 import { getAnthropicClient, MANAGED_AGENT_ID, MANAGED_ENV_ID } from '../agents/managed-config.js';
@@ -767,19 +767,20 @@ async function chatHandler(req, res) {
 
     // Always surface pending/confirmed requests so the model can answer status questions
     // and avoid re-routing requests that already have a pending submission.
-    const pendingEvents = await getConciergeEvents(member_id, { last: 10, types: ['request_submitted', 'staff_confirmed'] });
-    if (pendingEvents?.length) {
-      const pendingLines = pendingEvents.slice().reverse().map(ev => {
-        const ts = ev.emitted_at ? new Date(ev.emitted_at).toISOString().slice(0, 16) : '';
-        const p = ev.payload || {};
-        if (ev.event_type === 'staff_confirmed') return `  ✓ CONFIRMED [${ts}]: ${p.text || ''}`;
-        return `  ⏳ PENDING [${ts}]: ${p.request_id} — ${p.request_type} sent to ${p.routed_to}. ${p.expected_response || ''}`;
-      });
-      const confirmationFollowUp = /\b(did it go through|was it confirmed|has my request|did you send|did that go|was that processed|confirm|go through|get it|receive it|been processed)\b/i.test(message);
-      const contextLabel = confirmationFollowUp
-        ? 'PENDING AND CONFIRMED REQUESTS (answer the member\'s status question using this — do NOT re-fire send_request_to_club):'
-        : 'YOUR RECENT REQUESTS (for context — if the member asks about status, use this):';
-      pendingRequestsContext = `\n\n${contextLabel}\n${pendingLines.join('\n')}`;
+    const requestDetails = await getPendingRequestDetails(member_id);
+    const isStatusQuery = /\b(did it go through|was it confirmed|has my request|did you send|did that go|was that processed|confirm|go through|get it|receive it|been processed|still pending|any update|heard back|follow.?up|status)\b/i.test(message);
+    if (requestDetails.pending.length > 0 || requestDetails.confirmed.length > 0) {
+      const pendingLines = requestDetails.pending.map(r =>
+        `  ⏳ PENDING: ${r.request_type} sent to ${r.routed_to} ${r.time_label}${r.details ? ` — ${r.details}` : ''}. ${r.expected_response || ''}`
+      );
+      const confirmedLines = requestDetails.confirmed.map(r =>
+        `  ✓ CONFIRMED ${r.time_label}: ${r.text}`
+      );
+      const allLines = [...pendingLines, ...confirmedLines];
+      const contextLabel = isStatusQuery
+        ? 'MEMBER\'S PENDING AND CONFIRMED REQUESTS — IMPORTANT: Answer the status question using these records. If a pending request exists for what they asked about, tell them it was submitted and is still pending. Do NOT fire send_request_to_club again for the same thing:'
+        : 'MEMBER\'S RECENT REQUESTS (for context — if asked about status, use these records before routing to staff):';
+      pendingRequestsContext = `\n\n${contextLabel}\n${allLines.join('\n')}`;
     }
   } catch (_) { /* event log not available — fall through */ }
 
@@ -942,7 +943,15 @@ async function chatHandler(req, res) {
         if (isGhostMember) {
           openerLine = `a varied warm welcome-back (e.g. "${memberFirstName}! We've missed you so much — so glad you reached out." or "${memberFirstName}! You just made my day." — VARY it, never repeat the same phrase)`;
         } else if (isAtRiskMember && hasPriorComplaintFlag) {
-          openerLine = `"I know your last experience wasn't what it should have been, ${memberFirstName} — I want to make this one different."`;
+          const profileNotesLower = (profile.preferences?.notes || '').toLowerCase();
+          const hasBillingIssue = profileNotesLower.includes('billing') || profileNotesLower.includes('invoice') || profileNotesLower.includes('charge');
+          const hasServiceIssue = profileNotesLower.includes('slow service') || profileNotesLower.includes('slow at the bar') || profileNotesLower.includes('service at the bar') || profileNotesLower.includes('wait');
+          const specificAck = hasBillingIssue
+            ? `"${memberFirstName}, I know that billing issue still hasn't been resolved — let me make sure we get that fixed."`
+            : hasServiceIssue
+            ? `"${memberFirstName}, I know that wait wasn't what you deserved — I want to make this visit better."`
+            : `"I know your last experience wasn't what it should have been, ${memberFirstName} — I want to make this one different."`;
+          openerLine = `${specificAck} (VARY on subsequent turns — do not repeat verbatim)`;
         } else if (isAtRiskMember) {
           openerLine = `a warm validation opener (e.g. "${memberFirstName}, always love hearing from you!" or "${memberFirstName}! You made my day reaching out." or "So good to hear from you, ${memberFirstName}!" — VARY it, never repeat the same phrase)`;
         } else {

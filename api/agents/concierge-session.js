@@ -139,6 +139,72 @@ export async function getConciergeEvents(memberId, { last = 20, types = null, si
 }
 
 // ---------------------------------------------------------------------------
+// Pending request lookup — for status-query responses
+// ---------------------------------------------------------------------------
+
+/**
+ * Get structured details about a member's pending (unconfirmed) requests.
+ * Used by chat.js to inject status context when a member asks about prior requests,
+ * so the concierge can say "Your tee time request was submitted 2h ago, still pending"
+ * instead of creating a new send_request_to_club ticket.
+ *
+ * @param {string} memberId
+ * @param {object} opts - { maxAgeDays?: number }
+ * @returns {Promise<{ pending: object[], confirmed: object[] }>}
+ */
+export async function getPendingRequestDetails(memberId, { maxAgeDays = 7 } = {}) {
+  const sessionId = `mbr_${memberId}_concierge`;
+  try {
+    const since = new Date(Date.now() - maxAgeDays * 24 * 3600 * 1000).toISOString();
+    const r = await sql`
+      SELECT id, event_type, payload, emitted_at
+      FROM member_concierge_events
+      WHERE session_id = ${sessionId}
+        AND event_type IN ('request_submitted', 'staff_confirmed')
+        AND emitted_at >= ${since}
+      ORDER BY emitted_at DESC
+      LIMIT 15
+    `;
+
+    const pending = [];
+    const confirmed = [];
+    for (const row of r.rows) {
+      const p = row.payload || {};
+      const ts = row.emitted_at ? new Date(row.emitted_at) : null;
+      const hoursAgo = ts ? Math.round((Date.now() - ts.getTime()) / 3600000) : null;
+      const timeLabel = hoursAgo !== null
+        ? (hoursAgo < 1 ? 'less than an hour ago' : hoursAgo === 1 ? '1 hour ago' : `${hoursAgo} hours ago`)
+        : 'recently';
+
+      if (row.event_type === 'request_submitted') {
+        pending.push({
+          request_id: p.request_id,
+          request_type: p.request_type || 'request',
+          routed_to: p.routed_to,
+          details: p.details,
+          expected_response: p.expected_response,
+          submitted_at: ts?.toISOString(),
+          time_label: timeLabel,
+          summary: `${p.request_type || 'Request'} sent to ${p.routed_to} ${timeLabel} — still pending.`,
+        });
+      } else if (row.event_type === 'staff_confirmed') {
+        confirmed.push({
+          text: p.text,
+          confirmed_at: ts?.toISOString(),
+          time_label: timeLabel,
+          summary: `Confirmed ${timeLabel}: ${p.text}`,
+        });
+      }
+    }
+
+    return { pending, confirmed };
+  } catch (err) {
+    console.warn('[concierge-session] getPendingRequestDetails failed:', err.message);
+    return { pending: [], confirmed: [] };
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Member confirmation delivery (Sprint A: booking confirmation loop)
 // ---------------------------------------------------------------------------
 

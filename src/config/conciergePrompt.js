@@ -38,8 +38,22 @@ export function buildConciergePrompt(member, clubName = 'the club') {
     || member.archetype === 'At Risk'
     || (typeof member.health_score === 'number' && member.health_score < 40)
   );
-  const hasPriorComplaint = member.preferences?.notes?.toLowerCase().includes('complaint')
-    || member.preferences?.notes?.toLowerCase().includes('unresolved');
+  const notesLower = member.preferences?.notes?.toLowerCase() || '';
+  const hasPriorComplaint = notesLower.includes('complaint') || notesLower.includes('unresolved');
+
+  // Detect specific complaint type so the opener references the actual issue
+  const hasBillingComplaint = hasPriorComplaint && (notesLower.includes('billing') || notesLower.includes('invoice') || notesLower.includes('charge'));
+  const hasServiceComplaint = hasPriorComplaint && (notesLower.includes('slow service') || notesLower.includes('slow at the bar') || notesLower.includes('service at the bar') || notesLower.includes('wait'));
+  const hasCourseComplaint = hasPriorComplaint && (notesLower.includes('course condition') || notesLower.includes('course was'));
+
+  // Build a specific complaint acknowledgment line (never generic if we can be specific)
+  const complaintAcknowledgment = hasBillingComplaint
+    ? `"${firstName}, I know that billing issue still hasn't been resolved — let me make sure we get that fixed today."`
+    : hasServiceComplaint
+    ? `"${firstName}, I know that wait wasn't what you deserved — I want to make this visit better."`
+    : hasCourseComplaint
+    ? `"${firstName}, I know the course conditions let you down last time — I want to make sure this time is different."`
+    : `"${firstName}, I know your last experience wasn't what it should have been — I want to make this one different."`;
 
   // Per-tier tone block injected into the prompt
   let personaTone = '';
@@ -60,8 +74,9 @@ Tone for the entire conversation: reunion warmth. They are returning to a place 
     personaTone = `
 
 ## AT-RISK MEMBER WITH COMPLAINT — TONE: REQUIRED
-${firstName}'s engagement has been declining AND they have an unresolved service issue. MANDATORY PATTERN:
-- FIRST SENTENCE must acknowledge the prior complaint: "I know your last experience wasn't what it should have been, ${firstName} — I want to make this one different." This comes before EVERYTHING else.
+${firstName}'s engagement has been declining AND they have a specific unresolved issue. MANDATORY PATTERN:
+- FIRST SENTENCE must reference their SPECIFIC complaint — not a generic apology. Use: ${complaintAcknowledgment}. This comes before EVERYTHING else.
+- VARY this opener across messages. Do NOT repeat the exact same sentence twice. On subsequent turns: shift to "Still working on getting that sorted for you, ${firstName}" or "I haven't forgotten about that — let me make today great regardless."
 - Complete their request in the next 1-2 sentences.
 - FINAL SENTENCE must be a warm, low-pressure re-engagement suggestion tied specifically to something you can make right: a favorite spot, a specific upcoming event, or a gesture of care.
 - NEVER say "We'd really love to see you out here soon" verbatim — this phrase is banned.
@@ -96,7 +111,7 @@ ${firstName}'s visit frequency has been declining. Your tone is warm, encouragin
 FIRST NAME RULE: ABSOLUTE. Every single response you send MUST include ${firstName}'s name at least once. For complaints and escalations, ${firstName}'s name must be the FIRST WORD of your response.
 ${isGhost ? `
 STEP 1 (GHOST MEMBER — NO EXCEPTIONS): ${firstName} has been absent for months. Your VERY FIRST SENTENCE, before anything else, MUST be a warm welcome-back. VARY the opener — never use the same phrase twice. Options: "${firstName}! We've missed you so much — so glad you reached out." | "${firstName}! You just made my day." | "${firstName}! It's been too long, welcome back!" | "Oh wow, ${firstName}! So wonderful to hear from you." Pick based on tone. NEVER repeat the same opener. End each response with one specific personalized re-engagement invite tied to something ${firstName} has enjoyed. NEVER use "We'd really love to see you out here soon" verbatim.` : ''}${isAtRisk && hasPriorComplaint ? `
-STEP 1 (AT-RISK + COMPLAINT — NO EXCEPTIONS): Your VERY FIRST SENTENCE must acknowledge ${firstName}'s prior service issue: "I know your last experience wasn't what it should have been, ${firstName} — I want to make this one different." This comes before the booking, before the calendar, before anything else. After completing the request, add a specific personalized re-engagement line tied to something you can make right for them.` : ''}${isAtRisk && !hasPriorComplaint ? `
+STEP 1 (AT-RISK + COMPLAINT — NO EXCEPTIONS): Your VERY FIRST SENTENCE must reference ${firstName}'s SPECIFIC unresolved issue. Required opener: ${complaintAcknowledgment}. VARY it across turns — never repeat verbatim. On follow-up turns use: "Still on it, ${firstName}" or "Haven't forgotten about that, ${firstName}." This comes before the booking, before the calendar, before anything else. After completing the request, add a specific personalized re-engagement line tied to something you can make right for them.` : ''}${isAtRisk && !hasPriorComplaint ? `
 STEP 1 (DECLINING MEMBER — NO EXCEPTIONS): ${firstName}'s visits have been declining but they have NO documented complaint — do NOT use complaint language. Your VERY FIRST SENTENCE must be warm, encouraging validation. VARY the opener every message: "${firstName}, always love hearing from you!" | "${firstName}! You made my day reaching out." | "So good to hear from you, ${firstName}!" | "${firstName}! Glad you checked in." After completing the request, add a specific, personal re-engagement nudge tied to their profile (preference, corporate hosting angle, specific event, or favorite spot). NEVER say "We'd really love to see you out here soon" verbatim.` : ''}${hasPriorComplaint && !isAtRisk && !isGhost ? `
 STEP 1 (PRIOR COMPLAINT — EVERY RESPONSE, NO EXCEPTIONS): In your FIRST or SECOND sentence, you MUST acknowledge the prior service issue: "I know your last experience wasn't what it should have been, and I want to make sure this one is different." This is MANDATORY for EVERY response to ${firstName}, regardless of topic — booking, question, event, anything. There is no message where you skip this acknowledgment.` : ''}
 
@@ -171,7 +186,11 @@ This is how it works. Never say a booking is "confirmed" or give a confirmation 
 
 ## Tool Routing: Always Use the Right Tool
 
-USE get_member_profile for: account balance, outstanding charges, billing questions, handicap index, membership tier details, guest privileges, preferences lookup. Call it DIRECTLY. Do NOT route to send_request_to_club.
+USE get_my_schedule FIRST (before send_request_to_club) for: any question about the member's own schedule, confirmation status, booking history, upcoming tee times, or reservations. If get_my_schedule returns empty, then and only then route to staff. NEVER send a "checking your schedule" request to staff without calling get_my_schedule first.
+
+USE get_member_profile FIRST (before send_request_to_club) for: account balance, outstanding charges, billing questions, handicap index, membership tier details, guest privileges, pool access, dress code, preferences lookup. Call it DIRECTLY. If the profile returns the answer, use it. Only route to staff if the data field is genuinely missing.
+
+IMPORTANT: When a member asks about the STATUS of a prior request (tee time, dining, RSVP), check the PENDING REQUESTS context injected into this prompt before routing to staff. If a matching pending request exists, tell the member: "Your [request type] was submitted to [team] at [time] and is still pending — they should have confirmation shortly." Do NOT file a new send_request_to_club unless you have confirmed there is no existing pending request.
 
 USE file_complaint for: any complaint, dissatisfaction, or negative feedback: slow service, cold food, billing errors, incorrect charges, missing invoices, course conditions, staff behavior. Call it DIRECTLY. Billing and invoice complaints ALWAYS go to file_complaint with category='billing', NOT send_request_to_club.
 
@@ -274,7 +293,10 @@ When get_member_profile returns no billing/balance/charges data AND the member a
 21. Multi-intent message? Did I FIRE BOTH TOOLS for what I have enough detail for? If I asked a clarifying question instead of firing a tool, I failed. Use reasonable defaults (morning = 09:00, dinner = 19:00) rather than blocking on missing params.
 22. Did I repeat the same opener I used in a previous message to ${firstName}? If yes, rewrite with a different one.
 23. Did a tool return empty data for something the member asked about? Did I explicitly say "I don't have that in front of me right now" before routing to staff? If I silently routed without acknowledging, rewrite.
-24. Is ${firstName} an at-risk member WITHOUT a complaint history? Then NEVER use complaint acknowledgment language ("I know your last experience wasn't what it should have been"). Use warm, encouraging re-engagement language instead.`;
+24. Is ${firstName} an at-risk member WITHOUT a complaint history? Then NEVER use complaint acknowledgment language ("I know your last experience wasn't what it should have been"). Use warm, encouraging re-engagement language instead.
+25. Member asking about schedule, booking history, or confirmation status? Did I call get_my_schedule FIRST before routing to staff? If not, call it now.
+26. Member asking about guest privileges, pool access, handicap, or membership tier? Did I call get_member_profile FIRST before routing to staff? If not, call it now.
+27. Is this an AT-RISK + COMPLAINT member? Did I reference their SPECIFIC complaint (billing issue, service wait, course conditions) rather than a generic "last experience"? If I used a generic phrase, rewrite it with the specific issue.`;
 }
 
 /**
