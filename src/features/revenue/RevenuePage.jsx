@@ -153,6 +153,29 @@ export default function RevenuePage() {
                     </div>
                   </div>
 
+                  {/* POS-only insight — Top F&B spenders, available before tee sheet is connected */}
+                  <div className="rounded-xl border border-swoop-border bg-swoop-panel p-4">
+                    <div className="text-xs font-bold uppercase tracking-wide text-swoop-text-label mb-3">Top F&B Spenders This Month</div>
+                    <div className="flex flex-col gap-1.5">
+                      {[
+                        { name: 'Thomas Rivera', spend: 847, pct: 100 },
+                        { name: 'Karen Patel', spend: 712, pct: 84 },
+                        { name: 'David Thompson', spend: 634, pct: 75 },
+                        { name: 'Emily Dawson', spend: 591, pct: 70 },
+                        { name: 'Richard Gomez', spend: 508, pct: 60 },
+                      ].map(m => (
+                        <div key={m.name} className="flex items-center gap-3">
+                          <span className="text-xs text-swoop-text w-32 shrink-0">{m.name}</span>
+                          <div className="flex-1 h-1.5 bg-swoop-border rounded-full overflow-hidden">
+                            <div className="h-full bg-success-500 rounded-full" style={{ width: `${m.pct}%` }} />
+                          </div>
+                          <span className="text-xs font-mono text-success-500 shrink-0">${m.spend}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="text-[10px] text-swoop-text-ghost mt-2">Connect tee sheet to see spend-per-round and identify dining conversion gaps by hole.</div>
+                  </div>
+
                   <div className="rounded-xl border border-brand-500/25 bg-brand-500/[0.06] p-4">
                     <div className="flex items-start gap-3">
                       <div className="text-2xl">📋</div>

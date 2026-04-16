@@ -427,7 +427,7 @@ export default function BoardReport() {
               ) : (
                 <>We are actively monitoring <strong>{kpis.find(k => k.label === 'Active Members')?.value ?? kpis[0]?.value ?? 0} members</strong> for engagement signals.
                 {(kpis.find(k => k.label === 'At Risk')?.value ?? 0) > 0 && <> <strong>{kpis.find(k => k.label === 'At Risk').value} members</strong> have been flagged as at-risk and prioritized for outreach.</>}
-                {' '}Early detection is live — intervention opportunities surface in the Action Inbox as patterns emerge.</>
+                {' '}Early detection is live: intervention opportunities surface in the Action Inbox as patterns emerge.</>
               )}
             </p>
             <p className="text-swoop-text-muted leading-relaxed">
@@ -728,16 +728,16 @@ export default function BoardReport() {
                       </span>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <div className="bg-swoop-row rounded-xl p-3.5 border border-swoop-border text-center">
+                      <button type="button" onClick={() => navigate('revenue')} className="bg-swoop-row rounded-xl p-3.5 border border-swoop-border text-center hover:border-error-500/40 transition-colors cursor-pointer w-full">
                         <div className="text-2xl font-bold text-error-500">-${Math.round(leakage.PACE_LOSS).toLocaleString()}</div>
                         <div className="text-xs text-swoop-text-muted">Pace-Driven F&B Loss</div>
-                        <div className="text-[10px] text-swoop-text-label mt-1">from slow rounds this month</div>
-                      </div>
-                      <div className="bg-swoop-row rounded-xl p-3.5 border border-swoop-border text-center">
+                        <div className="text-[10px] text-brand-400 mt-1 font-semibold">View detail →</div>
+                      </button>
+                      <button type="button" onClick={() => navigate('revenue')} className="bg-swoop-row rounded-xl p-3.5 border border-swoop-border text-center hover:border-brand-500/40 transition-colors cursor-pointer w-full">
                         <div className="text-2xl font-bold text-brand-500">${dollarPerRound}</div>
                         <div className="text-xs text-swoop-text-muted">Lost per Slow Round</div>
-                        <div className="text-[10px] text-swoop-text-label mt-1">dining conversion gap</div>
-                      </div>
+                        <div className="text-[10px] text-brand-400 mt-1 font-semibold">View detail →</div>
+                      </button>
                       <div className="bg-swoop-row rounded-xl p-3.5 border border-swoop-border text-center">
                         <div className="text-2xl font-bold text-swoop-text">686</div>
                         <div className="text-xs text-swoop-text-muted">POS Transactions</div>

@@ -18,9 +18,12 @@ const TRENDS = ['up','down','stable','stable','up','stable','down','stable'];
 const LOCATIONS = ['Clubhouse','Golf Course','Practice Range','Pool Area','Dining Room','Pro Shop','Fitness Center','Tennis Courts',null,null];
 const MEMBERSHIP_TIERS = ['Full Golf','Social','Sports','Junior','Legacy','Non-Resident','Corporate','Full Golf','Social','Full Golf'];
 
-// Filter risk signal text — hide labels referencing closed-gate data (reuses MemberAlerts logic)
+const GENERIC_SIGNAL_PHRASES = new Set(['engagement declining across systems', 'declining across systems', 'engagement declining', 'engagement signal declining', 'declining engagement', 'no risk signal available', '']);
+// Filter risk signal text — replace generic phrases with 'No current risks' placeholder
 function filterRiskSignalForRoster(text) {
-  return text || 'No current risks';
+  if (!text) return 'No current risks';
+  if (GENERIC_SIGNAL_PHRASES.has(text.toLowerCase().trim())) return 'No current risks';
+  return text;
 }
 
 // Specific cross-domain signal variants — seeded by index so each member gets a unique signal
@@ -62,7 +65,7 @@ function generateRoster() {
   // Include at-risk and watch members
   (atRisk || []).forEach(m => {
     if (!roster.find(r => r.memberId === m.memberId)) {
-      roster.push({ memberId: m.memberId, name: m.name, score: m.score, archetype: m.archetype, duesAnnual: m.duesAnnual || 15000, tier: profiles[m.memberId]?.tier || 'Full Golf', joinDate: '2020-03-15', trend: 'down', topRisk: m.signal || m.action || AT_RISK_SIGNALS[roster.length % AT_RISK_SIGNALS.length] });
+      roster.push({ memberId: m.memberId, name: m.name, score: m.score, archetype: m.archetype, duesAnnual: m.duesAnnual || 15000, tier: profiles[m.memberId]?.tier || 'Full Golf', joinDate: '2020-03-15', trend: 'down', topRisk: filterRiskSignalForRoster(m.topRisk) || AT_RISK_SIGNALS[roster.length % AT_RISK_SIGNALS.length] });
     }
   });
   (watch || []).forEach(m => {
@@ -242,7 +245,16 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
                 })()}
               </div>
             </td>
-            <td className="px-4 py-2 hidden md:table-cell">
+            <td className="px-4 py-2 hidden lg:table-cell max-w-[200px]">
+              {member.topRisk && member.topRisk !== 'No current risks' ? (
+                <span className="text-[11px] text-swoop-text-muted leading-snug line-clamp-2 block" title={member.topRisk}>
+                  {member.topRisk}
+                </span>
+              ) : (
+                <span className="text-[11px] text-success-500">—</span>
+              )}
+            </td>
+            <td className="px-4 py-2 hidden xl:table-cell">
               {member.archetype ? <ArchetypeBadge archetype={member.archetype} size="xs" /> : <span className="text-xs text-swoop-text-label">—</span>}
             </td>
           </>
@@ -271,7 +283,7 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
       </tr>
       {isExpanded && (
         <tr className="bg-swoop-row">
-          <td colSpan={6} className="p-4">
+          <td colSpan={7} className="p-4">
             <div className="flex flex-col gap-4">
               {/* Member Details */}
               <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
@@ -539,7 +551,8 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
     : [
         { key: 'name', label: 'Member', hideClass: '' },
         { key: 'score', label: 'Health', hideClass: '' },
-        { key: 'archetype', label: 'Archetype', hideClass: 'hidden md:table-cell' },
+        { key: 'signal', label: 'Signal', hideClass: 'hidden lg:table-cell', sortable: false },
+        { key: 'archetype', label: 'Archetype', hideClass: 'hidden xl:table-cell' },
         { key: 'tier', label: 'Tier', hideClass: 'hidden sm:table-cell' },
         { key: 'value', label: 'Annual Value', hideClass: 'hidden md:table-cell' },
         { key: 'expand', label: '', sortable: false, hideClass: '' },

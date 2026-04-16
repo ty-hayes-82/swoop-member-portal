@@ -482,19 +482,34 @@ export default function TodayView() {
                 ]}
               />
             ) : (
-              <ClubKpiTile
-                label="Tee Times Today"
-                icon="⛳"
-                value="—"
-                valueSize={24}
-                valueColor={C.neutral}
-                source="Tee Sheet not connected"
-                footerLines={[
-                  { text: 'Jonas · ForeTees · Golf Genius · GolfNow' },
-                  { text: 'Connect to see today\u2019s rounds + alerts', color: C.accent, bold: true },
-                ]}
+              <div
+                role="button"
+                tabIndex={0}
                 onClick={() => navigate('integrations')}
-              />
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: 14,
+                  padding: '16px 14px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 6,
+                  cursor: 'pointer',
+                }}
+              >
+                <MicroLabel>Tee Times Today</MicroLabel>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 22 }}>⛳</span>
+                  <span style={{ fontSize: 24, fontWeight: 800, color: C.neutral, fontFamily: MONO, lineHeight: 1 }}>—</span>
+                </div>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>Tee Sheet not connected</div>
+                <div style={{ marginTop: 6, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Jonas · ForeTees · Golf Genius · GolfNow</div>
+                  <div style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, color: '#fff', background: C.accent, borderRadius: 6, padding: '4px 10px' }}>
+                    Connect Tee Sheet →
+                  </div>
+                </div>
+              </div>
             )}
             {teeSheetConnected ? (
               <ClubKpiTile

@@ -140,7 +140,7 @@ const formatMaybeNumber = (value, fallback = '—') => {
 };
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
-const GENERIC_RISK_PHRASES = new Set(['', '—', 'none', 'n/a', 'monitoring', 'monitoring ›', 'watch', 'watch list', 'no risk signal available']);
+const GENERIC_RISK_PHRASES = new Set(['', '—', 'none', 'n/a', 'monitoring', 'monitoring ›', 'watch', 'watch list', 'no risk signal available', 'engagement declining across systems', 'declining across systems', 'engagement declining', 'engagement signal declining', 'declining engagement']);
 
 const RISK_SIGNAL_OVERRIDES = new Map([
   ['mbr_300', 'Rounds down 58% • Dining spend -42%'],
