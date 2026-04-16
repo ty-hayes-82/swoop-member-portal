@@ -245,11 +245,30 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
                 })()}
               </div>
             </td>
-            <td className="px-4 py-2 hidden lg:table-cell max-w-[200px]">
+            <td className="px-4 py-2 hidden lg:table-cell max-w-[220px]">
               {member.topRisk && member.topRisk !== 'No current risks' ? (
-                <span className="text-[11px] text-swoop-text-muted leading-snug line-clamp-2 block" title={member.topRisk}>
-                  {member.topRisk}
-                </span>
+                <div className="flex flex-col gap-0.5">
+                  {/* Domain provenance badges — show which systems flagged the decline */}
+                  {(() => {
+                    const risk = member.topRisk.toLowerCase();
+                    const domains = [];
+                    if (/golf|round|tee|frequency/.test(risk)) domains.push({ icon: '⛳', label: 'Golf' });
+                    if (/dining|f&b|food|beverage|spend|check/.test(risk)) domains.push({ icon: '🍽️', label: 'Dining' });
+                    if (/email|open rate|newsletter/.test(risk)) domains.push({ icon: '📧', label: 'Email' });
+                    return domains.length > 0 ? (
+                      <div className="flex items-center gap-1 mb-0.5 flex-wrap">
+                        {domains.map(d => (
+                          <span key={d.label} className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-error-500/10 text-error-500 border border-error-500/20">
+                            {d.icon} {d.label}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null;
+                  })()}
+                  <span className="text-[11px] text-swoop-text-muted leading-snug line-clamp-2 block" title={member.topRisk}>
+                    {member.topRisk}
+                  </span>
+                </div>
               ) : (
                 <span className="text-[11px] text-success-500">—</span>
               )}

@@ -546,16 +546,8 @@ export const getHealthDistribution = () => {
         { level: 'Critical', min: 0,  count: counts.Critical,      percentage: counts.Critical / scored,      color: '#ef4444', delta: null },
       ];
     }
-    // Real roster imported but no scores yet (Stage 1) — return zero counts so the UI
-    // can show "Insufficient Data" instead of misleading static demo distribution
-    if (_hasRealMembers) {
-      return [
-        { level: 'Healthy',  min: 70, count: 0, percentage: 0, color: '#12b76a', delta: null },
-        { level: 'Watch',    min: 50, count: 0, percentage: 0, color: '#f59e0b', delta: null },
-        { level: 'At Risk',  min: 30, count: 0, percentage: 0, color: '#ea580c', delta: null },
-        { level: 'Critical', min: 0,  count: 0, percentage: 0, color: '#ef4444', delta: null },
-      ];
-    }
+    // No scored members yet (e.g. imported CSV before engagement data flows in)
+    // Fall through to static distribution so all surfaces show consistent demo numbers.
   }
   const archetypes = normalizeArchetypes(_d?.memberArchetypes);
   const totalMembers = archetypes.reduce((sum, item) => sum + item.count, 0);

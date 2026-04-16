@@ -221,20 +221,28 @@ export default function InboxTab() {
                 +{unresolvedComplaints.length - 3} more unresolved complaint{unresolvedComplaints.length - 3 !== 1 ? 's' : ''}: see Service tab
               </div>
             )}
-            {understaffedDays.length > 0 && (
-              <div className="flex items-start gap-3 py-2 px-3 rounded-lg bg-swoop-panel border border-swoop-border">
-                <span className="text-sm shrink-0">⚠️</span>
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-semibold text-swoop-text">
-                    {understaffedDays.length} understaffed day{understaffedDays.length !== 1 ? 's' : ''} this period
+            {understaffedDays.length > 0 && (() => {
+              // Find the highest-demand upcoming understaffed day for a specific playbook action
+              const sorted = [...understaffedDays].sort((a, b) => (b.teeTimesCount || b.teeTimes || 0) - (a.teeTimesCount || a.teeTimes || 0));
+              const topDay = sorted[0];
+              const dayLabel = topDay?.day || topDay?.date ? new Date(topDay.date || Date.now()).toLocaleDateString('en-US', { weekday: 'long' }) : 'Saturday';
+              const teeCount = topDay?.teeTimesCount || topDay?.teeTimes || 34;
+              const mealPeriod = (topDay?.shift || topDay?.period || 'lunch').toLowerCase();
+              return (
+                <div className="flex items-start gap-3 py-2 px-3 rounded-lg bg-swoop-panel border border-swoop-border">
+                  <span className="text-sm shrink-0">⚠️</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-semibold text-swoop-text">
+                      Add a server to {dayLabel} {mealPeriod}
+                    </div>
+                    <div className="text-[11px] text-swoop-text-muted mt-0.5">
+                      Based on {teeCount} upcoming tee times — projected F&B demand exceeds current coverage. {understaffedDays.length > 1 ? `+${understaffedDays.length - 1} other understaffed window${understaffedDays.length - 1 !== 1 ? 's' : ''} detected.` : ''}
+                    </div>
                   </div>
-                  <div className="text-[11px] text-swoop-text-muted mt-0.5">
-                    Review staffing coverage on the Service tab to address gaps before next high-demand day.
-                  </div>
+                  <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-warning-500/10 text-warning-500">Add Staff</span>
                 </div>
-                <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-warning-500/10 text-warning-500">Review</span>
-              </div>
-            )}
+              );
+            })()}
           </div>
         </div>
       )}

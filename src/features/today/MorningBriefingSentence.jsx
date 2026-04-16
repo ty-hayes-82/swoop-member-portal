@@ -67,7 +67,7 @@ function buildSegments() {
       ? atRiskTeetimes.sort((a, b) => (a.health ?? 100) - (b.health ?? 100))[0]
       : null;
     const topMemberText = topMember
-      ? ` — ${topMember.name} tees off at ${topMember.time}`
+      ? `. ${topMember.name} tees off at ${topMember.time}`
       : '';
 
     segments.push({
@@ -87,7 +87,7 @@ function buildSegments() {
   const leakage = getLeakageData();
   const staffingDollarExposure = leakage?.STAFFING_LOSS || 0;
   const dollarText = staffingDollarExposure > 0
-    ? ` — $${staffingDollarExposure.toLocaleString()}/mo at risk`
+    ? `. $${staffingDollarExposure.toLocaleString()}/mo at risk`
     : '';
 
   if (todayGap > 0) {

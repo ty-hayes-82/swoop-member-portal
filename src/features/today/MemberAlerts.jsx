@@ -1,6 +1,6 @@
 // MemberAlerts — Top 5 priority members needing attention this week
 // Uses live API data from memberService (not static demo data)
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getAtRiskMembers, getWatchMembers, getMemberSummary } from '@/services/memberService';
 import { getDailyBriefing } from '@/services/briefingService';
 import { getComplaintCorrelation } from '@/services/staffingService';
@@ -79,7 +79,7 @@ function buildPriorityList() {
         owner = complaint.days > 14 ? 'GM' : (ACTION_OWNERS[archetype] || 'GM');
       } else if (archetype === 'Ghost') {
         reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Email open rate dropped, golf rounds stopped, dining visits at zero';
-        action = 'GM personal call — re-engagement conversation';
+        action = 'GM personal call: re-engagement conversation';
         owner = 'GM';
       } else if (archetype === 'Declining') {
         reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Golf rounds dropped from 3 to 0 this month; F&B spend $0 last 30 days';
@@ -99,10 +99,10 @@ function buildPriorityList() {
         owner = 'Events Coordinator';
       } else if (isNewMember) {
         reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'No habits forming in first 60 days';
-        action = 'New member integration check-in — identify engagement gaps';
+        action = 'New member integration check-in: identify engagement gaps';
         owner = 'Membership Director';
       } else if (archetype === 'Snowbird') {
-        reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Seasonal return expected — no reactivation';
+        reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Seasonal return expected: no reactivation detected';
         action = 'Send welcome-back package';
         owner = 'Front Desk';
       } else {
@@ -137,25 +137,73 @@ function getTeeTimeForMember(memberId) {
   return atRiskTeetimes.find(t => t.memberId === memberId) || null;
 }
 
+// Build a short draft message preview for the Approve tooltip
+function buildDraftPreview(member) {
+  const { name, archetype, reason, action } = member;
+  const firstName = name.split(' ')[0];
+  if (archetype === 'Ghost' || archetype === 'Declining') {
+    return `Hi ${firstName}, we noticed you haven't been in recently. We'd love to connect and make sure everything is meeting your expectations. Can we schedule a quick call?`;
+  }
+  if (archetype === 'Die-Hard Golfer' || archetype === 'Weekend Warrior') {
+    return `Hi ${firstName}, your Pro Shop team noticed you haven't had a round in a while. We have some prime tee times this weekend and wanted to reach out personally.`;
+  }
+  if (archetype === 'Social Butterfly') {
+    return `Hi ${firstName}, we have an exclusive upcoming event we think you'd love. We wanted to personally reach out to make sure you had first access.`;
+  }
+  if (archetype === 'New Member') {
+    return `Hi ${firstName}, you're in your first 90 days and we want to make sure you're getting the most from your membership. Can we schedule a quick welcome check-in?`;
+  }
+  return `Hi ${firstName}, your membership team flagged some changes in your engagement and wanted to personally reach out. We'd love to make sure everything is going well.`;
+}
+
 export default function MemberAlerts() {
   const { navigate } = useNavigation();
   const members = buildPriorityList();
   const [bulkApproved, setBulkApproved] = useState(false);
   const [rowStates, setRowStates] = useState({}); // memberId -> 'approved' | 'dismissed'
+  const [undoToast, setUndoToast] = useState(null); // { memberId, memberName, prevState }
+  const undoTimerRef = useRef(null);
+
+  // Clear undo toast timer on unmount
+  useEffect(() => () => { if (undoTimerRef.current) clearTimeout(undoTimerRef.current); }, []);
 
   const handleRowAction = (memberId, action, memberName, memberAction) => {
+    const prevState = rowStates[memberId] || null;
     setRowStates(prev => ({ ...prev, [memberId]: action }));
-    if (action === 'approved') {
-      trackAction({
-        actionType: 'approve',
-        actionSubtype: 'member_alert',
-        memberId,
-        memberName,
-        referenceType: 'priority_member',
-        referenceId: `alert_${memberId}`,
-        description: `Approved outreach: ${memberAction}`,
-      });
-    }
+
+    // Show 5-second undo toast
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    setUndoToast({ memberId, memberName, action, prevState });
+    undoTimerRef.current = setTimeout(() => {
+      setUndoToast(null);
+      // Commit the action only after undo window expires
+      if (action === 'approved') {
+        trackAction({
+          actionType: 'approve',
+          actionSubtype: 'member_alert',
+          memberId,
+          memberName,
+          referenceType: 'priority_member',
+          referenceId: `alert_${memberId}`,
+          description: `Approved outreach: ${memberAction}`,
+        });
+      }
+    }, 5000);
+  };
+
+  const handleUndo = () => {
+    if (!undoToast) return;
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    setRowStates(prev => {
+      const next = { ...prev };
+      if (undoToast.prevState === null) {
+        delete next[undoToast.memberId];
+      } else {
+        next[undoToast.memberId] = undoToast.prevState;
+      }
+      return next;
+    });
+    setUndoToast(null);
   };
 
   const handleBulkApprove = () => {
@@ -228,6 +276,21 @@ export default function MemberAlerts() {
 
   return (
     <div id="today-member-alerts" className="alerts-section-enhanced fade-in-up fade-delay-1" data-section="member-alerts">
+      {/* Undo toast — 5-second window after Approve/Dismiss */}
+      {undoToast && (
+        <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 mb-2 rounded-lg bg-swoop-canvas border border-swoop-border text-xs animate-fade-in">
+          <span className="text-swoop-text-muted">
+            {undoToast.action === 'approved' ? '✓ Approved' : 'Dismissed'} outreach for <span className="font-semibold text-swoop-text">{undoToast.memberName}</span>
+          </span>
+          <button
+            type="button"
+            onClick={handleUndo}
+            className="text-brand-500 font-bold hover:underline bg-transparent border-none cursor-pointer p-0 text-xs shrink-0"
+          >
+            Undo
+          </button>
+        </div>
+      )}
       <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
         <div className="flex items-center gap-2 flex-wrap">
           <div className="alerts-header" style={{ color: '#ef4444', margin: 0 }}>
@@ -343,7 +406,7 @@ export default function MemberAlerts() {
                         type="button"
                         onClick={() => handleRowAction(m.memberId, 'approved', m.name, m.action)}
                         className="px-2.5 py-1 rounded-l-md text-[10px] font-bold bg-success-500/15 text-success-500 border border-success-500/30 hover:bg-success-500/25 transition-colors"
-                        title="Approve recommended outreach"
+                        title={`Preview draft:\n\n"${buildDraftPreview(m)}"\n\nApprove to send via ${m.archetype === 'Ghost' ? 'email' : 'email or SMS'}.`}
                       >
                         Approve
                       </button>

@@ -322,6 +322,22 @@ export default function BoardReport() {
         );
       })()}
 
+      {/* Dues Saved YTD — prominent metric surfacing dues recovery performance */}
+      {totalDues > 0 && (
+        <div className="rounded-xl border border-success-500/30 bg-success-500/[0.05] px-5 py-4 mb-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="flex-1">
+            <div className="text-[10px] font-bold uppercase tracking-widest text-success-500 mb-1">Dues Saved YTD</div>
+            <div className="text-3xl font-extrabold text-success-500 font-mono">${totalDues.toLocaleString()}</div>
+            <div className="text-xs text-swoop-text-muted mt-1">Annual dues recovered through early member intervention — {memberSaves.length} member{memberSaves.length !== 1 ? 's' : ''} retained before resignation window</div>
+          </div>
+          <div className="flex flex-col items-start sm:items-end gap-1 shrink-0">
+            <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">Avg per save</div>
+            <div className="text-xl font-bold text-swoop-text font-mono">${memberSaves.length > 0 ? Math.round(totalDues / memberSaves.length).toLocaleString() : 0}</div>
+            <div className="text-[10px] text-swoop-text-muted">annual dues per member retained</div>
+          </div>
+        </div>
+      )}
+
       <KPIStrip kpis={kpis} navigate={navigate} onDrillDown={() => setActiveTab(1)} />
 
       {/* Board Confidence Score Methodology */}

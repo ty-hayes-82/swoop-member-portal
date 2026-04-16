@@ -114,6 +114,24 @@ export default function OnboardingChecklist() {
           Connect four data sources to access your full member intelligence dashboard. {doneCount} of {items.length} done.
         </p>
       </div>
+
+      {/* Primary shortcut — shown before the checklist so GMs see immediate value */}
+      {doneCount === 0 && (
+        <div className="rounded-xl border-2 border-brand-500/50 bg-brand-500/[0.06] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <div className="text-sm font-bold text-swoop-text">See exactly what you'll get, no IT required</div>
+            <div className="text-xs text-swoop-text-muted mt-0.5">Explore a live 300-member golf club: at-risk alerts, F&B leakage, staffing gaps, and board report. All populated with sample data.</div>
+          </div>
+          <button
+            type="button"
+            onClick={() => { try { localStorage.setItem('swoop_club_id', 'demo'); } catch {} window.location.reload(); }}
+            className="flex-shrink-0 px-5 py-2.5 rounded-lg bg-brand-500 text-white text-sm font-bold cursor-pointer hover:bg-brand-600 transition-colors whitespace-nowrap shadow-sm"
+          >
+            Explore with Sample Data →
+          </button>
+        </div>
+      )}
+
       <Panel title="Onboarding checklist" subtitle="Each source you connect activates more of Today View.">
         <div className="flex flex-col gap-3">
           {items.map(item => (
@@ -135,20 +153,22 @@ export default function OnboardingChecklist() {
           or render a white card in the zero-data state. */}
       {doneCount > 0 && <StageInsightsPanel />}
 
-      {/* Demo shortcut — let GMs explore before IT effort */}
-      <div className="rounded-xl border border-swoop-border bg-swoop-panel p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div>
-          <div className="text-sm font-semibold text-swoop-text">Not ready to connect data yet?</div>
-          <div className="text-xs text-swoop-text-muted mt-0.5">Explore the full dashboard with a sample 300-member golf club to see exactly what you'll get.</div>
+      {/* Secondary demo shortcut — shown after checklist once user has started connecting */}
+      {doneCount > 0 && (
+        <div className="rounded-xl border border-swoop-border bg-swoop-panel p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <div className="text-sm font-semibold text-swoop-text">Want to see the full dashboard now?</div>
+            <div className="text-xs text-swoop-text-muted mt-0.5">Explore a complete sample 300-member club while your data loads in.</div>
+          </div>
+          <button
+            type="button"
+            onClick={() => { try { localStorage.setItem('swoop_club_id', 'demo'); } catch {} window.location.reload(); }}
+            className="flex-shrink-0 px-4 py-2 rounded-lg border border-brand-500/40 bg-brand-500/10 text-brand-500 text-sm font-semibold cursor-pointer hover:bg-brand-500/20 transition-colors whitespace-nowrap"
+          >
+            Explore with Sample Data
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => { try { localStorage.setItem('swoop_club_id', 'demo'); } catch {} window.location.reload(); }}
-          className="flex-shrink-0 px-4 py-2 rounded-lg border border-brand-500/40 bg-brand-500/10 text-brand-500 text-sm font-semibold cursor-pointer hover:bg-brand-500/20 transition-colors whitespace-nowrap"
-        >
-          Explore with Sample Data
-        </button>
-      </div>
+      )}
     </div>
   );
 }
