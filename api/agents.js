@@ -1,6 +1,7 @@
 import { sql } from '@vercel/postgres';
 import { withAuth, getReadClubId, getWriteClubId } from './lib/withAuth.js';
 import { sendSessionEvent, MANAGED_AGENT_ID, MANAGED_ENV_ID } from './agents/managed-config.js';
+import { emitGmEvent } from './gm/gm-session-events.js';
 
 export default withAuth(async function handler(req, res) {
   // B25: GET is a read (swoop_admin may cross-club view), POST approves/dismisses
@@ -13,6 +14,22 @@ export default withAuth(async function handler(req, res) {
         await sql`UPDATE agent_actions SET status = 'approved', approved_at = NOW(), approval_action = ${meta?.approvalAction ?? null} WHERE action_id = ${actionId} AND club_id = ${clubId}`;
       } else if (operation === 'dismiss') {
         await sql`UPDATE agent_actions SET status = 'dismissed', dismissed_at = NOW(), dismissal_reason = ${meta?.reason ?? ''} WHERE action_id = ${actionId} AND club_id = ${clubId}`;
+      }
+
+      // Write GM session event for approval/dismissal — builds the decision audit log
+      if (operation === 'approve' || operation === 'dismiss') {
+        const gmId = req.auth?.userId;
+        if (gmId) {
+          emitGmEvent(gmId, clubId, {
+            type: operation === 'approve' ? 'approval' : 'dismissal',
+            payload: {
+              agent_action_id: actionId,
+              approval_action: meta?.approvalAction ?? null,
+              dismissal_reason: meta?.reason ?? null,
+              decision_context: meta?.context ?? null,
+            },
+          }).catch(e => console.warn('[agents] emitGmEvent failed:', e.message));
+        }
       }
 
       // Forward approve/dismiss to managed agent session if one exists for this action's member

@@ -784,6 +784,24 @@ async function chatHandler(req, res) {
     }
   } catch (_) { /* event log not available — fall through */ }
 
+  // Check for undelivered analyst recommendations for this member's session
+  let recommendationContext = '';
+  try {
+    const { getAgentEvents } = await import('../agents/session-core.js');
+    const memberSessionId = `mbr_${member_id}_concierge`;
+    const recEvents = await getAgentEvents(memberSessionId, { types: ['recommendation_received'], last: 3 });
+    if (recEvents.length > 0) {
+      const lines = recEvents.map(ev => {
+        const p = typeof ev.payload === 'string' ? JSON.parse(ev.payload) : (ev.payload || {});
+        const snippet = (p.findings || p.summary || '').slice(0, 200);
+        return snippet ? `- ${snippet}` : null;
+      }).filter(Boolean);
+      if (lines.length > 0) {
+        recommendationContext = `\n\nPENDING ANALYST SIGNALS (surface proactively if natural — e.g. after completing their request):\n${lines.join('\n')}`;
+      }
+    }
+  } catch (_) { /* recommendation events not available */ }
+
   // Fall back to text summary if event log is empty
   if (!conversationContext && session.conversation_summary) {
     conversationContext = `\n\nPrevious conversation context: ${session.conversation_summary}`;
@@ -819,8 +837,12 @@ async function chatHandler(req, res) {
     || profile.archetype === 'At Risk'
     || (typeof profile.health_score === 'number' && profile.health_score < 40)
   );
-  const hasPriorComplaintFlag = profile.preferences?.notes?.toLowerCase().includes('complaint')
-    || profile.preferences?.notes?.toLowerCase().includes('unresolved');
+  const notesLowerChat = (profile.preferences?.notes || '').toLowerCase();
+  const hasPriorComplaintFlag = notesLowerChat.includes('complaint') || notesLowerChat.includes('unresolved');
+  // Mirrors conciergePrompt.js: declining members get reactivation opener, not complaint opener
+  const isDeclineMemberFlag = notesLowerChat.startsWith('declining')
+    || (typeof profile.archetype === 'string' && profile.archetype.toLowerCase().includes('declining'));
+  const isComplaintFirstFlag = isAtRiskMember && hasPriorComplaintFlag && !isDeclineMemberFlag;
   const memberFirstName = (profile.first_name || profile.name?.split(' ')[0] || 'there');
 
   // Sprint D: intent-based temperature selection
@@ -842,7 +864,7 @@ async function chatHandler(req, res) {
       model: 'claude-sonnet-4-20250514',
       max_tokens: 2048,
       temperature: conciergeTemperature,
-      system: systemPrompt + conversationContext + pendingRequestsContext,
+      system: systemPrompt + conversationContext + pendingRequestsContext + recommendationContext,
       messages,
       tools: availableTools,
     });
@@ -942,20 +964,21 @@ async function chatHandler(req, res) {
         let openerLine;
         if (isGhostMember) {
           openerLine = `a varied warm welcome-back (e.g. "${memberFirstName}! We've missed you so much — so glad you reached out." or "${memberFirstName}! You just made my day." — VARY it, never repeat the same phrase)`;
-        } else if (isAtRiskMember && hasPriorComplaintFlag) {
-          const profileNotesLower = (profile.preferences?.notes || '').toLowerCase();
-          const hasBillingIssue = profileNotesLower.includes('billing') || profileNotesLower.includes('invoice') || profileNotesLower.includes('charge');
-          const hasServiceIssue = profileNotesLower.includes('slow service') || profileNotesLower.includes('slow at the bar') || profileNotesLower.includes('service at the bar') || profileNotesLower.includes('wait');
+        } else if (isComplaintFirstFlag) {
+          // Complaint is the PRIMARY persona driver (e.g. Sandra Chen) — complaint opener first
+          const hasBillingIssue = notesLowerChat.includes('billing') || notesLowerChat.includes('invoice') || notesLowerChat.includes('charge');
+          const hasServiceIssue = notesLowerChat.includes('slow service') || notesLowerChat.includes('slow at the bar') || notesLowerChat.includes('service at the bar') || notesLowerChat.includes('wait');
           const specificAck = hasBillingIssue
-            ? `"${memberFirstName}, I know that billing issue still hasn't been resolved — let me make sure we get that fixed."`
+            ? `"${memberFirstName}, I know that billing issue still hasn't been resolved, let me make sure we get that fixed."`
             : hasServiceIssue
-            ? `"${memberFirstName}, I know that wait wasn't what you deserved — I want to make this visit better."`
-            : `"I know your last experience wasn't what it should have been, ${memberFirstName} — I want to make this one different."`;
-          openerLine = `${specificAck} (VARY on subsequent turns — do not repeat verbatim)`;
+            ? `"${memberFirstName}, I know that wait wasn't what you deserved, I want to make this visit better."`
+            : `"${memberFirstName}, I know your last experience wasn't what it should have been, I want to make this one different."`;
+          openerLine = `${specificAck} (VARY on subsequent turns, do not repeat verbatim)`;
         } else if (isAtRiskMember) {
-          openerLine = `a warm validation opener (e.g. "${memberFirstName}, always love hearing from you!" or "${memberFirstName}! You made my day reaching out." or "So good to hear from you, ${memberFirstName}!" — VARY it, never repeat the same phrase)`;
+          // Declining/reactivation member (e.g. Robert Callahan, Anne Jordan) — warm re-engagement first
+          openerLine = `a warm re-engagement opener (e.g. "${memberFirstName}, always love hearing from you!" or "${memberFirstName}! Great to hear from you, we'd love to see you out here more." or "So good to hear from you, ${memberFirstName}!" — VARY it, never repeat the same phrase)`;
         } else {
-          openerLine = `"I know your last experience wasn't what it should have been, and I want to make sure this one is different."`;
+          openerLine = `"${memberFirstName}, I know your last experience wasn't what it should have been, I want to make sure this one is different."`;
         }
         toolResults.push({
           type: 'text',
@@ -969,7 +992,7 @@ async function chatHandler(req, res) {
         model: 'claude-sonnet-4-20250514',
         max_tokens: 2048,
         temperature: conciergeTemperature,
-        system: systemPrompt + conversationContext + pendingRequestsContext,
+        system: systemPrompt + conversationContext + pendingRequestsContext + recommendationContext,
         messages,
         tools: availableTools,
       });

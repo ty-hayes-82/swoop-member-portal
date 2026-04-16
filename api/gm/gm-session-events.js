@@ -46,6 +46,21 @@ export const EVENT_TYPES = [
 // ---------------------------------------------------------------------------
 
 /**
+ * Upsert the gm_sessions row for a GM (ensures session exists before events are written).
+ */
+async function touchGmSession(gmId, clubId) {
+  const sessionId = `gm_${gmId}_${clubId}`;
+  try {
+    await sql`
+      INSERT INTO gm_sessions (session_id, gm_id, club_id)
+      VALUES (${sessionId}, ${gmId}, ${clubId})
+      ON CONFLICT (session_id) DO UPDATE SET last_active = NOW()
+    `;
+  } catch (_) { /* best-effort — events table may not exist yet */ }
+  return sessionId;
+}
+
+/**
  * Emit a GM session event.
  *
  * @param {string} gmId - GM user_id
@@ -56,6 +71,8 @@ export const EVENT_TYPES = [
 export async function emitGmEvent(gmId, clubId, event) {
   const { type, payload = {}, related_request_id = null } = event;
   try {
+    // Ensure session row exists
+    await touchGmSession(gmId, clubId);
     const r = await sql`
       INSERT INTO gm_session_events (gm_id, club_id, event_type, payload, related_request_id)
       VALUES (${gmId}, ${clubId}, ${type}, ${JSON.stringify(payload)}::jsonb, ${related_request_id})
@@ -66,6 +83,18 @@ export async function emitGmEvent(gmId, clubId, event) {
     if (/does not exist/.test(err.message)) {
       // Table missing — attempt lazy creation then retry once
       try {
+        // gm_sessions: one row per GM, tracks session lifecycle and learned preferences
+        await sql`
+          CREATE TABLE IF NOT EXISTS gm_sessions (
+            session_id   TEXT PRIMARY KEY,
+            gm_id        TEXT NOT NULL,
+            club_id      UUID NOT NULL,
+            created_at   TIMESTAMPTZ DEFAULT NOW(),
+            last_active  TIMESTAMPTZ DEFAULT NOW(),
+            status       TEXT DEFAULT 'active'
+          )
+        `;
+        await sql`CREATE INDEX IF NOT EXISTS idx_gm_sessions_gm_club ON gm_sessions(gm_id, club_id)`;
         await sql`
           CREATE TABLE IF NOT EXISTS gm_session_events (
             id              BIGSERIAL PRIMARY KEY,
