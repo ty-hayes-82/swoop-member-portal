@@ -195,7 +195,12 @@ export default function RevenuePage() {
                   <span className="text-base text-swoop-text-muted">/mo estimated leakage</span>
                 </div>
                 <p className="text-xs text-swoop-text-muted m-0">
-                  For your {leakageLabel}-member club. Swoop cross-references your tee sheet, POS, and scheduling data to tell you exactly where these dollars go and what stops them.
+                  {memberCount > 0
+                    ? `Estimated for your ${leakageLabel}-member club at $21/member/mo — the NGCOA peer-group average for private clubs 300–600 members.`
+                    : 'NGCOA peer-group average for private clubs 300–600 members ($21/member/mo). Your estimate personalizes once your roster is imported.'}
+                </p>
+                <p className="text-[11px] text-swoop-text-label mt-1.5 m-0">
+                  Swoop cross-references your tee sheet, POS, and scheduling data to tell you exactly where these dollars go and what stops them.
                 </p>
               </div>
 

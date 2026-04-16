@@ -80,11 +80,12 @@ function buildBullets({ memberSummary, leakage, pendingCount, briefing, teeSheet
     }
   }
 
-  // 4. Watch-list members (only when activity data gives meaningful health scores)
-  if (hasActivityData && memberSummary.watch > 0 && bullets.length < 4) {
+  // 4. Watch-list members (only when activity data gives meaningful health scores
+  //    AND we have a real historical baseline to compare against)
+  if (hasActivityData && leakage?.TOTAL > 0 && memberSummary.watch > 0 && bullets.length < 4) {
     bullets.push({
       icon: '👁️',
-      text: `${memberSummary.watch} member${memberSummary.watch === 1 ? '' : 's'} on watch: activity trending below baseline, no immediate action required`,
+      text: `${memberSummary.watch} member${memberSummary.watch === 1 ? '' : 's'} on watch: engagement signal declining — monitoring closely`,
       nav: 'members',
       navOpts: { tab: 'watch' },
       urgent: false,

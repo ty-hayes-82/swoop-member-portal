@@ -80,7 +80,7 @@ function InboxActionCard({ action, onApprove, onDismiss }) {
             <div className="flex items-center gap-2 text-xs text-swoop-text-muted mb-2 flex-wrap">
               {hasActionType && (
                 <span className="text-[10px] uppercase tracking-wide text-swoop-text-label">
-                  {action.actionType.replace(/_/g, ' ').toLowerCase()}
+                  {action.actionType.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                 </span>
               )}
               {hasContrib && (
@@ -207,7 +207,7 @@ export default function InboxTab() {
                 <span className="text-sm shrink-0">🔴</span>
                 <div className="flex-1 min-w-0">
                   <div className="text-xs font-semibold text-swoop-text">
-                    {c.memberName || c.member || 'Member'}: {c.category ? c.category.replace(/_/g, ' ') : 'service issue'}
+                    {c.memberName || c.member || 'Member'}: {c.category ? c.category.replace(/_/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase()) : 'Service Issue'}
                   </div>
                   <div className="text-[11px] text-swoop-text-muted mt-0.5">
                     {c.description || c.complaint || 'Complaint awaiting resolution'}{c.date ? ` · Filed ${new Date(c.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}

@@ -170,7 +170,9 @@ function FilterChip({ label, onRemove, color }) {
 
 function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) {
   const [hovered, setHovered] = useState(false);
-  const hasScore = member.score != null && !rosterOnly;
+  // Only show numeric health scores when at least one activity gate is open (real behavioral data exists)
+  const hasActivityGate = isGateOpen('tee-sheet') || isGateOpen('fb') || isGateOpen('email');
+  const hasScore = member.score != null && !rosterOnly && hasActivityGate;
   const healthLevel = hasScore ? getHealthLevel(member.score) : '—';
   const healthColor = !hasScore ? '#9CA3AF'
     : member.score >= 70 ? '#12b76a'

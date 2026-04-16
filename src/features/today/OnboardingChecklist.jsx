@@ -59,6 +59,9 @@ export default function OnboardingChecklist() {
   const posConnected = systems.some(
     s => s.category === 'pos' && s.status === 'connected',
   );
+  const schedulingConnected = systems.some(
+    s => s.category === 'scheduling' && s.status === 'connected',
+  );
 
   const items = [
     {
@@ -88,6 +91,15 @@ export default function OnboardingChecklist() {
       actionLabel: 'Connect POS',
       onAction: () => navigate('integrations'),
     },
+    {
+      key: 'scheduling',
+      done: schedulingConnected,
+      title: '4. Connect your scheduling system',
+      description: 'Link your staff schedules to detect understaffing before it triggers complaints and F&B shortfalls.',
+      teaser: 'See demand-driven staffing alerts: "Add a server to Saturday lunch based on 34 tee times"',
+      actionLabel: 'Connect scheduling',
+      onAction: () => navigate('integrations'),
+    },
   ];
 
   const doneCount = items.filter(i => i.done).length;
@@ -99,7 +111,7 @@ export default function OnboardingChecklist() {
           Gain real-time visibility into member health and F&amp;B revenue.
         </h1>
         <p className="text-sm text-swoop-text-muted mt-1 mb-0">
-          Connect three data sources to activate the operational cockpit. {doneCount} of {items.length} done.
+          Connect four data sources to activate the full operational cockpit. {doneCount} of {items.length} done.
         </p>
       </div>
       <Panel title="Onboarding checklist" subtitle="Each source you connect activates more of Today View.">
