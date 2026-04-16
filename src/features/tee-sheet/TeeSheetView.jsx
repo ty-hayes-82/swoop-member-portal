@@ -228,13 +228,13 @@ function CartPrepCard({ teeTime, onSendCartText, onSendDiningNudge }) {
       <div className="flex gap-2 mt-3 flex-wrap">
         <button
           onClick={() => onSendCartText(teeTime)}
-          className="px-3 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-brand-200 bg-brand-50 text-brand-500 inline-flex items-center gap-1"
+          className="px-3 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-brand-500/40 bg-brand-500/10 text-brand-400 inline-flex items-center gap-1 hover:bg-brand-500/20 transition-colors"
         >
           <span>💬</span> Send Cart Prep Text
         </button>
         <button
             onClick={() => onSendDiningNudge(teeTime)}
-            className="px-3 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-amber-200 bg-amber-50 text-amber-700 inline-flex items-center gap-1"
+            className="px-3 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border border-amber-500/40 bg-amber-500/10 text-amber-400 inline-flex items-center gap-1 hover:bg-amber-500/20 transition-colors"
           >
             <span>🍽</span> Post-Round Dining Nudge
           </button>
@@ -374,23 +374,14 @@ export default function TeeSheetView() {
         {/* Course utilization powered by imported courses + bookings */}
         <CourseUtilizationCards />
 
-        {/* At-Risk & VIP Alerts */}
+        {/* At-Risk members are surfaced inline in the tee sheet table via color-coded health badges.
+            Full alert cards live on the Today view — this keeps the tee sheet focused on scheduling. */}
         {atRiskTimes.length > 0 && (
-          <div>
-            <div className="text-[11px] font-bold text-error-500 uppercase tracking-wide mb-2.5">
-              At-Risk Members on Course Today ({atRiskTimes.length})
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {atRiskTimes.map(t => (
-                <AlertCard
-                  key={t.memberId}
-                  teeTime={t}
-                  onSendRecovery={handleSendRecovery}
-                  isExpanded={expandedAlertId === t.memberId}
-                  onToggle={() => setExpandedAlertId(expandedAlertId === t.memberId ? null : t.memberId)}
-                />
-              ))}
-            </div>
+          <div className="flex items-center gap-2 px-1">
+            <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
+            <span className="text-[11px] text-error-500 font-semibold">
+              {atRiskTimes.length} at-risk member{atRiskTimes.length !== 1 ? 's' : ''} on today's sheet — health scores visible in the table below
+            </span>
           </div>
         )}
 

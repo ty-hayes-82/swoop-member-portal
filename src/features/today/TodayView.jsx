@@ -318,7 +318,7 @@ export default function TodayView() {
             {connectedCount > 0 && (
               <div className="px-5 py-2.5 bg-success-50 border-t border-success-100">
                 <span className="text-xs text-success-700 font-semibold">{connectedCount} of 3 source{connectedCount !== 1 ? 's' : ''} connected</span>
-                <span className="text-xs text-swoop-text-muted"> — keep going to unlock the full briefing</span>
+                <span className="text-xs text-swoop-text-muted"> — connect your remaining sources to activate the full briefing</span>
               </div>
             )}
           </div>
@@ -544,10 +544,35 @@ export default function TodayView() {
           </div>
         </SwoopSection>
 
-        {/* Overnight Brief (pinned, expanded) */}
-        <SwoopSection title="Overnight Brief" titleColor={C.neutral} peek="what surfaced while you were away" defaultOpen={true}>
-          <OvernightBrief />
-        </SwoopSection>
+        {/* Overnight Brief — gated: only meaningful when activity data exists */}
+        {hasActivityData ? (
+          <SwoopSection title="Overnight Brief" titleColor={C.neutral} peek="what surfaced while you were away" defaultOpen={true}>
+            <OvernightBrief />
+          </SwoopSection>
+        ) : (
+          <SwoopSection title="Overnight Brief" titleColor={C.neutral} peek="Connect POS or Tee Sheet to unlock" defaultOpen={true}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ padding: '14px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 8 }}>
+                  What appears here once connected
+                </div>
+                {[
+                  { icon: '🚨', label: 'At-risk members who visited yesterday with declining spend', color: C.danger },
+                  { icon: '📉', label: 'Engagement drops detected overnight across dining + golf', color: C.accent },
+                  { icon: '💬', label: 'Service complaints flagged in the last 24 hours', color: C.neutral },
+                ].map((item, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+                    <span style={{ fontSize: 16 }}>{item.icon}</span>
+                    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>{item.label}</span>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'rgba(243,146,45,0.07)', border: '1px solid rgba(243,146,45,0.18)', borderRadius: 10 }}>
+                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>🔒 Connect your POS or Tee Sheet to surface overnight signals</span>
+              </div>
+            </div>
+          </SwoopSection>
+        )}
 
         {/* Live Check-ins (pinned 3rd, expanded) */}
         {(() => {
@@ -608,32 +633,45 @@ export default function TodayView() {
           );
         })()}
 
-        {/* Priority Member Alerts — highest urgency */}
-        <SwoopSection
-          title="Priority Member Alerts"
-          titleColor={C.danger}
-          count={priorityMemberCount > 0 ? `${priorityMemberCount} priority` : 'Awaiting activity data'}
-          peek={priorityMemberCount > 0
-            ? `${atRiskCount} at-risk · ${watchCount} on watch`
-            : 'Connect POS / Tee Sheet to surface at-risk members'}
-        >
-          <MemberAlerts />
-        </SwoopSection>
+        {/* Priority Member Alerts — only show when activity data is loaded */}
+        {hasActivityData && (
+          <SwoopSection
+            title="Priority Member Alerts"
+            titleColor={C.danger}
+            count={priorityMemberCount > 0 ? `${priorityMemberCount} priority` : undefined}
+            peek={priorityMemberCount > 0
+              ? `${atRiskCount} at-risk · ${watchCount} on watch`
+              : 'No critical alerts at this time'}
+          >
+            <MemberAlerts />
+          </SwoopSection>
+        )}
 
-        {/* Action Queue */}
-        <SwoopSection
-          title="Action Queue"
-          titleColor={C.accent}
-          count={pendingAgentCount > 0 ? pendingAgentCount : 'Awaiting activity data'}
-          peek={pendingAgentCount > 0
-            ? `${pendingAgentCount} pending · F&B capture, member engagement, service recovery`
-            : 'Agents populate this queue once POS and tee sheet are connected'}
-        >
-          <PendingActionsInline topPriority={topPriority} />
-        </SwoopSection>
+        {/* Action Queue — routing summary only; full queue lives on the Actions page */}
+        {hasActivityData && pendingAgentCount > 0 && (
+          <SwoopSection
+            title="Action Queue"
+            titleColor={C.accent}
+            count={pendingAgentCount}
+            peek={`${pendingAgentCount} pending · F&B capture, member engagement, service recovery`}
+          >
+            <div className="flex items-center justify-between px-1 py-2">
+              <span className="text-sm text-swoop-text-muted">
+                {pendingAgentCount} action{pendingAgentCount !== 1 ? 's' : ''} ready for approval
+              </span>
+              <button
+                type="button"
+                onClick={() => navigate('automations')}
+                className="px-4 py-1.5 rounded-lg bg-brand-500 text-white text-xs font-semibold hover:bg-brand-600 transition-colors"
+              >
+                Review &amp; Approve →
+              </button>
+            </div>
+          </SwoopSection>
+        )}
 
-        {/* Today's Priorities */}
-        <SwoopSection
+        {/* Today's Priorities — staffing/events data requires activity sources */}
+        {hasActivityData && <SwoopSection
           title="Today's Priorities"
           titleColor={C.accent}
           count={2}
@@ -690,10 +728,10 @@ export default function TodayView() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 10px', background: 'rgba(34,197,94,0.08)', borderRadius: 8, border: '1px solid rgba(34,197,94,0.15)' }}>
               <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Highest ROI:</span>
               <span style={{ fontSize: 11, fontWeight: 700, color: '#fff' }}>Chef's Table</span>
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>— 98% retention · 5.1× ROI</span>
+              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>: 98% retention · 5.1× ROI</span>
             </div>
           </div>
-        </SwoopSection>
+        </SwoopSection>}
 
         {/* Weather Alert */}
         <SwoopSection

@@ -22,7 +22,9 @@
     "vision:capture": "npx playwright test --config=playwright.insights.config.js",
     "vision:critique": "node scripts/gemini-critique.mjs",
     "vision:full": "npm run vision:capture && npm run vision:critique",
-    "app:critique": "node scripts/app-vision-critique.mjs"
+    "app:critique": "node scripts/app-vision-critique.mjs",
+    "scoring:run": "node scripts/scoring-loop.mjs",
+    "scoring:quick": "QUICK_MODE=1 node scripts/scoring-loop.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.87.0",

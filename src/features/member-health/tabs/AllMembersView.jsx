@@ -619,7 +619,7 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
         <div className="px-3 sm:px-4 py-2 border-b border-swoop-border flex items-center gap-2 flex-wrap text-[10px] text-swoop-text-muted">
           <span className="font-semibold uppercase tracking-wide">Sources:</span>
           <SourceBadgeRow systems={['Member CRM', 'Tee Sheet', 'POS', 'Email']} size="xs" />
-          <span className="text-swoop-text-label">— health scores synthesize all four signals</span>
+          <span className="text-swoop-text-label">: health scores synthesize all four signals</span>
         </div>
         <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
           <table className="w-full border-collapse text-sm member-table">

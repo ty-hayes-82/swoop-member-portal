@@ -118,7 +118,7 @@ export default function RevenuePage() {
                   <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/[0.06] p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-lg">✅</span>
-                      <span className="font-semibold text-swoop-text">POS Connected — {686} transactions loaded</span>
+                      <span className="font-semibold text-swoop-text">POS Connected: {686} transactions loaded</span>
                       <SourceBadge system="POS" size="xs" />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -144,7 +144,7 @@ export default function RevenuePage() {
                     </div>
                     {atRisk.length > 0 && (
                       <div className="mt-3">
-                        <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-2">Members Declining — Cross-Reference with Spend</div>
+                        <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-2">Members Declining: Cross-Reference with Spend</div>
                         <div className="flex flex-col gap-1.5">
                           {atRisk.map(m => (
                             <div key={m.id || m.memberId} className="flex items-center justify-between bg-swoop-panel rounded-lg px-3 py-2 border border-swoop-border-inset">
@@ -164,7 +164,7 @@ export default function RevenuePage() {
                     <div className="flex items-start gap-3">
                       <div className="text-2xl">📋</div>
                       <div className="flex-1">
-                        <div className="font-semibold text-swoop-text mb-1">Next: Connect Tee Sheet → unlock revenue leakage</div>
+                        <div className="font-semibold text-swoop-text mb-1">Next: Connect Tee Sheet to track revenue leakage</div>
                         <div className="text-sm text-swoop-text-muted mb-3">
                           Swoop will cross-reference POS checks against tee sheet rounds — identifying which rounds skip dining and quantifying the revenue impact per slow hole.
                         </div>
@@ -318,6 +318,24 @@ export default function RevenuePage() {
           <ARAgingPanel />
         </div>
 
+        {/* $31/round hero callout — the demo-stopping per-unit metric */}
+        {leakage.PACE_LOSS > 0 && dollarPerSlowRound > 0 && (
+          <div className="rounded-xl border border-error-500/30 bg-error-500/[0.07] px-5 py-4 flex items-center gap-5 flex-wrap">
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-wide text-error-500/70 mb-0.5">Pace of Play: per-round cost</div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-4xl font-extrabold text-error-500 font-mono">${dollarPerSlowRound}</span>
+                <span className="text-base text-swoop-text-muted">lost per slow round</span>
+              </div>
+            </div>
+            <div className="h-10 w-px bg-swoop-border hidden sm:block" />
+            <div className="text-sm text-swoop-text-muted leading-relaxed max-w-md">
+              Dining conversion drops from <span className="font-bold text-swoop-text">41% → 22%</span> when rounds run long.
+              Every slow round costs your F&B operation <span className="font-bold text-error-500">${dollarPerSlowRound}</span> in missed revenue — before a single member decides not to renew.
+            </div>
+          </div>
+        )}
+
         {/* Story headline — copy matches whichever leakage sources have real data */}
         {(() => {
           const activeSources = [
@@ -330,7 +348,7 @@ export default function RevenuePage() {
             ? activeSources[0]
             : 'operational failures';
           const contextLine = sourceCount >= 3
-            ? 'Three root causes. Three different source systems. One number that\'s invisible until you connect them.'
+            ? `Three root causes. Three different source systems. One number that's invisible until you connect them.`
             : sourceCount === 2
             ? `Two root causes across two source systems. Connect scheduling and weather to see the full picture.`
             : `One root cause identified so far. Connect scheduling and weather data to uncover additional leakage.`;
@@ -394,7 +412,7 @@ export default function RevenuePage() {
               </div>
               <div className="text-2xl font-bold text-swoop-text-ghost font-mono mt-1">$—</div>
               <SourceBadge system="Scheduling" size="xs" />
-              <div className="text-[11px] text-swoop-text-label mt-1.5 leading-snug">Connect scheduling data to unlock staffing-driven loss tracking.</div>
+              <div className="text-[11px] text-swoop-text-label mt-1.5 leading-snug">Connect scheduling data to track staffing-driven revenue loss.</div>
             </div>
           )}
           {leakage.WEATHER_LOSS > 0 ? (
@@ -414,7 +432,7 @@ export default function RevenuePage() {
               </div>
               <div className="text-2xl font-bold text-swoop-text-ghost font-mono mt-1">$—</div>
               <SourceBadge system="Weather API" size="xs" />
-              <div className="text-[11px] text-swoop-text-label mt-1.5 leading-snug">Connect scheduling + weather feed to unlock no-show analysis.</div>
+              <div className="text-[11px] text-swoop-text-label mt-1.5 leading-snug">Connect scheduling and weather feed to track no-show revenue patterns.</div>
             </div>
           )}
         </div>

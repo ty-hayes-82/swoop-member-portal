@@ -54,7 +54,7 @@ export default function StaffingTab() {
                   return <>Based on {df.expectedRounds || bookedRounds} expected rounds
                     ({bookedRounds} booked × {df.golfModifier} weather factor)
                     {df.weatherSummary !== 'No weather disruptions — standard demand expected'
-                      && <> — {df.weatherSummary}</>}.
+                      && <>: {df.weatherSummary}</>}.
                     On similar days with 2 servers, complaints increased {avgComplaintMultiplier}x.</>;
                 }
                 return <>Based on {bookedRounds} booked rounds + weather forecast + 1 private dining event.
@@ -210,7 +210,7 @@ export default function StaffingTab() {
                       <MemberLink mode="drawer" memberId={c.memberId} className="font-semibold text-brand-500 no-underline">
                         {c.memberName || c.memberId}
                       </MemberLink>
-                      <span className="text-swoop-text-label"> — {c.category}</span>
+                      <span className="text-swoop-text-label">: {c.category}</span>
                     </span>
                     <span className="text-[11px] text-swoop-text-label">{c.status}</span>
                   </div>

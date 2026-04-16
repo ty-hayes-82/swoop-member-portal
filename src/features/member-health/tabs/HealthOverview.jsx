@@ -248,7 +248,7 @@ export default function HealthOverview() {
           <span className="text-lg leading-none mt-0.5 text-brand-500">◆</span>
           <div className="flex-1">
             <div className="text-sm font-semibold text-swoop-text">
-              {allMembers.length} members imported · connect golf and dining data to unlock member health scores
+              {allMembers.length} members imported · connect golf and dining data to calculate member health scores
             </div>
             <div className="text-xs text-swoop-text-muted mt-1 leading-relaxed">
               Detect 82→61 health score drops, track the cross-domain decay sequence, and protect $32K+ in at-risk annual dues per member save.
@@ -281,7 +281,7 @@ export default function HealthOverview() {
           const descriptor = levelDescriptions[d.level] ?? 'are in this state';
           const deltaColor = scoresMissing ? '#9CA3AF' : delta > 0 ? '#ef4444' : delta < 0 ? '#12b76a' : '#9CA3AF';
           const deltaCopy = scoresMissing
-            ? 'Pending computation — tease $32K+ dues save per member.'
+            ? 'Connect activity data to calculate dues at risk per member.'
             : delta === 0
               ? 'same as last month.'
               : `${Math.abs(delta)} ${delta > 0 ? 'more' : 'fewer'} than last month.`;

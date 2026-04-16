@@ -183,8 +183,8 @@ export default function BoardReport() {
       <PageTransition>
         <div className="p-6 w-full">
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-swoop-text">Board Report — Service, Members & Operations</h1>
-            <p className="text-sm text-swoop-text-muted mt-1">Monthly executive summary — service quality, member health, and operational response</p>
+            <h1 className="text-2xl font-bold text-swoop-text">Board Report: Service, Members & Operations</h1>
+            <p className="text-sm text-swoop-text-muted mt-1">Monthly executive summary: service quality, member health, and operational response</p>
           </div>
           <DataEmptyState icon="📊" title="Board report needs data" description="Import member, golf, and F&B data to generate your executive board report with KPIs, member saves, and operational insights." dataType="club data" />
           <AgentUpsell
@@ -218,10 +218,10 @@ export default function BoardReport() {
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-swoop-text">
-            Board Report — Service, Members & Operations
+            Board Report: Service, Members & Operations
           </h1>
           <p className="text-xs sm:text-sm text-swoop-text-muted mt-1">
-            Monthly executive summary — service quality, member health, and operational response
+            Monthly executive summary: service quality, member health, and operational response
           </p>
         </div>
         <div className="flex gap-2 shrink-0">
@@ -240,9 +240,45 @@ export default function BoardReport() {
       {!isRealClub() && (
         <div className="rounded-xl border border-warning-500/40 bg-warning-50 p-2 px-3.5 mb-4 text-xs text-amber-700 flex items-center gap-2">
           <span className="font-bold">Demo data</span>
-          <span>— Real metrics will appear after 30 days of live data. All figures shown are simulated.</span>
+          <span>Real metrics will appear after 30 days of live data. All figures shown are simulated.</span>
         </div>
       )}
+
+      {/* Top 3 Signals — GM-first summary before any raw KPIs */}
+      {(() => {
+        const atRiskCount = dist.find(d => d.level === 'At Risk')?.count || 0;
+        const criticalCount = dist.find(d => d.level === 'Critical')?.count || 0;
+        const signals = [
+          memberSaves.length > 0
+            ? { icon: '🛡️', color: '#22c55e', label: `${memberSaves.length} member${memberSaves.length !== 1 ? 's' : ''} retained`, sub: `$${totalDues.toLocaleString()} in annual dues protected through early intervention` }
+            : (atRiskCount + criticalCount > 0)
+              ? { icon: '⚠️', color: '#ef4444', label: `${atRiskCount + criticalCount} member${atRiskCount + criticalCount !== 1 ? 's' : ''} at risk`, sub: 'Proactive outreach recommended before dues renewal window' }
+              : null,
+          operationalSaves.length > 0
+            ? { icon: '⚡', color: '#60a5fa', label: `${operationalSaves.length} operational issue${operationalSaves.length !== 1 ? 's' : ''} prevented`, sub: `$${totalOpsRevenue.toLocaleString()} in operational revenue protected` }
+            : null,
+          resolutionRate > 0
+            ? { icon: '✅', color: '#22c55e', label: `${resolutionRate}% complaint resolution`, sub: avgResolutionDays ? `Avg ${avgResolutionDays}-day resolution time` : 'Service quality holding this period' }
+            : feedbackRecords.length === 0
+              ? { icon: '✅', color: '#22c55e', label: 'No service complaints this period', sub: 'Clean slate — operations running smoothly' }
+              : null,
+        ].filter(Boolean).slice(0, 3);
+
+        if (signals.length === 0) return null;
+        return (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+            {signals.map((s, i) => (
+              <div key={i} className="rounded-xl border border-swoop-border bg-swoop-panel px-4 py-3 flex items-start gap-3">
+                <span className="text-xl shrink-0">{s.icon}</span>
+                <div>
+                  <div className="text-sm font-bold" style={{ color: s.color }}>{s.label}</div>
+                  <div className="text-[11px] text-swoop-text-muted mt-0.5 leading-snug">{s.sub}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
 
       <KPIStrip kpis={kpis} navigate={navigate} onDrillDown={() => setActiveTab(1)} />
 
@@ -328,7 +364,7 @@ export default function BoardReport() {
               ) : resolutionRate > 0 ? (
                 <>This month, {getClubName()} achieved a <strong>{resolutionRate}% complaint resolution rate</strong>{avgResolutionDays ? <> with an average resolution time of <strong>{avgResolutionDays} days</strong></> : ''} across {feedbackRecords.length} service complaints.</>
               ) : (
-                <>{feedbackRecords.length} service complaint{feedbackRecords.length !== 1 ? 's' : ''} received at {getClubName()} this month — <strong>under review</strong>.</>
+                <>{feedbackRecords.length} service complaint{feedbackRecords.length !== 1 ? 's' : ''} received at {getClubName()} this month: <strong>under review</strong>.</>
               )}
               {' '}The operations team responded to alerts with an average{' '}
               <strong>{avgDetectionHrs != null ? `${avgDetectionHrs}-hour` : 'sub-day'} detection-to-action time</strong>
@@ -386,8 +422,10 @@ export default function BoardReport() {
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
               {(() => {
+                const resolutionFactor = feedbackRecords.length === 0 ? 50 : resolutionRate;
+                const understaffedDaysPct = (understaffedDays.length / 30) * 100;
                 const consistencyScore = Math.round(
-                  (resolutionRate * 0.4) + ((100 - (feedbackRecords.filter(f => f.isUnderstaffedDay).length / Math.max(feedbackRecords.length, 1) * 100)) * 0.3) + (70 * 0.3)
+                  (resolutionFactor * 0.4) + ((100 - understaffedDaysPct) * 0.3) + (60 * 0.3)
                 );
                 const csColorClass = consistencyScore >= 70 ? 'text-success-500' : consistencyScore >= 50 ? 'text-warning-500' : 'text-error-500';
                 return (
@@ -439,7 +477,7 @@ export default function BoardReport() {
               {feedbackSummary.slice(0, 4).map(cat => (
                 <div key={cat.category} className="py-1.5 px-3 rounded-lg text-xs bg-swoop-row border border-swoop-border">
                   <span className="font-semibold text-swoop-text">{cat.category}</span>
-                  <span className="text-swoop-text-label"> — {cat.count} total, {cat.unresolvedCount} open</span>
+                  <span className="text-swoop-text-label">: {cat.count} total, {cat.unresolvedCount} open</span>
                 </div>
               ))}
             </div>
@@ -592,7 +630,7 @@ export default function BoardReport() {
                 <>
                   <div className="rounded-xl border border-warning-500/40 bg-warning-50 p-2 px-3 mb-4 text-xs flex items-center gap-1.5">
                     <span className="font-bold text-warning-500">Awaiting data</span>
-                    <span className="text-swoop-text-label">— Import F&B transactions via CSV Import or connect your POS system to unlock revenue metrics.</span>
+                    <span className="text-swoop-text-label">Import F&B transactions via CSV Import or connect your POS system to activate revenue metrics.</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 opacity-40">
                     {[

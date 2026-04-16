@@ -78,20 +78,20 @@ function buildPriorityList() {
         action = `Schedule GM call — complaint unresolved ${complaint.days} days`;
         owner = complaint.days > 14 ? 'GM' : (ACTION_OWNERS[archetype] || 'GM');
       } else if (archetype === 'Ghost') {
-        reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Engagement fully lapsed';
+        reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Email open rate dropped, golf rounds stopped, dining visits at zero';
         action = 'GM personal call — re-engagement conversation';
         owner = 'GM';
       } else if (archetype === 'Declining') {
-        reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Activity declining';
-        action = 'Membership Director outreach — identify root cause';
+        reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Golf frequency down, F&B spend declining across the past 30 days';
+        action = 'Membership Director outreach: identify root cause';
         owner = 'Membership Director';
       } else if (archetype === 'Weekend Warrior') {
         reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Engagement frequency declining';
         action = 'Priority Saturday tee time offer';
         owner = 'Pro Shop';
       } else if (archetype === 'Die-Hard Golfer') {
-        reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Activity declining';
-        action = 'Pro shop outreach — check equipment/injury/schedule';
+        reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Round frequency dropped vs. 90-day baseline, tee sheet bookings sparse';
+        action = 'Pro shop outreach: check equipment, injury, or schedule conflict';
         owner = 'Pro Shop';
       } else if (archetype === 'Social Butterfly') {
         reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Event engagement dropping';
@@ -106,7 +106,7 @@ function buildPriorityList() {
         action = 'Send welcome-back package';
         owner = 'Front Desk';
       } else {
-        reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Health score declining';
+        reason = filterRiskSignal(m.topRisk) || filterRiskSignal(m.signal) || 'Composite health score declining across tee sheet, dining, and engagement signals';
         action = m.action || 'Personalized outreach based on engagement pattern';
         owner = ACTION_OWNERS[archetype] || 'Membership Director';
       }
