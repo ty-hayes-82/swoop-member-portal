@@ -8,7 +8,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { GoogleGenAI, Modality } from '@google/genai';
 
-const LIVE_MODEL = 'gemini-2.5-flash-preview-native-audio-dialog';
+const LIVE_MODEL = 'gemini-3.1-flash-live-preview';
 const SAMPLE_RATE = 16000;
 
 // Tool declarations that mirror the SMS concierge backend
