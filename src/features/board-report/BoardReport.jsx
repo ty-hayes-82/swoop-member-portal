@@ -7,7 +7,8 @@ import { useNavigationContext } from '@/context/NavigationContext';
 import { useMemberProfile } from '@/context/MemberProfileContext';
 import MemberLink from '@/components/MemberLink';
 import { getKPIs, getMemberSaves, getOperationalSaves, getDuesAtRiskNote, getMonthlyTrends } from '@/services/boardReportService';
-import { getRevenueScenario } from '@/services/revenueService';
+import { getRevenueScenario, getLeakageData, getDollarPerSlowRound } from '@/services/revenueService';
+import { isGateOpen } from '@/services/demoGate';
 import { getHealthDistribution, getLiveDashboard } from '@/services/memberService';
 import { getComplaintCorrelation, getFeedbackSummary, getUnderstaffedDays } from '@/services/staffingService';
 import { isRealClub, isAuthenticatedClub, getClubName } from '@/config/constants';
@@ -113,10 +114,10 @@ function KPIStrip({ kpis, navigate, onDrillDown }) {
             </div>
             <div
               className="text-xs text-[#BCC3CF] mt-1"
-              title={kpi.label === 'Board Confidence Score' ? 'Composite score based on retention rate, financial performance vs. budget, member satisfaction trends, and operational response metrics.' : undefined}
+              title={kpi.description || undefined}
             >
               {kpi.label}
-              {kpi.label === 'Board Confidence Score' && <span className="ml-1 cursor-help opacity-60" title="Composite score based on retention rate, financial performance vs. budget, member satisfaction trends, and operational response metrics.">&#9432;</span>}
+              {kpi.description && <span className="ml-1 cursor-help opacity-60" title={kpi.description}>&#9432;</span>}
             </div>
             {/* Source badges — Pillar 1: SEE IT */}
             <div className="flex gap-1 justify-center mt-2 flex-wrap">
@@ -644,17 +645,42 @@ export default function BoardReport() {
                   </div>
                 );
               }
+              // POS connected but no scheduling close-out data yet — show leakage-based F&B metrics
+              const leakage = getLeakageData();
+              const posConnected = isGateOpen('fb');
+              if (posConnected && leakage && leakage.PACE_LOSS > 0) {
+                const dollarPerRound = getDollarPerSlowRound();
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="bg-swoop-row rounded-xl p-3.5 border border-swoop-border text-center">
+                      <div className="text-2xl font-bold text-error-500">-${Math.round(leakage.PACE_LOSS).toLocaleString()}</div>
+                      <div className="text-xs text-swoop-text-muted">Pace-Driven F&B Loss</div>
+                      <div className="text-[10px] text-swoop-text-label mt-1">from slow rounds this month</div>
+                    </div>
+                    <div className="bg-swoop-row rounded-xl p-3.5 border border-swoop-border text-center">
+                      <div className="text-2xl font-bold text-brand-500">${dollarPerRound}</div>
+                      <div className="text-xs text-swoop-text-muted">Lost per Slow Round</div>
+                      <div className="text-[10px] text-swoop-text-label mt-1">dining conversion gap</div>
+                    </div>
+                    <div className="bg-swoop-row rounded-xl p-3.5 border border-swoop-border text-center">
+                      <div className="text-2xl font-bold text-swoop-text">686</div>
+                      <div className="text-xs text-swoop-text-muted">POS Transactions</div>
+                      <div className="text-[10px] text-swoop-text-label mt-1">spend patterns mapped</div>
+                    </div>
+                  </div>
+                );
+              }
               return (
                 <>
-                  <div className="rounded-xl border border-warning-500/40 bg-warning-50 p-2 px-3 mb-4 text-xs flex items-center gap-1.5">
+                  <div className="rounded-xl border border-warning-500/40 bg-warning-500/10 p-2 px-3 mb-4 text-xs flex items-center gap-1.5">
                     <span className="font-bold text-warning-500">Awaiting data</span>
-                    <span className="text-swoop-text-label">Import F&B transactions via CSV Import or connect your POS system to activate revenue metrics.</span>
+                    <span className="text-swoop-text-label">Connect your POS system to activate F&B revenue metrics.</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 opacity-40">
                     {[
-                      { label: 'Revenue per Cover', value: '—' },
-                      { label: 'Covers vs Capacity', value: '—' },
-                      { label: 'Post-Round Dining Rate', value: '—' },
+                      { label: 'Pace-Driven F&B Loss', value: '—' },
+                      { label: 'Lost per Slow Round', value: '—' },
+                      { label: 'POS Transactions', value: '—' },
                     ].map(m => (
                       <div key={m.label} className="bg-swoop-row rounded-xl p-3.5 border border-swoop-border text-center">
                         <div className="text-2xl font-bold text-swoop-text-label">{m.value}</div>

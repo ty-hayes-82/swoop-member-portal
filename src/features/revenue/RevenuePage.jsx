@@ -374,7 +374,7 @@ export default function RevenuePage() {
             </div>
             <SourceBadge system="Tee Sheet" size="xs" />
             <div className="text-[11px] text-swoop-text-label mt-1.5 leading-snug">
-              <span className="font-bold text-brand-500">$31 lost per slow round</span>: 41% → 22% dining conversion drop when rounds run long.
+              <span className="font-bold text-brand-500">${dollarPerSlowRound} lost per slow round</span>: 41% → 22% dining conversion when rounds run long.
             </div>
           </div>
           {leakage.STAFFING_LOSS > 0 ? (

@@ -670,8 +670,8 @@ export default function TodayView() {
           </SwoopSection>
         )}
 
-        {/* Today's Priorities — staffing/events data requires activity sources */}
-        {hasActivityData && <SwoopSection
+        {/* Today's Priorities — requires both tee sheet + POS to have real staffing/events data */}
+        {teeSheetConnected && isGateOpen('fb') && <SwoopSection
           title="Today's Priorities"
           titleColor={C.accent}
           count={2}
