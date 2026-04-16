@@ -84,4 +84,4 @@ async function staffAgentHandler(req, res) {
   }
 }
 
-export default withAuth(staffAgentHandler, { roles: ['gm', 'assistant_gm', 'staff', 'swoop_admin'] });
+export default withAuth(staffAgentHandler, { roles: ['gm', 'assistant_gm', 'staff', 'swoop_admin', 'fb_director', 'head_pro', 'membership_director', 'controller', 'dining_room_manager'] });
