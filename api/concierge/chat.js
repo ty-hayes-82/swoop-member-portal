@@ -137,95 +137,67 @@ async function executeConciergeTool(toolName, input, profile, clubId) {
       };
     }
 
-    // ── BOOK TEE TIME ──────────────────────────────────────────────────
+    // ── BOOK TEE TIME (human-in-the-loop: submits request, pro shop confirms) ──
     case 'book_tee_time': {
       const course = input.course || 'North Course';
       const players = input.players || 4;
-      const prefs = profile.preferences || {};
-      const beverage = prefs.dining?.includes('Arnold Palmer') ? 'Arnold Palmer' : 'cold water and towels';
-      const bookingId = `bkg_c_${Date.now().toString(36)}`;
-      const confNumber = `TT-${Date.now().toString(36).toUpperCase()}`;
+      const requestId = `req_tt_${Date.now().toString(36)}`;
 
       try {
-        // Resolve course_id from name
-        const courseResult = await sql`
-          SELECT course_id, name FROM courses
-          WHERE club_id = ${clubId} AND name ILIKE '%' || ${course} || '%'
-          LIMIT 1
+        const detail = JSON.stringify({
+          date: input.date, time: input.time, course, players,
+          member_id: memberId, member_name: profile.name, request_id: requestId,
+        });
+        await sql`
+          INSERT INTO activity_log (action_type, action_subtype, member_id, member_name, reference_id, reference_type, description, status, meta)
+          VALUES ('concierge_request', 'tee_time', ${memberId}, ${profile.name}, ${requestId}, 'booking_request',
+            ${`Tee time request: ${input.date} at ${input.time} on ${course} for ${players}`},
+            'pending_staff_confirmation',
+            ${detail}::jsonb)
         `;
-        const courseId = courseResult.rows[0]?.course_id;
-        const courseName = courseResult.rows[0]?.name || course;
-
-        if (courseId) {
-          await sql`
-            INSERT INTO bookings (booking_id, club_id, course_id, booking_date, tee_time, player_count, status)
-            VALUES (${bookingId}, ${clubId}, ${courseId}, ${input.date}, ${input.time}, ${players}, 'confirmed')
-          `;
-          // Add the member as first player
-          const playerId = `bp_c_${Date.now().toString(36)}`;
-          await sql`
-            INSERT INTO booking_players (player_id, booking_id, member_id, position_in_group)
-            VALUES (${playerId}, ${bookingId}, ${memberId}, 1)
-          `;
-          // Log to activity_log
-          try {
-            await sql`
-              INSERT INTO activity_log (action_type, action_subtype, member_id, member_name, reference_id, reference_type, description, meta)
-              VALUES ('concierge_booking', 'tee_time', ${memberId}, ${profile.name}, ${bookingId}, 'booking',
-                ${`Booked tee time: ${input.date} at ${input.time} on ${courseName}`},
-                ${JSON.stringify({ course: courseName, players, confirmation: confNumber })}::jsonb)
-            `;
-          } catch (_) { /* activity_log may not exist */ }
-
-          return {
-            confirmation: `Tee time booked: ${input.date} at ${input.time} on the ${courseName} for ${players} players.`,
-            confirmation_number: confNumber,
-            booking_id: bookingId,
-            member_name: profile.name,
-            cart_note: `Cart will be staged with ${beverage} at the bag drop 15 min before your time.`,
-          };
-        }
       } catch (e) {
-        console.warn('[concierge] book_tee_time DB error (using fallback):', e.message);
+        console.warn('[concierge] book_tee_time log error (continuing):', e.message);
       }
-      // Fallback: hardcoded
       return {
-        confirmation: `Tee time booked: ${input.date} at ${input.time} on the ${course} for ${players} players.`,
-        confirmation_number: confNumber,
+        status: 'request_submitted',
+        pending: true,
+        request_id: requestId,
+        routed_to: 'Pro Shop',
+        details: `Tee time request: ${input.date} at ${input.time} on the ${course} for ${players} players.`,
+        expected_response: 'Pro shop will confirm within the hour.',
         member_name: profile.name,
-        cart_note: `Cart will be staged with ${beverage} at the bag drop 15 min before your time.`,
       };
     }
 
-    // ── MAKE DINING RESERVATION ────────────────────────────────────────
+    // ── MAKE DINING RESERVATION (human-in-the-loop: submits request, F&B team confirms) ──
     case 'make_dining_reservation': {
       const party = input.party_size || 2;
-      const time = input.time || '7:00 PM';
-      const prefs = profile.preferences || {};
-      const favDining = prefs.dining || '';
-      const seatingNote = favDining.includes('booth 12') ? 'Booth 12 reserved — your usual spot.' : 'Window table reserved.';
-      const confNumber = `DR-${Date.now().toString(36).toUpperCase()}`;
+      const time = input.time || '19:00';
+      const requestId = `req_dr_${Date.now().toString(36)}`;
 
       try {
         const detail = JSON.stringify({
           date: input.date, time, outlet: input.outlet, party_size: party,
-          preferences: input.preferences, confirmation: confNumber,
+          preferences: input.preferences, member_id: memberId, member_name: profile.name, request_id: requestId,
         });
         await sql`
-          INSERT INTO activity_log (action_type, action_subtype, member_id, member_name, reference_id, reference_type, description, meta)
-          VALUES ('concierge_booking', 'dining_reservation', ${memberId}, ${profile.name}, ${confNumber}, 'dining',
-            ${`Dining reservation: ${input.date} at ${time} at ${input.outlet} for ${party}`},
+          INSERT INTO activity_log (action_type, action_subtype, member_id, member_name, reference_id, reference_type, description, status, meta)
+          VALUES ('concierge_request', 'dining_reservation', ${memberId}, ${profile.name}, ${requestId}, 'booking_request',
+            ${`Dining reservation request: ${input.date} at ${time} at ${input.outlet} for ${party}`},
+            'pending_staff_confirmation',
             ${detail}::jsonb)
         `;
       } catch (e) {
-        console.warn('[concierge] make_dining_reservation DB error (using fallback):', e.message);
+        console.warn('[concierge] make_dining_reservation log error (continuing):', e.message);
       }
 
       return {
-        confirmation: `Dining reservation confirmed: ${input.date} at ${time} at ${input.outlet} for ${party} guests.`,
-        confirmation_number: confNumber,
-        seating: seatingNote,
-        preferences_noted: input.preferences || (favDining ? `On file: ${favDining}` : 'None specified'),
+        status: 'request_submitted',
+        pending: true,
+        request_id: requestId,
+        routed_to: 'F&B Team',
+        details: `Dining reservation request: ${input.date} at ${time} at ${input.outlet || 'Main Dining Room'} for ${party} guests.${input.preferences ? ` Notes: ${input.preferences}` : ''}`,
+        expected_response: 'F&B team will confirm within the hour.',
         member_name: profile.name,
       };
     }
@@ -318,16 +290,19 @@ async function executeConciergeTool(toolName, input, profile, clubId) {
       };
     }
 
-    // ── RSVP EVENT ─────────────────────────────────────────────────────
+    // ── RSVP EVENT (human-in-the-loop: submits request, events team confirms) ──
     case 'rsvp_event': {
       const eventTitle = input.event_title || 'Event';
       const who = input.member_name || profile.name;
       const guestCount = input.guest_count || 0;
+      const requestId = `req_ev_${Date.now().toString(36)}`;
 
+      // Try to find the event for context, but don't auto-register
+      let eventName = eventTitle;
+      let eventDate = null;
       try {
-        // Find the event by fuzzy title match
         const eventResult = await sql`
-          SELECT event_id, name, event_date, capacity, registration_fee
+          SELECT event_id, name, event_date
           FROM event_definitions
           WHERE club_id = ${clubId} AND name ILIKE '%' || ${eventTitle} || '%'
             AND event_date >= CURRENT_DATE
@@ -335,83 +310,100 @@ async function executeConciergeTool(toolName, input, profile, clubId) {
           LIMIT 1
         `;
         if (eventResult.rows.length > 0) {
-          const ev = eventResult.rows[0];
-          const regId = `reg_c_${Date.now().toString(36)}`;
-          // Resolve target member_id (household member or self)
-          let targetMemberId = memberId;
-          if (input.member_name && input.member_name !== profile.name) {
-            try {
-              const hhResult = await sql`
-                SELECT m2.member_id FROM members m1
-                JOIN members m2 ON m2.household_id = m1.household_id AND m2.club_id = m1.club_id
-                WHERE m1.member_id = ${memberId} AND m1.club_id = ${clubId}
-                  AND (m2.first_name || ' ' || m2.last_name) ILIKE '%' || ${input.member_name} || '%'
-                LIMIT 1
-              `;
-              if (hhResult.rows.length > 0) targetMemberId = hhResult.rows[0].member_id;
-            } catch (_) { /* fall back to self */ }
-          }
-          await sql`
-            INSERT INTO event_registrations (registration_id, event_id, member_id, status, guest_count, fee_paid, registered_at)
-            VALUES (${regId}, ${ev.event_id}, ${targetMemberId}, 'registered', ${guestCount}, ${ev.registration_fee || 0}, NOW()::text)
-          `;
-          return {
-            registration_id: regId,
-            event: ev.name,
-            event_date: ev.event_date,
-            registered_for: who,
-            guest_count: guestCount,
-            status: 'registered',
-          };
+          eventName = eventResult.rows[0].name;
+          eventDate = eventResult.rows[0].event_date;
         }
       } catch (e) {
-        console.warn('[concierge] rsvp_event DB error (using fallback):', e.message);
+        console.warn('[concierge] rsvp_event lookup error (continuing):', e.message);
       }
-      // Fallback: hardcoded
+
+      try {
+        const detail = JSON.stringify({
+          event_title: eventName, event_date: eventDate, registered_for: who,
+          guest_count: guestCount, member_id: memberId, member_name: profile.name, request_id: requestId,
+        });
+        await sql`
+          INSERT INTO activity_log (action_type, action_subtype, member_id, member_name, reference_id, reference_type, description, status, meta)
+          VALUES ('concierge_request', 'event_rsvp', ${memberId}, ${profile.name}, ${requestId}, 'booking_request',
+            ${`RSVP request: ${eventName}${eventDate ? ` on ${eventDate}` : ''} for ${who}${guestCount > 0 ? ` +${guestCount} guests` : ''}`},
+            'pending_staff_confirmation',
+            ${detail}::jsonb)
+        `;
+      } catch (e) {
+        console.warn('[concierge] rsvp_event log error (continuing):', e.message);
+      }
+
       return {
-        registration_id: `ER-${Date.now().toString(36).toUpperCase()}`,
-        event: eventTitle,
+        status: 'request_submitted',
+        pending: true,
+        request_id: requestId,
+        routed_to: 'Events Team',
+        event: eventName,
+        event_date: eventDate,
         registered_for: who,
         guest_count: guestCount,
-        status: 'registered',
+        details: `RSVP request submitted for ${eventName}${eventDate ? ` on ${eventDate}` : ''} for ${who}${guestCount > 0 ? ` +${guestCount} guests` : ''}.`,
+        expected_response: 'Events team will confirm your spot.',
+        member_name: profile.name,
       };
     }
 
-    // ── CANCEL TEE TIME ────────────────────────────────────────────────
+    // ── CANCEL TEE TIME (human-in-the-loop: submits request, pro shop confirms) ──
     case 'cancel_tee_time': {
+      const requestId = `req_cx_${Date.now().toString(36)}`;
+
+      // Look up the booking for context, but don't auto-cancel
+      let bookingInfo = null;
       try {
-        const cancelResult = await sql`
-          UPDATE bookings SET status = 'cancelled'
-          WHERE booking_id IN (
-            SELECT b.booking_id FROM bookings b
-            JOIN booking_players bp ON bp.booking_id = b.booking_id
-            WHERE b.club_id = ${clubId} AND bp.member_id = ${memberId}
-              AND b.booking_date = ${input.booking_date}
-              AND b.status = 'confirmed'
-              AND (${input.tee_time || null}::text IS NULL OR b.tee_time = ${input.tee_time})
-            LIMIT 1
-          )
-          RETURNING booking_id, booking_date, tee_time
+        const lookupResult = await sql`
+          SELECT b.booking_id, b.booking_date, b.tee_time, c.name AS course_name
+          FROM bookings b
+          JOIN booking_players bp ON bp.booking_id = b.booking_id
+          JOIN courses c ON c.course_id = b.course_id
+          WHERE b.club_id = ${clubId} AND bp.member_id = ${memberId}
+            AND b.booking_date = ${input.booking_date}
+            AND b.status = 'confirmed'
+            AND (${input.tee_time || null}::text IS NULL OR b.tee_time = ${input.tee_time})
+          ORDER BY b.booking_date, b.tee_time
+          LIMIT 1
         `;
-        if (cancelResult.rows.length > 0) {
-          const row = cancelResult.rows[0];
-          return {
-            status: 'cancelled',
-            booking_id: row.booking_id,
-            booking_date: row.booking_date,
-            tee_time: row.tee_time,
-            message: `Tee time on ${row.booking_date} at ${row.tee_time} has been cancelled.`,
-          };
+        if (lookupResult.rows.length > 0) {
+          bookingInfo = lookupResult.rows[0];
         }
       } catch (e) {
-        console.warn('[concierge] cancel_tee_time DB error (using fallback):', e.message);
+        console.warn('[concierge] cancel_tee_time lookup error (continuing):', e.message);
       }
-      // Fallback: hardcoded
+
+      try {
+        const detail = JSON.stringify({
+          booking_date: input.booking_date,
+          tee_time: bookingInfo?.tee_time || input.tee_time,
+          course: bookingInfo?.course_name,
+          booking_id: bookingInfo?.booking_id,
+          member_id: memberId, member_name: profile.name, request_id: requestId,
+        });
+        await sql`
+          INSERT INTO activity_log (action_type, action_subtype, member_id, member_name, reference_id, reference_type, description, status, meta)
+          VALUES ('concierge_request', 'tee_time_cancel', ${memberId}, ${profile.name}, ${requestId}, 'booking_request',
+            ${`Cancellation request: tee time on ${input.booking_date}${bookingInfo?.tee_time ? ` at ${bookingInfo.tee_time}` : ''}`},
+            'pending_staff_confirmation',
+            ${detail}::jsonb)
+        `;
+      } catch (e) {
+        console.warn('[concierge] cancel_tee_time log error (continuing):', e.message);
+      }
+
       return {
-        status: 'cancelled',
+        status: 'request_submitted',
+        pending: true,
+        request_id: requestId,
+        routed_to: 'Pro Shop',
         booking_date: input.booking_date,
-        tee_time: input.tee_time || '7:00 AM',
-        message: `Tee time on ${input.booking_date} has been cancelled. Your group has been notified.`,
+        tee_time: bookingInfo?.tee_time || input.tee_time,
+        course: bookingInfo?.course_name,
+        details: `Cancellation request submitted for tee time on ${input.booking_date}${bookingInfo?.tee_time ? ` at ${bookingInfo.tee_time}` : ''}${bookingInfo?.course_name ? ` on ${bookingInfo.course_name}` : ''}.`,
+        expected_response: 'Pro shop will process and confirm the cancellation.',
+        member_name: profile.name,
       };
     }
 
@@ -704,7 +696,8 @@ async function chatHandler(req, res) {
     const messages = [{ role: 'user', content: message }];
     let result = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
+      max_tokens: 2048,
+      temperature: 0,
       system: systemPrompt + conversationContext,
       messages,
       tools: availableTools,
@@ -713,33 +706,55 @@ async function chatHandler(req, res) {
     // Collect tool call trace for debug mode
     const toolCallLog = [];
 
-    // Tool-use loop: execute tools and feed results back until Claude responds with text
-    while (result.stop_reason === 'tool_use') {
-      const toolUse = result.content.find(c => c.type === 'tool_use');
-      if (!toolUse) break;
+    // Tool-use loop: execute ALL tool_use blocks per turn, feed results back, repeat until text
+    let loopGuard = 0;
+    while (result.stop_reason === 'tool_use' && loopGuard++ < 5) {
+      const toolUses = result.content.filter(c => c.type === 'tool_use');
+      if (toolUses.length === 0) break;
 
-      const toolResult = await executeConciergeTool(toolUse.name, toolUse.input, profile, clubId);
-
-      if (debug) {
-        toolCallLog.push({ name: toolUse.name, input: toolUse.input, result: toolResult, ts: new Date().toISOString() });
-      }
+      // Execute all tools in this turn (may be multiple simultaneous calls)
+      const toolResults = await Promise.all(toolUses.map(async (toolUse) => {
+        let toolResult;
+        try {
+          toolResult = await executeConciergeTool(toolUse.name, toolUse.input, profile, clubId);
+        } catch (toolErr) {
+          console.warn(`[concierge] tool ${toolUse.name} threw:`, toolErr.message);
+          toolResult = { error: 'Tool execution failed', message: 'Unable to complete that action — let me connect you with staff.' };
+        }
+        if (debug) {
+          toolCallLog.push({ tool_name: toolUse.name, arguments: toolUse.input, result: toolResult, ts: new Date().toISOString() });
+        }
+        return { type: 'tool_result', tool_use_id: toolUse.id, content: JSON.stringify(toolResult) };
+      }));
 
       messages.push({ role: 'assistant', content: result.content });
-      messages.push({
-        role: 'user',
-        content: [{ type: 'tool_result', tool_use_id: toolUse.id, content: JSON.stringify(toolResult) }],
-      });
+      messages.push({ role: 'user', content: toolResults });
 
       result = await client.messages.create({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 1024,
+        max_tokens: 2048,
+        temperature: 0,
         system: systemPrompt + conversationContext,
         messages,
         tools: availableTools,
       });
     }
 
-    const responseText = result.content?.find(c => c.type === 'text')?.text ?? '';
+    let responseText = result.content?.find(c => c.type === 'text')?.text ?? '';
+
+    // Sanitize: strip raw XML/parameter markup that occasionally leaks from model thinking.
+    // When this pattern is detected, substitute a graceful fallback rather than exposing internals.
+    if (/<parameter\s+name=|<invoke>|<parameter>/.test(responseText)) {
+      console.warn('[concierge/chat] XML parameter leak detected — using fallback response');
+      const firstName = profile.first_name || profile.name?.split(' ')[0] || 'there';
+      responseText = `Hey ${firstName}, I ran into a hiccup processing that — let me flag it for the team. In the meantime, call the front desk and they'll take care of you right away.`;
+    }
+
+    // Fallback for empty response (model returned no text block)
+    if (!responseText) {
+      const firstName = profile.first_name || profile.name?.split(' ')[0] || 'there';
+      responseText = `Hey ${firstName}, something went sideways on my end — sorry about that. Give the front desk a call and they'll sort it out for you.`;
+    }
 
     // Update conversation summary (truncate to last exchange)
     try {
@@ -758,7 +773,15 @@ async function chatHandler(req, res) {
     });
   } catch (err) {
     console.error('Concierge chat error:', err);
-    return res.status(500).json({ error: 'Failed to process chat message' });
+    // Return graceful fallback instead of 500 — member should never see a raw error
+    const firstName = profile?.first_name || profile?.name?.split(' ')[0] || 'there';
+    return res.status(200).json({
+      session_id: null,
+      member_id,
+      response: `Hey ${firstName}, I'm having a moment — let me connect you with the front desk. They'll take great care of you.`,
+      simulated: false,
+      error_handled: true,
+    });
   }
 }
 
