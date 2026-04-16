@@ -366,7 +366,21 @@ export default function AllMembersView({ initialArchetype = null, rosterOnly = f
   const allMembers = useMemo(() => getFullRoster(), []);
 
   if (allMembers.length === 0) {
-    return <DataEmptyState icon="👥" title="No members imported yet" description="Import your member roster to see health scores, archetypes, and engagement data for every member." dataType="members" />;
+    return <DataEmptyState
+      icon="👥"
+      title="No members imported yet"
+      description="Import your member roster to see health scores, archetypes, and engagement data for every member."
+      dataType="members"
+      actions={
+        <button
+          type="button"
+          onClick={() => { try { localStorage.setItem('swoop_club_id', 'demo'); } catch {} window.location.reload(); }}
+          className="px-5 py-2.5 rounded-lg bg-brand-500 text-white text-sm font-semibold cursor-pointer border-none hover:bg-brand-600 transition-colors"
+        >
+          Explore with Sample Data →
+        </button>
+      }
+    />;
   }
 
   const [expandedMember, setExpandedMember] = useState(null);

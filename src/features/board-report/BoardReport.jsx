@@ -106,7 +106,7 @@ function KPIStrip({ kpis, navigate, onDrillDown }) {
           <div
             key={kpi.label}
             onClick={() => dest ? navigate?.(dest) : onDrillDown?.()}
-            className="bg-swoop-canvas rounded-xl p-4 text-center border border-[#2d2d44] cursor-pointer transition-all duration-150 hover:shadow-lg hover:-translate-y-px"
+            className="group bg-swoop-canvas rounded-xl p-4 text-center border border-[#2d2d44] cursor-pointer transition-all duration-150 hover:shadow-lg hover:-translate-y-px"
           >
             <div className={`text-[28px] font-bold ${colorMap[kpi.color] || 'text-success-500'}`}>
               {kpi.prefix}
@@ -131,6 +131,11 @@ function KPIStrip({ kpis, navigate, onDrillDown }) {
                 <SourceBadge key={s} system={s} size="xs" />
               ))}
             </div>
+            {dest && (
+              <div className="mt-1.5 text-[10px] font-semibold text-brand-400 opacity-70 group-hover:opacity-100">
+                View detail →
+              </div>
+            )}
           </div>
         );
       })}
@@ -381,8 +386,8 @@ export default function BoardReport() {
                 being monitored. We are tracking member engagement, tee sheet activity, and service quality
                 in real time.
                 {resolutionRate > 0 && <> Service complaint resolution rate: <strong>{resolutionRate}%</strong>.</>}
-                {' '}As behavioral data accumulates, Swoop will identify at-risk members early and surface
-                intervention opportunities before members consider leaving.
+                {' '}As behavioral data accumulates, we are identifying at-risk members early and surfacing
+                intervention opportunities before they consider leaving.
               </>
             )}
           </p>
@@ -420,9 +425,9 @@ export default function BoardReport() {
                 Through proactive interventions, <strong>{memberSaves.length} members</strong> showing early disengagement signals were
                 successfully re-engaged, demonstrating the value of early detection and personal outreach.</>
               ) : (
-                <>Swoop is actively monitoring <strong>{kpis.find(k => k.label === 'Active Members')?.value ?? kpis[0]?.value ?? 0} members</strong> for engagement signals.
-                {(kpis.find(k => k.label === 'At Risk')?.value ?? 0) > 0 && <> <strong>{kpis.find(k => k.label === 'At Risk').value} members</strong> have been flagged as at-risk and are being prioritized for outreach.</>}
-                {' '}Early detection is live. Intervention opportunities will appear in the Action Inbox as patterns emerge.</>
+                <>We are actively monitoring <strong>{kpis.find(k => k.label === 'Active Members')?.value ?? kpis[0]?.value ?? 0} members</strong> for engagement signals.
+                {(kpis.find(k => k.label === 'At Risk')?.value ?? 0) > 0 && <> <strong>{kpis.find(k => k.label === 'At Risk').value} members</strong> have been flagged as at-risk and prioritized for outreach.</>}
+                {' '}Early detection is live — intervention opportunities surface in the Action Inbox as patterns emerge.</>
               )}
             </p>
             <p className="text-swoop-text-muted leading-relaxed">

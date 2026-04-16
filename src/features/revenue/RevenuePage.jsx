@@ -206,14 +206,14 @@ export default function RevenuePage() {
                     : 'NGCOA peer-group average for private clubs 300–600 members ($21/member/mo). Your estimate personalizes once your roster is imported.'}
                 </p>
                 <p className="text-[11px] text-swoop-text-label mt-1.5 m-0">
-                  Swoop cross-references your tee sheet, POS, and scheduling data to tell you exactly where these dollars go and what stops them.
+                  Connect tee sheet, POS, and scheduling data to see exactly where these dollars go and what causes the leakage.
                 </p>
               </div>
 
               {/* Three locked source rows */}
               <div className="rounded-xl border border-swoop-border bg-swoop-panel overflow-hidden">
                 <div className="px-5 py-3 border-b border-swoop-border-inset">
-                  <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">What Swoop will quantify for you</div>
+                  <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label">Revenue leakage we quantify once connected</div>
                 </div>
                 {[
                   { label: 'Pace of Play', desc: 'Slow rounds suppress F&B conversion. Swoop identifies which holes and shifts.', est: '$3,200–$5,000', color: '#ef4444', icon: '⛳', source: 'Tee Sheet + POS' },
@@ -245,17 +245,17 @@ export default function RevenuePage() {
               <div className="flex gap-3 flex-wrap">
                 <button
                   type="button"
-                  onClick={() => navigate('admin', { tab: 'data-hub' })}
+                  onClick={() => { try { localStorage.setItem('swoop_club_id', 'demo'); } catch {} window.location.reload(); }}
                   className="px-5 py-2.5 rounded-lg bg-brand-500 text-white text-sm font-semibold cursor-pointer border-none hover:bg-brand-600 transition-colors"
                 >
-                  {hasTeeSheet ? 'Connect POS →' : 'Connect Tee Sheet →'}
+                  Explore with Sample Data →
                 </button>
                 <button
                   type="button"
                   onClick={() => navigate('admin', { tab: 'data-hub' })}
                   className="px-5 py-2.5 rounded-lg border border-swoop-border bg-transparent text-swoop-text-muted text-sm font-semibold cursor-pointer hover:bg-swoop-row-hover transition-colors"
                 >
-                  {hasTeeSheet ? 'View Connected Sources' : hasPOS ? 'Connect Tee Sheet →' : 'View All Integrations'}
+                  {hasTeeSheet ? 'Connect POS →' : 'Connect Tee Sheet →'}
                 </button>
               </div>
             </div>

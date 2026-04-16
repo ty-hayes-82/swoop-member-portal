@@ -348,7 +348,7 @@ export default function MemberAlerts() {
                   </div>
                   {m.duesAnnual > 0 && (
                     <div style={{ fontSize: 11, color: severityColor, fontWeight: 700, marginTop: 4 }}>
-                      ${Math.round(m.duesAnnual / 1000)}K/yr dues at risk — save opportunity
+                      ${Math.round(m.duesAnnual / 1000)}K/yr dues at risk: save opportunity
                     </div>
                   )}
                   {m.owner && (

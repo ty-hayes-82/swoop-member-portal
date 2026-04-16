@@ -348,7 +348,7 @@ export default function InboxTab() {
                     </div>
                   </div>
                 </div>
-                <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-muted mb-2">What your agents are looking for</div>
+                <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-muted mb-2">Monitored Intervention Triggers</div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {[
                     { icon: '⚠️', label: 'At-risk members', detail: 'Members with declining visit frequency or low engagement scores' },
