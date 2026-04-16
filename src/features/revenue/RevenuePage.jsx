@@ -170,7 +170,7 @@ export default function RevenuePage() {
                         </div>
                         <div className="grid grid-cols-2 gap-3 text-center">
                           {[
-                            { label: 'Industry avg leakage', value: '$8,400/mo', sub: 'benchmark — not your data yet' },
+                            { label: 'Industry avg leakage', value: '$8,400/mo', sub: 'benchmark: not your data yet' },
                             { label: 'Time to insight', value: '< 2 min', sub: 'after tee sheet import' },
                           ].map(({ label, value, sub }) => (
                             <div key={label} className="rounded-lg p-3 border border-swoop-border-inset bg-swoop-row">
@@ -387,7 +387,7 @@ export default function RevenuePage() {
             </div>
             <SourceBadge system="Tee Sheet" size="xs" />
             <div className="text-[11px] text-swoop-text-label mt-1.5 leading-snug">
-              <span className="font-bold text-brand-500">$31 lost per slow round</span> — 41% → 22% dining conversion drop when rounds run long.
+              <span className="font-bold text-brand-500">$31 lost per slow round</span>: 41% → 22% dining conversion drop when rounds run long.
             </div>
           </div>
           {leakage.STAFFING_LOSS > 0 ? (

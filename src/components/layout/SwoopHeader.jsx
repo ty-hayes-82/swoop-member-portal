@@ -298,9 +298,9 @@ const SwoopHeader = () => {
           <div className="flex items-center gap-2 text-sm text-swoop-text-muted">
             <span className="font-medium text-swoop-text hidden sm:inline">{currentNav.label}</span>
             {clubId !== "demo" && isGateOpen('members') && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success-50 text-success-600 text-xs font-medium">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success-50 text-success-600 text-xs font-medium" title="Data current as of today">
                 <span className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse" />
-                LIVE
+                LIVE · Today
               </span>
             )}
             {clubId === "demo" && (

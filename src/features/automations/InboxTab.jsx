@@ -180,7 +180,7 @@ export default function InboxTab() {
   const totalApproved = inbox.filter(i => i.status === 'approved').length;
   const TRUST_LEVELS = [
     { threshold: 0,  label: 'Manual only',       description: 'Every action requires your approval.' },
-    { threshold: 5,  label: 'Learning your style', description: 'AI is watching your approvals to understand priorities.' },
+    { threshold: 5,  label: 'Training your style', description: 'Swoop is learning your approval patterns to calibrate priorities.' },
     { threshold: 15, label: 'Trusted assistant',  description: 'Low-risk actions can be auto-suggested. You still approve all.' },
     { threshold: 30, label: 'Co-pilot mode',      description: 'You can enable auto-send for low-risk outreach.' },
   ];
@@ -292,7 +292,7 @@ export default function InboxTab() {
                     </svg>
                   </div>
                   <div>
-                    <div className="text-sm font-semibold text-brand-800">AI agents are scanning your data</div>
+                    <div className="text-sm font-semibold text-brand-800">Scanning for revenue and retention opportunities</div>
                     <div className="text-xs text-brand-600/80 mt-0.5">
                       Your agents are analyzing member activity, tee sheet patterns, and service records. Recommendations will appear here as they are generated.
                     </div>
@@ -371,7 +371,7 @@ export default function InboxTab() {
           </div>
           {nextLevel && (
             <div className="text-[10px] text-swoop-text-label whitespace-nowrap shrink-0">
-              {nextLevel.threshold - totalHandled} more to unlock "{nextLevel.label}"
+              {nextLevel.threshold - totalHandled} more approvals to reach "{nextLevel.label}"
             </div>
           )}
           {!nextLevel && (
@@ -382,7 +382,7 @@ export default function InboxTab() {
         </div>
         {totalApproved > 0 && (
           <div className="text-[10px] text-swoop-text-label mt-1.5">
-            {totalApproved} approved · {totalHandled - totalApproved} dismissed — approval rate {Math.round((totalApproved / totalHandled) * 100)}%
+            {totalApproved} approved · {totalHandled - totalApproved} dismissed · approval rate {Math.round((totalApproved / totalHandled) * 100)}%
           </div>
         )}
       </div>

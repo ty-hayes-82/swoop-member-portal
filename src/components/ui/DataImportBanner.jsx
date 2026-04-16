@@ -72,11 +72,11 @@ function buildMessage(category) {
       const staff = getStaffingSummary();
       const days = staff.understaffedDaysCount || 3;
       const impact = staff.totalRevenueLoss ? fmt$(staff.totalRevenueLoss) : '$3,400'; // lint-no-hardcoded-dollars: allow — fallback before data loads
-      return `Staff coverage mapped \u2014 ${days} understaffed days this month, ${impact} revenue impact.`;
+      return `Staff coverage mapped: ${days} understaffed days this month, ${impact} revenue impact.`;
     }
     case 'pipeline': // club-profile gate alias
     case 'club-profile': {
-      return 'Club profile complete \u2014 weather feed active, board report unlocked.';
+      return 'Club profile complete: weather feed active, board report ready.';
     }
     case 'agents': {
       const actions = getPendingActions();

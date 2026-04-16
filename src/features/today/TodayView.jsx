@@ -299,7 +299,7 @@ export default function TodayView() {
                 Here's what you'll see when connected
               </div>
               <p className="text-sm text-swoop-text-muted m-0">
-                Connect your three core systems to unlock your full operational briefing. Each source adds a layer of intelligence you can't get from any single vendor.
+                Connect your three core systems to activate your full operational briefing. Each source adds a layer of intelligence you can't get from any single vendor.
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-swoop-border-inset">
@@ -447,7 +447,7 @@ export default function TodayView() {
           peek={
             teeSheetConnected
               ? `Good conditions · ${roundsToday || 220} rounds · 6 at-risk on sheet · ${pendingAgentCount ?? 0} pending actions`
-              : `Connect tee sheet to unlock today's rounds and at-risk alerts · ${pendingAgentCount ?? 0} pending actions`
+              : `Connect tee sheet to see today's rounds and at-risk alerts · ${pendingAgentCount ?? 0} pending actions`
           }
         >
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
@@ -550,7 +550,7 @@ export default function TodayView() {
             <OvernightBrief />
           </SwoopSection>
         ) : (
-          <SwoopSection title="Overnight Brief" titleColor={C.neutral} peek="Connect POS or Tee Sheet to unlock" defaultOpen={true}>
+          <SwoopSection title="Overnight Brief" titleColor={C.neutral} peek="Connect POS or Tee Sheet to activate" defaultOpen={true}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <div style={{ padding: '14px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10 }}>
                 <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 8 }}>

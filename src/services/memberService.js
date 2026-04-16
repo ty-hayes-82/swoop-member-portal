@@ -205,16 +205,16 @@ const resolveRiskSignal = (member, profileMap = {}) => {
   }
 
   if (member?.trend && typeof member.trend === 'string' && member.trend.toLowerCase().includes('declin')) {
-    return 'Health score trending down across systems';
+    return 'Golf rounds down, dining frequency declining, email opens dropped';
   }
 
   // ON-109: Varied fallback signals based on member attributes instead of generic copy
   const fallbacks = [
-    'Engagement declining across multiple touchpoints',
-    'Visit frequency dropped below 90-day average',
-    'Cross-system activity gap detected',
-    'Reduced interaction pattern vs prior quarter',
-    'Multi-channel disengagement signal',
+    'Email open rate dropped → golf rounds down → dining visits stopped',
+    'Tee sheet bookings down 40% vs 90-day baseline, F&B spend declining',
+    'Golf frequency dropped, stopped responding to outreach emails',
+    'Dining visits down 60%, last tee time 6+ weeks ago',
+    'No rounds booked in 30 days, email engagement near zero',
   ];
   const hash = (member?.memberId || member?.name || '').split('').reduce((a, c) => a + c.charCodeAt(0), 0);
   return fallbacks[hash % fallbacks.length];
