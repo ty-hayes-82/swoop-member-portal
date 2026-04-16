@@ -303,6 +303,34 @@ function _interpolatePrefill(prefill, memberContext) {
 // ---------------------------------------------------------------------------
 
 /**
+ * Format a slice of member concierge events as structured context for the prompt.
+ * Used when sessionId is provided — replaces the lossy text summary.
+ *
+ * @param {Array<object>} events
+ * @returns {string}
+ */
+function _formatEventSliceContext(events) {
+  if (!events?.length) return '';
+  const lines = events
+    .slice()
+    .reverse() // chronological order
+    .map(ev => {
+      const ts = ev.emitted_at ? new Date(ev.emitted_at).toISOString().slice(0, 16) : '';
+      const p = ev.payload || {};
+      switch (ev.event_type) {
+        case 'user_message':    return `[${ts}] Member: ${p.text || ''}`;
+        case 'agent_response':  return `[${ts}] Concierge: ${(p.text || '').slice(0, 200)}`;
+        case 'tool_call':       return `[${ts}] Tool: ${p.tool}(${JSON.stringify(p.args || {})}) → ${p.status || 'ok'}`;
+        case 'staff_confirmed': return `[${ts}] CONFIRMED: ${p.text || ''}`;
+        case 'preference_observed': return `[${ts}] Preference noted: ${p.field} = ${p.value}`;
+        case 'complaint_filed': return `[${ts}] Complaint filed: ${p.category} — ${p.description?.slice(0, 100)}`;
+        default: return `[${ts}] ${ev.event_type}: ${JSON.stringify(p).slice(0, 100)}`;
+      }
+    });
+  return `\n\nPrevious interaction history (most recent ${events.length} events):\n${lines.join('\n')}`;
+}
+
+/**
  * Assemble a complete, ready-to-send Claude API payload for an agent call.
  *
  * Loads config from the database (cached 60 s), resolves the base prompt,
@@ -314,8 +342,10 @@ function _interpolatePrefill(prefill, memberContext) {
  * @param {object} memberContext  — { first_name, last_name, club_name, ... }
  * @param {string} userMessage    — The end-user or system message to send.
  * @param {object} [opts]         — Optional overrides.
- * @param {Array<object>} [opts.tools] — Full tool set for the agent (caller provides).
- * @param {string} [opts.scenarioFilter] — Only inject custom examples matching this scenario type.
+ * @param {Array<object>} [opts.tools]           — Full tool set for the agent.
+ * @param {string}  [opts.scenarioFilter]        — Only inject custom examples matching this scenario.
+ * @param {string}  [opts.sessionId]             — Member concierge session ID for durable event log context.
+ * @param {string}  [opts.fallbackContext]        — Fallback text context (used when event log is empty).
  * @returns {Promise<object>} Assembled payload: { model, temperature, max_tokens, system, messages, tools, config }.
  */
 export async function assembleAgentCall(clubId, agentId, memberContext, userMessage, opts = {}) {
@@ -361,7 +391,26 @@ export async function assembleAgentCall(clubId, agentId, memberContext, userMess
   }
   messages.push({ role: 'user', content: userMessage });
 
-  // 10. Return payload (not executed)
+  // 10. Resolve session context (Sprint B: durable event log)
+  let sessionContext = '';
+  if (opts.sessionId) {
+    try {
+      const { getConciergeEvents } = await import('./concierge-session.js');
+      const memberId = opts.sessionId.replace(/^mbr_/, '').replace(/_concierge$/, '');
+      const events = await getConciergeEvents(memberId, { last: 20 });
+      sessionContext = _formatEventSliceContext(events);
+    } catch (e) {
+      console.warn('[assemble] getConciergeEvents failed:', e.message);
+    }
+  }
+  if (!sessionContext && opts.fallbackContext) {
+    sessionContext = `\n\nPrevious conversation context: ${opts.fallbackContext}`;
+  }
+  if (sessionContext) {
+    assembledPrompt += sessionContext;
+  }
+
+  // 11. Return payload (not executed)
   return {
     model,
     temperature,

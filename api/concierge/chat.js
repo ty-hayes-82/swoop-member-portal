@@ -9,7 +9,7 @@
  */
 import { sql } from '@vercel/postgres';
 import { withAuth, getReadClubId } from '../lib/withAuth.js';
-import { getOrCreateSession, updateSessionSummary } from '../agents/concierge-session.js';
+import { getOrCreateSession, updateSessionSummary, emitConciergeEvent, getConciergeEvents } from '../agents/concierge-session.js';
 import { buildConciergePrompt } from '../../src/config/conciergePrompt.js';
 import { getAnthropicClient, MANAGED_AGENT_ID, MANAGED_ENV_ID } from '../agents/managed-config.js';
 import { routeEvent } from '../agents/agent-events.js';
@@ -733,10 +733,41 @@ async function chatHandler(req, res) {
     });
   }
 
-  // Build conversation context
-  const conversationContext = session.conversation_summary
-    ? `\n\nPrevious conversation context: ${session.conversation_summary}`
-    : '';
+  // Build conversation context (Sprint B: prefer durable event log over text summary)
+  const sessionId = `mbr_${member_id}_concierge`;
+  let conversationContext = '';
+  try {
+    const recentEvents = await getConciergeEvents(member_id, { last: 20 });
+    if (recentEvents?.length) {
+      const lines = recentEvents
+        .slice()
+        .reverse()
+        .map(ev => {
+          const ts = ev.emitted_at ? new Date(ev.emitted_at).toISOString().slice(0, 16) : '';
+          const p = ev.payload || {};
+          switch (ev.event_type) {
+            case 'user_message':    return `[${ts}] Member: ${p.text || ''}`;
+            case 'agent_response':  return `[${ts}] Concierge: ${(p.text || '').slice(0, 200)}`;
+            case 'tool_call':       return `[${ts}] Tool: ${p.tool}(${JSON.stringify(p.args || {})}) → ${p.status || 'ok'}`;
+            case 'staff_confirmed': return `[${ts}] CONFIRMED: ${p.text || ''}`;
+            case 'preference_observed': return `[${ts}] Preference: ${p.field} = ${p.value}`;
+            case 'complaint_filed': return `[${ts}] Complaint: ${p.category} — ${(p.description || '').slice(0, 100)}`;
+            default: return `[${ts}] ${ev.event_type}: ${JSON.stringify(p).slice(0, 100)}`;
+          }
+        });
+      conversationContext = `\n\nPrevious interaction history (most recent ${recentEvents.length} events):\n${lines.join('\n')}`;
+    }
+  } catch (_) { /* event log not available — fall through */ }
+
+  // Fall back to text summary if event log is empty
+  if (!conversationContext && session.conversation_summary) {
+    conversationContext = `\n\nPrevious conversation context: ${session.conversation_summary}`;
+  }
+
+  // Emit the incoming user message to the durable event log
+  try {
+    await emitConciergeEvent(member_id, clubId, { type: 'user_message', text: message });
+  } catch (_) { /* non-blocking */ }
 
   if (SIMULATION_MODE) {
     // Simulation: return a canned response based on the message
@@ -749,6 +780,15 @@ async function chatHandler(req, res) {
     });
   }
 
+  // Sprint D: intent-based temperature selection
+  // booking-concierge (0) — deterministic for reservations
+  // service-recovery-concierge (0.3) — slight warmth for complaint handling
+  // personal-concierge (0.5) — conversational for general / re-engagement
+  const msgLower = message.toLowerCase();
+  const isBookingIntent = /\b(book|reserve|cancel|tee\s*time|reservation|rsvp|sign\s*up|register)\b/.test(msgLower);
+  const isComplaintIntent = /\b(complain|complaint|issue|problem|terrible|slow|wrong|never|awful|bad|frustrated|upset|billing|invoice|charge)\b/.test(msgLower);
+  const conciergeTemperature = isComplaintIntent ? 0.3 : isBookingIntent ? 0 : 0.5;
+
   // Live mode: call Claude API
   try {
     const client = getAnthropicClient();
@@ -756,7 +796,7 @@ async function chatHandler(req, res) {
     let result = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 2048,
-      temperature: 0,
+      temperature: conciergeTemperature,
       system: systemPrompt + conversationContext,
       messages,
       tools: availableTools,
@@ -788,6 +828,16 @@ async function chatHandler(req, res) {
         if (debug) {
           toolCallLog.push({ tool_name: toolUse.name, arguments: toolUse.input, result: toolResult, ts: new Date().toISOString() });
         }
+        // Emit tool_call event to durable log (Sprint B)
+        try {
+          await emitConciergeEvent(member_id, clubId, {
+            type: 'tool_call',
+            tool: toolUse.name,
+            args: toolUse.input,
+            status: toolResult?.status || 'ok',
+            result_summary: JSON.stringify(toolResult).slice(0, 200),
+          });
+        } catch (_) { /* non-blocking */ }
         return { type: 'tool_result', tool_use_id: toolUse.id, content: JSON.stringify(toolResult) };
       }));
 
@@ -797,7 +847,7 @@ async function chatHandler(req, res) {
       result = await client.messages.create({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 2048,
-        temperature: 0,
+        temperature: conciergeTemperature,
         system: systemPrompt + conversationContext,
         messages,
         tools: availableTools,
@@ -828,7 +878,12 @@ async function chatHandler(req, res) {
       }
     }
 
-    // Update conversation summary (truncate to last exchange)
+    // Emit agent_response event to durable log (Sprint B)
+    try {
+      await emitConciergeEvent(member_id, clubId, { type: 'agent_response', text: responseText });
+    } catch (_) { /* non-blocking */ }
+
+    // Update conversation summary (fallback for clusters that lack event log)
     try {
       const summary = `Member asked: "${message.slice(0, 200)}". Agent responded: "${responseText.slice(0, 200)}"`;
       await updateSessionSummary(clubId, member_id, summary);
