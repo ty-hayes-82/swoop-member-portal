@@ -8,13 +8,11 @@ import { useApp } from '@/context/AppContext';
 import InboxTab from './InboxTab';
 import AgentsTab from './AgentsTab';
 import PlaybooksPage from '@/features/playbooks/PlaybooksPage';
-import SMSChatSimulatorPage from '@/features/agents/SMSChatSimulatorPage';
 
 const TABS = [
   { key: 'inbox', label: 'Inbox', icon: '📥' },
   { key: 'playbooks', label: 'Action Plans', icon: '📋' },
   { key: 'agents', label: 'Automated Saves', icon: '🤖' },
-  { key: 'sms', label: 'SMS Simulator', icon: '💬' },
 ];
 
 export default function AutomationsHub() {
@@ -75,7 +73,6 @@ export default function AutomationsHub() {
         {activeTab === 'inbox' && <InboxTab />}
         {activeTab === 'playbooks' && <PlaybooksPage embedded />}
         {activeTab === 'agents' && <AgentsTab />}
-        {activeTab === 'sms' && <SMSChatSimulatorPage embedded />}
       </div>
     </div>
   );

@@ -48,6 +48,16 @@ export const navItems = [
     sourceSystems: ['Member CRM', 'POS', 'Tee Sheet', 'Scheduling', 'Email'],
   },
   {
+    key: 'operations',
+    label: 'Operations',
+    section: 'PRIMARY',
+    pillar: 'fix',
+    icon: '🏛',
+    color: theme.colors.navOperations,
+    subtitle: 'All agent activity, member requests, orders, and club operations.',
+    sourceSystems: ['Member CRM', 'POS', 'Concierge', 'Scheduling'],
+  },
+  {
     key: 'revenue',
     label: 'Revenue',
     section: 'PRIMARY',
