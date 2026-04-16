@@ -10,7 +10,7 @@
 import { ANCHOR_BRIEF } from './anchor-brief.mjs';
 import { AGENTS } from './agent-defs.mjs';
 import { computeWeightedComposite, mergeRecommendations } from './scoring.mjs';
-import { geminiWithRetry } from '../lib/infra.mjs';
+import { anthropicWithRetry } from '../lib/infra.mjs';
 
 // ─── Orchestrator Prompt (from docx Section 7) ────────────────────────────────
 
@@ -102,12 +102,7 @@ CONSTRAINTS
 
 // ─── Main Orchestrator Function ───────────────────────────────────────────────
 
-export async function runOrchestrator(genAI, agentOutputs, runMeta) {
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-3.1-pro-preview',
-    systemInstruction: ORCHESTRATOR_SYSTEM,
-    generationConfig: { thinkingConfig: { thinkingBudget: 5000 } },
-  });
+export async function runOrchestrator(anthropic, agentOutputs, runMeta) {
 
   // Pre-compute composite in code (orchestrator verifies, not computes)
   const { composite, contributions, agentAverages } = computeWeightedComposite(agentOutputs);
@@ -147,9 +142,14 @@ ${agentOutputsText}
 Produce the orchestrator JSON output described in your system prompt.
 `.trim();
 
-  const rawText = await geminiWithRetry(async () => {
-    const result = await model.generateContent(userPrompt);
-    return result.response.text();
+  const rawText = await anthropicWithRetry(async () => {
+    const response = await anthropic.messages.create({
+      model: 'claude-opus-4-6',
+      max_tokens: 8096,
+      system: ORCHESTRATOR_SYSTEM,
+      messages: [{ role: 'user', content: userPrompt }],
+    });
+    return response.content[0].text;
   });
 
   // Parse the orchestrator JSON

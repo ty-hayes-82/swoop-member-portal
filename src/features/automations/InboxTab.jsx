@@ -230,7 +230,7 @@ export default function InboxTab() {
               const teeCount = topDay?.teeTimesCount || topDay?.teeTimes || 34;
               const mealPeriod = (topDay?.shift || topDay?.period || 'lunch').toLowerCase();
               const wx = getTomorrowForecast();
-              const wxSuffix = wx ? ` · ${wx.condition === 'sunny' || (!wx.rain && wx.high >= 70) ? `☀ ${wx.high}°F clear — strong dining demand expected` : wx.rain ? `🌧 ${wx.high}°F rain — lower demand than forecast` : `${wx.high}°F ${wx.description || wx.condition}`}` : '';
+              const wxSuffix = wx ? ` · ${wx.condition === 'sunny' || (!wx.rain && wx.high >= 70) ? `☀ ${wx.high}°F clear: strong dining demand expected` : wx.rain ? `🌧 ${wx.high}°F rain: lower demand than forecast` : `${wx.high}°F ${wx.description || wx.condition}`}` : '';
               return (
                 <div className="flex items-start gap-3 py-2 px-3 rounded-lg bg-swoop-panel border border-swoop-border">
                   <span className="text-sm shrink-0">⚠️</span>

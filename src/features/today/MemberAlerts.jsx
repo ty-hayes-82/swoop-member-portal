@@ -165,7 +165,7 @@ export default function MemberAlerts() {
   const { navigate } = useNavigation();
   const members = buildPriorityList();
   const [bulkApproved, setBulkApproved] = useState(false);
-  const [rowStates, setRowStates] = useState({}); // memberId -> 'approved' | 'dismissed'
+  const [rowStates, setRowStates] = useState({}); // memberId -> 'approved' | 'dismissed' | 'snoozed'
   const [undoToast, setUndoToast] = useState(null); // { memberId, memberName, prevState }
   const undoTimerRef = useRef(null);
 
@@ -285,7 +285,7 @@ export default function MemberAlerts() {
       {undoToast && (
         <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 mb-2 rounded-lg bg-swoop-canvas border border-swoop-border text-xs animate-fade-in">
           <span className="text-swoop-text-muted">
-            {undoToast.action === 'approved' ? '✓ Approved' : 'Dismissed'} outreach for <span className="font-semibold text-swoop-text">{undoToast.memberName}</span>
+            {undoToast.action === 'approved' ? '✓ Approved' : undoToast.action === 'snoozed' ? '⏰ Snoozed' : 'Dismissed'} outreach for <span className="font-semibold text-swoop-text">{undoToast.memberName}</span>
           </span>
           <button
             type="button"
@@ -330,15 +330,16 @@ export default function MemberAlerts() {
           const rowState = rowStates[m.memberId];
           const isRowApproved = bulkApproved || rowState === 'approved';
           const isRowDismissed = rowState === 'dismissed';
+          const isRowSnoozed = rowState === 'snoozed';
           const severityRgb = isRowApproved
             ? '34,197,94'
-            : isRowDismissed
+            : isRowDismissed || isRowSnoozed
             ? '100,100,120'
             : m.score < 30 ? '239,68,68'
             : m.score < 50 ? '243,146,45'
             : '245,158,11';
           const severityColor = `rgb(${severityRgb})`;
-          const severityLabel = isRowApproved ? 'APPROVED' : isRowDismissed ? 'DISMISSED' : healthTierLabel(m.score).toUpperCase();
+          const severityLabel = isRowApproved ? 'APPROVED' : isRowSnoozed ? 'SNOOZED' : isRowDismissed ? 'DISMISSED' : healthTierLabel(m.score).toUpperCase();
           const teeTime = getTeeTimeForMember(m.memberId);
 
           const metaParts = [
@@ -357,7 +358,7 @@ export default function MemberAlerts() {
                 borderColor: `rgba(${severityRgb},0.18)`,
                 flexDirection: 'column',
                 gap: 0,
-                opacity: isRowApproved || isRowDismissed ? 0.6 : 1,
+                opacity: isRowApproved || isRowDismissed || isRowSnoozed ? 0.6 : 1,
               }}
             >
               {/* Header strip */}
@@ -403,6 +404,8 @@ export default function MemberAlerts() {
                 <div className="flex items-center gap-1 shrink-0">
                   {rowStates[m.memberId] === 'approved' ? (
                     <span className="text-[10px] font-bold text-success-500 px-2">✓ Approved</span>
+                  ) : rowStates[m.memberId] === 'snoozed' ? (
+                    <span className="text-[10px] font-bold text-swoop-text-muted px-2">⏰ Snoozed to tomorrow</span>
                   ) : rowStates[m.memberId] === 'dismissed' ? (
                     <span className="text-[10px] font-bold text-swoop-text-muted px-2">Dismissed</span>
                   ) : (
@@ -417,8 +420,16 @@ export default function MemberAlerts() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleRowAction(m.memberId, 'dismissed', m.name, m.action)}
+                        onClick={() => handleRowAction(m.memberId, 'snoozed', m.name, m.action)}
                         className="px-2.5 py-1 text-[10px] font-bold bg-swoop-row text-swoop-text-muted border-y border-swoop-border hover:bg-swoop-border transition-colors"
+                        title="Snooze: push this alert to tomorrow"
+                      >
+                        Snooze
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRowAction(m.memberId, 'dismissed', m.name, m.action)}
+                        className="px-2.5 py-1 text-[10px] font-bold bg-swoop-row text-swoop-text-muted border-y border-l-0 border-swoop-border hover:bg-swoop-border transition-colors"
                         title="Dismiss this alert"
                       >
                         Dismiss

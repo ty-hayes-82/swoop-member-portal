@@ -13,23 +13,23 @@
  *   - Merged, ranked recommendations in RECOMMENDATIONS.json
  *
  * Usage:
- *   GEMINI_API_KEY=<key> APP_URL=https://swoop-member-portal-dev.vercel.app \
+ *   ANTHROPIC_API_KEY=<key> APP_URL=https://swoop-member-portal-dev.vercel.app \
  *   node scripts/scoring-loop.mjs
  *
  * Quick mode (9 critical screenshots):
- *   QUICK_MODE=1 GEMINI_API_KEY=<key> APP_URL=... node scripts/scoring-loop.mjs
+ *   QUICK_MODE=1 ANTHROPIC_API_KEY=<key> APP_URL=... node scripts/scoring-loop.mjs
  *
  * Output: critiques/scoring-run-{TIMESTAMP}/
  */
 
 import { chromium } from 'playwright';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Anthropic from '@anthropic-ai/sdk';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 import {
-  makeTimestamp, ensureDir, writeFileSafe, sleep, geminiWithRetry,
+  makeTimestamp, ensureDir, writeFileSafe, sleep, anthropicWithRetry,
   createClub, login, importCSV,
   injectAuthAndNavigate, captureScreenshot,
 } from './lib/infra.mjs';
@@ -43,9 +43,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // ─── Config ───────────────────────────────────────────────────────────────────
 
 const APP_URL       = (process.env.APP_URL || 'http://localhost:3000').replace(/\/$/, '');
-const API_KEY       = process.env.GEMINI_API_KEY;
-const AGENT_MODEL   = 'gemini-3.1-pro-preview';
-const THINKING_CFG  = { thinkingConfig: { thinkingBudget: 3000 } };
+const API_KEY       = process.env.ANTHROPIC_API_KEY;
+const AGENT_MODEL   = 'claude-opus-4-6';
 const VIEWPORT      = { width: 1440, height: 900 };
 const FIXTURE_DIR   = path.resolve(__dirname, '../tests/fixtures/small');
 const OUTPUT_BASE   = path.resolve(__dirname, '../../critiques');
@@ -178,14 +177,8 @@ const STAGES = process.env.QUICK_MODE ? STAGES_QUICK : STAGES_FULL;
 
 // ─── Agent Critique ───────────────────────────────────────────────────────────
 
-async function runAgentOnScreenshots(genAI, agent, screenshots, stageLabel, dataState) {
+async function runAgentOnScreenshots(anthropic, agent, screenshots, stageLabel, dataState) {
   if (screenshots.length === 0) return null;
-
-  const model = genAI.getGenerativeModel({
-    model: AGENT_MODEL,
-    systemInstruction: agent.systemPrompt,
-    generationConfig: THINKING_CFG,
-  });
 
   // Build multi-image user prompt
   const screenshotList = screenshots.map((s, i) =>
@@ -209,18 +202,30 @@ Return ONLY valid JSON matching the output contract in your system prompt.
 No markdown fences, no explanation outside the JSON.
 `.trim();
 
-  // Build parts array: images first, then text
-  const imageParts = screenshots.map(s => ({
-    inlineData: {
-      mimeType: 'image/png',
+  // Build content array: images first, then text
+  const imageBlocks = screenshots.map(s => ({
+    type: 'image',
+    source: {
+      type: 'base64',
+      media_type: 'image/png',
       data: fs.readFileSync(s.screenshotPath).toString('base64'),
     },
   }));
 
-  const rawText = await geminiWithRetry(async () => {
-    const result = await model.generateContent([...imageParts, userPrompt]);
-    return result.response.text();
-  });
+  const callOnce = async (prompt) => {
+    const response = await anthropic.messages.create({
+      model: AGENT_MODEL,
+      max_tokens: 4096,
+      system: agent.systemPrompt,
+      messages: [{
+        role: 'user',
+        content: [...imageBlocks, { type: 'text', text: prompt }],
+      }],
+    });
+    return response.content[0].text;
+  };
+
+  const rawText = await anthropicWithRetry(() => callOnce(userPrompt));
 
   const parsed = parseAgentJSON(rawText);
   const validation = validateContract(parsed, agent);
@@ -228,10 +233,9 @@ No markdown fences, no explanation outside the JSON.
   if (!validation.valid) {
     console.warn(`    ⚠ ${agent.name} contract invalid: ${validation.errors.join('; ')}`);
     // Retry once with explicit reminder
-    const retryText = await geminiWithRetry(async () => {
+    const retryText = await anthropicWithRetry(async () => {
       const reminder = `${userPrompt}\n\nCRITICAL: Your previous response was not valid JSON or was missing required fields. Return ONLY a JSON object. No markdown, no text before or after the JSON.`;
-      const result = await model.generateContent([...imageParts, reminder]);
-      return result.response.text();
+      return callOnce(reminder);
     }).catch(() => null);
 
     if (retryText) {
@@ -251,7 +255,7 @@ No markdown fences, no explanation outside the JSON.
 
 // ─── Per-Stage Agent Run ──────────────────────────────────────────────────────
 
-async function runAgentsForStage(genAI, stageShotInfos, stageLabel, dataState) {
+async function runAgentsForStage(anthropic, stageShotInfos, stageLabel, dataState) {
   // stageShotInfos: array of { slug, label, hash, screenshotPath }
   // Group screenshots by agent
   const agentTasks = AGENTS.map(agent => {
@@ -264,7 +268,7 @@ async function runAgentsForStage(genAI, stageShotInfos, stageLabel, dataState) {
   // Fan out all agents in parallel
   const results = await Promise.all(
     agentTasks.map(({ agent, screenshots }) =>
-      runAgentOnScreenshots(genAI, agent, screenshots, stageLabel, dataState)
+      runAgentOnScreenshots(anthropic, agent, screenshots, stageLabel, dataState)
         .then(output => ({ agentId: agent.id, agentName: agent.name, output }))
         .catch(err => {
           console.error(`    ✗ ${agent.name} failed: ${err.message}`);
@@ -301,7 +305,7 @@ async function main() {
   console.log(`    Mode:     ${process.env.QUICK_MODE ? 'QUICK (9 screenshots)' : 'FULL (15 screenshots)'}`);
 
   if (!API_KEY) {
-    console.error('❌  GEMINI_API_KEY is required.');
+    console.error('❌  ANTHROPIC_API_KEY is required.');
     process.exit(1);
   }
 
@@ -318,7 +322,7 @@ async function main() {
 
   console.log(`\n📁 Output: ${outputDir}`);
 
-  const genAI = new GoogleGenerativeAI(API_KEY);
+  const anthropic = new Anthropic({ apiKey: API_KEY });
 
   // ── Create club + login ────────────────────────────────────────────────────
   console.log('\n🏗  Creating club…');
@@ -380,7 +384,7 @@ async function main() {
 
       // Run agents on this stage's screenshots
       const stageResults = await runAgentsForStage(
-        genAI, stageShotInfos, stage.label, stage.dataState
+        anthropic, stageShotInfos, stage.label, stage.dataState
       );
 
       // Save agent outputs (per-stage files + accumulate for orchestrator)
@@ -448,7 +452,7 @@ async function main() {
     console.log('\n🎯 Running orchestrator…');
     let orchResult;
     try {
-      orchResult = await runOrchestrator(genAI, allAgentOutputs, runMeta);
+      orchResult = await runOrchestrator(anthropic, allAgentOutputs, runMeta);
     } catch (err) {
       console.error(`  ✗ Orchestrator failed: ${err.message}`);
       orchResult = { parsed: { _error: err.message }, composite, merged };

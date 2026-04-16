@@ -299,7 +299,7 @@ export default function HealthOverview() {
             : !hasDelta
               ? ''
               : delta === 0
-                ? 'Stable vs. last month.'
+                ? ''
                 : `${Math.abs(delta)} ${delta > 0 ? 'more' : 'fewer'} than last month.`;
           return (
             <div
@@ -468,6 +468,7 @@ export default function HealthOverview() {
                       { label: 'Score', style: { width: 90, textAlign: 'left' }, className: 'px-3' },
                       { label: 'Archetype', style: { width: 110, textAlign: 'left' }, className: 'px-3 hidden sm:table-cell' },
                       { label: 'Signal', style: { textAlign: 'left' }, className: 'px-3 hidden md:table-cell' },
+                      { label: 'Annual Value', style: { width: 100, textAlign: 'right' }, className: 'px-3 hidden lg:table-cell' },
                       { label: 'Assign To', style: { width: 130, textAlign: 'left' }, className: 'px-3 hidden sm:table-cell' },
                       { label: 'Alerts', style: { width: 58, textAlign: 'center' }, className: 'px-3' },
                     ].map(h => (
@@ -572,8 +573,46 @@ export default function HealthOverview() {
                               {m.archetype}
                             </span>
                           </td>
-                          <td className="px-3 hidden md:table-cell" style={{ maxWidth: 260, ...cellPad, fontSize: 12, color: 'rgba(255,255,255,0.65)', fontWeight: 400 }}>
-                            <span className="line-clamp-1">{m.reason}</span>
+                          <td className="px-3 hidden md:table-cell" style={{ maxWidth: 260, ...cellPad }}>
+                            {m.reason ? (() => {
+                              const r = m.reason.toLowerCase();
+                              const domains = [
+                                /golf|round|tee|frequency/.test(r) && { icon: '⛳', label: 'Golf' },
+                                /dining|f&b|food|beverage|spend|check/.test(r) && { icon: '🍽', label: 'Dining' },
+                                /email|open rate|newsletter/.test(r) && { icon: '📧', label: 'Email' },
+                              ].filter(Boolean);
+                              return (
+                                <div className="flex flex-col gap-0.5">
+                                  {domains.length > 0 && (
+                                    <div className="flex items-center gap-1 flex-wrap">
+                                      {domains.map(d => (
+                                        <span key={d.label} className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-error-500/10 text-error-500 border border-error-500/20">
+                                          {d.icon} {d.label}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                  <span className="line-clamp-1 text-xs" style={{ color: 'rgba(255,255,255,0.65)' }}>{m.reason}</span>
+                                </div>
+                              );
+                            })() : <span className="text-xs text-swoop-text-label">—</span>}
+                          </td>
+                          <td className="px-3 hidden lg:table-cell" style={{ ...cellPad, textAlign: 'right' }}>
+                            {(() => {
+                              const dues = m.duesAnnual || m.dues_annual || m.dues || 0;
+                              const fbAnnual = Math.round((m.fbSpend || m.fbMonthly || 0) * 12);
+                              const total = dues + fbAnnual;
+                              if (!total) return <span className="text-[11px] text-swoop-text-label">—</span>;
+                              return (
+                                <span
+                                  className="font-mono text-[11px]"
+                                  style={{ color: m.score < 50 ? '#ef4444' : 'rgba(255,255,255,0.65)' }}
+                                  title={`Dues: $${dues.toLocaleString()}${fbAnnual ? ` · F&B est.: $${fbAnnual.toLocaleString()}/yr` : ''}`}
+                                >
+                                  ${total.toLocaleString()}
+                                </span>
+                              );
+                            })()}
                           </td>
                           <td className="px-3 hidden sm:table-cell" style={{ ...cellPad, fontSize: 11, fontWeight: 500 }}>
                             <span
@@ -598,7 +637,7 @@ export default function HealthOverview() {
 
                         {isExpanded && (
                           <tr className="bg-swoop-row">
-                            <td colSpan={7} className="px-4 py-3 border-t border-swoop-border-inset">
+                            <td colSpan={8} className="px-4 py-3 border-t border-swoop-border-inset">
                               <div className="flex gap-8 flex-wrap items-start mb-3 pl-6">
                                 <div>
                                   <div className="text-[10px] font-bold text-swoop-text-label uppercase tracking-wide mb-1">Signal</div>

@@ -58,6 +58,7 @@ export default function RevenuePage() {
   const { showToast } = useApp() || {};
   const [isLoading, setIsLoading] = useState(true);
   const [rangerDeployed, setRangerDeployed] = useState(false);
+  const [manualMemberCount, setManualMemberCount] = useState('');
 
   useEffect(() => {
     const t = setTimeout(() => setIsLoading(false), 400);
@@ -177,6 +178,14 @@ export default function RevenuePage() {
                       ))}
                     </div>
                     <div className="text-[10px] text-swoop-text-ghost mt-2">Connect tee sheet to correlate spend patterns with round pace and identify dining conversion gaps by day.</div>
+                    {/* POS insight: highlight lowest weekday vs. best day */}
+                    <div className="mt-3 flex items-start gap-2 p-2.5 rounded-lg bg-warning-500/10 border border-warning-500/25">
+                      <span className="text-sm shrink-0">💡</span>
+                      <div>
+                        <span className="text-[11px] font-semibold text-warning-400">Tuesday avg check ($28) is 32% below Saturday ($41)</span>
+                        <span className="text-[11px] text-swoop-text-muted"> — targeted weekday promotions or staffing adjustments could recover an estimated $800–$1,200/month in F&amp;B revenue.</span>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="rounded-xl border border-brand-500/25 bg-brand-500/[0.06] p-4">
@@ -217,28 +226,47 @@ export default function RevenuePage() {
             (() => {
               const memberSummary = getMemberSummary();
               const memberCount = memberSummary.total || 0;
+              const effectiveCount = manualMemberCount ? parseInt(manualMemberCount, 10) || 0 : memberCount;
               // Industry avg: $21/member/month F&B leakage, rounded to nearest $100
-              const leakageEstimate = memberCount > 0
-                ? Math.round(memberCount * 21 / 100) * 100
+              const leakageEstimate = effectiveCount > 0
+                ? Math.round(effectiveCount * 21 / 100) * 100
                 : 8400;
-              const leakageLabel = memberCount > 0 ? memberCount : 400;
+              const leakageLabel = effectiveCount > 0 ? effectiveCount : 400;
+              const isCustomized = manualMemberCount && parseInt(manualMemberCount, 10) > 0;
               return (
             <div className="flex flex-col gap-4">
               {/* Industry benchmark hero */}
               <div className="rounded-xl border border-swoop-border bg-swoop-panel p-5">
-                <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-1">{memberCount > 0 ? 'Industry-Baseline Projection' : 'Industry Benchmark'}</div>
+                <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-1">{effectiveCount > 0 ? 'Industry-Baseline Projection' : 'Industry Benchmark'}</div>
                 <div className="flex items-baseline gap-2 mb-1">
                   <span className="text-4xl font-extrabold text-swoop-text font-mono">${leakageEstimate.toLocaleString()}</span>
                   <span className="text-base text-swoop-text-muted">/mo estimated leakage</span>
                 </div>
                 <p className="text-xs text-swoop-text-muted m-0">
-                  {memberCount > 0
+                  {effectiveCount > 0
                     ? `Estimated for your ${leakageLabel}-member club at $21/member/mo — the NGCOA peer-group average for private clubs 300–600 members.`
                     : 'NGCOA peer-group average for private clubs 300–600 members ($21/member/mo). Your estimate personalizes once your roster is imported.'}
                 </p>
                 <p className="text-[11px] text-swoop-text-label mt-1.5 m-0">
                   Connect tee sheet, POS, and scheduling data to see exactly where these dollars go and what causes the leakage.
                 </p>
+                {!memberCount && (
+                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-swoop-border-inset">
+                    <label className="text-[11px] text-swoop-text-label whitespace-nowrap">Your member count:</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="5000"
+                      placeholder="e.g. 350"
+                      value={manualMemberCount}
+                      onChange={e => setManualMemberCount(e.target.value)}
+                      className="w-24 px-2 py-1 rounded text-xs bg-swoop-row border border-swoop-border text-swoop-text outline-none focus:border-brand-500"
+                    />
+                    {isCustomized && (
+                      <span className="text-[10px] text-brand-400 font-semibold">Updated for {parseInt(manualMemberCount, 10)} members</span>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Three locked source rows */}

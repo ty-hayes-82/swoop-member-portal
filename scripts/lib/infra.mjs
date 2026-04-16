@@ -55,6 +55,23 @@ export async function geminiWithRetry(fn, maxAttempts = 3, baseDelayMs = 2000) {
   }
 }
 
+export async function anthropicWithRetry(fn, maxAttempts = 3, baseDelayMs = 2000) {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      const is429 = err.status === 429 || err.message?.includes('429') || String(err).includes('rate_limit');
+      const isLast = attempt === maxAttempts - 1;
+      if (isLast) throw err;
+      const delay = is429
+        ? Math.min(baseDelayMs * Math.pow(2, attempt), 60_000)
+        : baseDelayMs;
+      console.warn(`  [retry ${attempt + 1}/${maxAttempts}] ${String(err.message || err).slice(0, 80)} — waiting ${delay}ms`);
+      await sleep(delay);
+    }
+  }
+}
+
 // ─── CSV Parser ───────────────────────────────────────────────────────────────
 
 export function parseCSV(content) {

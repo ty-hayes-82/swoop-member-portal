@@ -91,8 +91,10 @@ export default function PendingActionsInline({ topPriority = null }) {
     );
     return [...pending]
       .sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 2) - (PRIORITY_ORDER[b.priority] ?? 2))
-      .slice(0, 3);
+      .slice(0, 5);
   }, [inbox, topPriority?.id, snoozedIds]);
+
+  const totalPending = inbox.filter(i => i.status === 'pending' && !snoozedIds.has(i.id)).length;
 
   const hasHero = !!topPriority;
   const hasActions = pendingAgentCount > 0;
@@ -103,8 +105,22 @@ export default function PendingActionsInline({ topPriority = null }) {
 
   return (
     <div>
-      <div className="text-[11px] font-bold text-brand-500 uppercase tracking-wide mb-3">
-        Action Queue {hasActions ? `(${pendingAgentCount})` : ''}
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-[11px] font-bold text-brand-500 uppercase tracking-wide">
+          Top {topActions.length} Critical Actions
+          {totalPending > topActions.length && (
+            <span className="ml-1 font-normal text-swoop-text-label normal-case tracking-normal">of {totalPending} total</span>
+          )}
+        </div>
+        {totalPending > topActions.length && (
+          <button
+            type="button"
+            onClick={() => navigate('automations')}
+            className="text-[10px] font-semibold text-brand-400 hover:underline bg-transparent border-none cursor-pointer p-0"
+          >
+            See all {totalPending} →
+          </button>
+        )}
       </div>
 
       <div className="flex flex-col gap-2">
