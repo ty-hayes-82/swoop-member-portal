@@ -24,7 +24,10 @@
     "vision:full": "npm run vision:capture && npm run vision:critique",
     "app:critique": "node scripts/app-vision-critique.mjs",
     "scoring:run": "node scripts/scoring-loop.mjs",
-    "scoring:quick": "QUICK_MODE=1 node scripts/scoring-loop.mjs"
+    "scoring:quick": "QUICK_MODE=1 node scripts/scoring-loop.mjs",
+    "test:pinetree:setup": "node scripts/pinetree-setup.mjs",
+    "test:pinetree": "APP_URL=https://swoop-member-portal-dev.vercel.app npx playwright test tests/e2e/pinetree-concierge.spec.js --project=\"Desktop Chrome\" --reporter=html",
+    "test:pinetree:local": "APP_URL=http://localhost:3000 npx playwright test tests/e2e/pinetree-concierge.spec.js --project=\"Desktop Chrome\" --reporter=html"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.87.0",
