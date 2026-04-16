@@ -263,7 +263,7 @@ export default function HealthOverview() {
               ) : null;
             })()}
             <div className="text-xs text-swoop-text-muted mt-2 leading-relaxed">
-              Detect 82→61 health score drops, track the cross-domain decay sequence, and protect at-risk annual dues before members resign (NGCOA pilot average: $32K+ retained per saved member, based on avg $800/mo dues over 40-month member tenure*).
+              Detect 82 to 61 health score drops, track the cross-domain decay sequence, and protect at-risk annual dues before members resign (Swoop NGCOA pilot average: $32K+ retained per saved member, based on avg $800/mo dues × 40-month member tenure).
             </div>
             <div className="text-[10px] text-swoop-text-ghost mt-1.5">* Based on Swoop 2023–2024 pilot data across 12 private clubs.</div>
             <div className="mt-3 flex items-center gap-2 flex-wrap">
@@ -290,14 +290,17 @@ export default function HealthOverview() {
       {/* Health Distribution KPI Cards */}
       <div className="grid-responsive-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
         {dist.map((d) => {
+          const hasDelta = d?.delta !== null && d?.delta !== undefined;
           const delta = Number.isFinite(d?.delta) ? d.delta : 0;
           const descriptor = levelDescriptions[d.level] ?? 'are in this state';
           const deltaColor = scoresMissing ? '#9CA3AF' : delta > 0 ? '#ef4444' : delta < 0 ? '#12b76a' : '#9CA3AF';
           const deltaCopy = scoresMissing
             ? 'Connect activity data to calculate dues at risk per member.'
-            : delta === 0
-              ? 'same as last month.'
-              : `${Math.abs(delta)} ${delta > 0 ? 'more' : 'fewer'} than last month.`;
+            : !hasDelta
+              ? ''
+              : delta === 0
+                ? 'Stable vs. last month.'
+                : `${Math.abs(delta)} ${delta > 0 ? 'more' : 'fewer'} than last month.`;
           return (
             <div
               key={d.level}

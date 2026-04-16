@@ -202,12 +202,25 @@ function _UnusedGmGreetingAlert({ onDismiss }) {
   );
 }
 
-function getGreeting() {
+function getGreeting(atRiskCount = 0, watchCount = 0, roundsToday = 0) {
   const hour = new Date().getHours();
   const stored = localStorage.getItem('swoop_auth_user');
   const firstName = stored ? (() => { try { return getFirstName(JSON.parse(stored).name || ''); } catch { return ''; } })() : '';
   const nameStr = firstName ? `, ${firstName}` : '';
-  if (hour < 12) return `Good morning${nameStr}. Here's what needs your attention today.`;
+  const riskTotal = atRiskCount + watchCount;
+
+  // Data-driven greeting: lead with the executive outcome when data is available
+  if (riskTotal > 0 && roundsToday > 0) {
+    return `${roundsToday} rounds on the sheet${nameStr}. ${riskTotal} member${riskTotal !== 1 ? 's' : ''} need attention.`;
+  }
+  if (riskTotal > 0) {
+    return `${riskTotal} member${riskTotal !== 1 ? 's' : ''} flagged for intervention today${nameStr}.`;
+  }
+  if (roundsToday > 0) {
+    return `${roundsToday} rounds on the tee sheet${nameStr}. All members in good standing.`;
+  }
+
+  if (hour < 12) return `Good morning${nameStr}. Here's your club health at a glance.`;
   if (hour < 17) return `Afternoon check-in${nameStr}. Here's where things stand.`;
   return `Good evening${nameStr}. End-of-day summary.`;
 }
@@ -374,7 +387,7 @@ export default function TodayView() {
         >
           <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
             <div className="greeting-text" style={{ fontSize: 16, fontWeight: 600, color: 'white', letterSpacing: -0.2, margin: 0, whiteSpace: 'nowrap' }}>
-              {getGreeting()}
+              {getGreeting(atRiskCount, watchCount, roundsToday)}
             </div>
             <div className="greeting-date" style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', margin: '2px 0 0', fontWeight: 500 }}>
               {formatDate()}
@@ -542,26 +555,34 @@ export default function TodayView() {
                 onClick={() => navigate('integrations')}
               />
             )}
-            <ClubKpiTile
-              label="Pending Actions"
-              labelColor="rgba(243,146,45,0.7)"
-              icon="🔔"
-              value={pendingAgentCount ?? 0}
-              valueColor={C.accent}
-              source="◉ Analytics"
-              accentBg="rgba(243,146,45,0.07)"
-              accentBorder="rgba(243,146,45,0.18)"
-              footerLines={
-                pendingAgentCount > 0
-                  ? [
-                      { text: `${pendingAgentCount} item${pendingAgentCount === 1 ? '' : 's'} in the queue` },
-                      { text: 'Review now →', color: C.accent, bold: true },
-                    ]
-                  : [
-                      { text: 'Queue clear: no open actions' },
-                    ]
-              }
-            />
+            {(() => {
+              const inboxCount = pendingAgentCount ?? 0;
+              const memberAlerts = atRiskCount + watchCount;
+              const totalPending = inboxCount + memberAlerts;
+              return (
+                <ClubKpiTile
+                  label="Pending Actions"
+                  labelColor="rgba(243,146,45,0.7)"
+                  icon="🔔"
+                  value={totalPending}
+                  valueColor={totalPending > 0 ? C.accent : C.neutral}
+                  source="◉ Actions Inbox + Member Alerts"
+                  accentBg={totalPending > 0 ? 'rgba(243,146,45,0.07)' : undefined}
+                  accentBorder={totalPending > 0 ? 'rgba(243,146,45,0.18)' : undefined}
+                  onClick={totalPending > 0 ? () => navigate('automations') : undefined}
+                  footerLines={
+                    totalPending > 0
+                      ? [
+                          { text: `${inboxCount} inbox · ${memberAlerts} member alert${memberAlerts !== 1 ? 's' : ''}` },
+                          { text: 'Review now →', color: C.accent, bold: true },
+                        ]
+                      : [
+                          { text: 'All clear: no open actions' },
+                        ]
+                  }
+                />
+              );
+            })()}
           </div>
         </SwoopSection>
 

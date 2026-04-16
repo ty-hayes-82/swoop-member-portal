@@ -44,7 +44,7 @@ const STATUS_FILTERS = [
 ];
 
 export default function ComplaintsTab() {
-  const { routeIntent, clearRouteIntent } = useNavigationContext();
+  const { routeIntent, clearRouteIntent, navigate } = useNavigationContext();
   const [statusFilter, setStatusFilter] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState(null);
   const [expandedComplaintId, setExpandedComplaintId] = useState(null);
@@ -92,6 +92,25 @@ export default function ComplaintsTab() {
 
   return (
     <div className="flex flex-col gap-6">
+
+      {/* Primary action: funnel resolution tasks to Actions Inbox */}
+      <div className="rounded-xl border border-brand-500/40 bg-brand-500/[0.05] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div>
+          <div className="text-sm font-bold text-swoop-text">Resolve complaints in the Actions Inbox</div>
+          <div className="text-xs text-swoop-text-muted mt-0.5">
+            {openComplaints.length > 0
+              ? `${openComplaints.length} open complaint${openComplaints.length !== 1 ? 's' : ''} — assign, track, and close them from one place.`
+              : 'All complaints resolved. New service issues surface here and route to your inbox.'}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate?.('automations')}
+          className="flex-shrink-0 px-4 py-2 rounded-lg bg-brand-500 text-white text-sm font-semibold cursor-pointer hover:bg-brand-600 transition-colors whitespace-nowrap"
+        >
+          View in Actions Inbox →
+        </button>
+      </div>
 
       <div className="rounded-2xl p-5 bg-gradient-to-br from-purple-500/[0.05] to-purple-500/[0.02] border border-purple-500/30">
         <div className="flex items-center justify-between mb-2 flex-wrap gap-2">

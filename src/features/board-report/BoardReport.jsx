@@ -148,6 +148,7 @@ export default function BoardReport() {
   const { openProfile } = useMemberProfile();
   const [activeTab, setActiveTab] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAllKpis, setShowAllKpis] = useState(false);
 
   // Allow async data to settle before rendering (services init in background)
   useEffect(() => {
@@ -338,7 +339,16 @@ export default function BoardReport() {
         </div>
       )}
 
-      <KPIStrip kpis={kpis} navigate={navigate} onDrillDown={() => setActiveTab(1)} />
+      <KPIStrip kpis={showAllKpis ? kpis : kpis.slice(0, 4)} navigate={navigate} onDrillDown={() => setActiveTab(1)} />
+      {kpis.length > 4 && (
+        <button
+          type="button"
+          onClick={() => setShowAllKpis(v => !v)}
+          className="text-[11px] font-semibold text-brand-500 bg-transparent border-none cursor-pointer mb-2 self-start hover:underline"
+        >
+          {showAllKpis ? '↑ Show fewer metrics' : `+ ${kpis.length - 4} more metrics`}
+        </button>
+      )}
 
       {/* Board Confidence Score Methodology */}
       <details className="mb-4 bg-swoop-panel border border-swoop-border rounded-lg p-3 px-4">
@@ -405,7 +415,7 @@ export default function BoardReport() {
                 in real time.
                 {resolutionRate > 0 && <> Service complaint resolution rate: <strong>{resolutionRate}%</strong>.</>}
                 {' '}As behavioral data accumulates, we are identifying at-risk members early and surfacing
-                intervention opportunities before they consider leaving.
+                identifying issues before they impact retention.
               </>
             )}
           </p>
@@ -445,7 +455,7 @@ export default function BoardReport() {
               ) : (
                 <>We are actively monitoring <strong>{kpis.find(k => k.label === 'Active Members')?.value ?? kpis[0]?.value ?? 0} members</strong> for engagement signals.
                 {atRiskCount > 0 && <> <strong>{atRiskCount} members</strong> have been flagged as at-risk and prioritized for outreach.</>}
-                {' '}Early detection is live: intervention opportunities surface in the Action Inbox as patterns emerge.</>
+                {' '}Early detection is live: issues are identified before they impact retention and surface in the Action Inbox as patterns emerge.</>
               )}
             </p>
             <p className="text-swoop-text-muted leading-relaxed">

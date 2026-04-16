@@ -37,9 +37,9 @@ export default function AutomationsHub() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-xl font-bold m-0 text-swoop-text">Recommended Actions</h1>
+        <h1 className="text-xl font-bold m-0 text-swoop-text">Revenue &amp; Retention Opportunities</h1>
         <p className="text-sm text-swoop-text-muted mt-1 mb-0">
-          Smart actions that improve member experience and revenue. Approve or dismiss in seconds.
+          Prioritized actions that protect dues revenue and improve member retention. Approve or dismiss in seconds.
         </p>
       </div>
 

@@ -152,8 +152,21 @@ const SwoopSidebar = () => {
                 </svg>
               )}
             </h2>
+            {/* Group nav items by pillar when sidebar is expanded */}
             <ul className="flex flex-col gap-1">
-              {primaryItems.map((item) => (
+              {primaryItems.map((item, idx) => {
+                const prevItem = primaryItems[idx - 1];
+                const pillarChanged = item.pillar && item.pillar !== prevItem?.pillar;
+                const pillarLabel = item.pillar === 'see' ? 'See It' : item.pillar === 'fix' ? 'Fix It' : item.pillar === 'prove' ? 'Prove It' : null;
+                return (
+                <>
+                  {showFull && pillarChanged && pillarLabel && (
+                    <li key={`pillar-${item.pillar}`} className="px-2 pt-3 pb-0.5" aria-hidden="true">
+                      <span className="text-[9px] font-bold uppercase tracking-widest text-swoop-text-label opacity-50">
+                        {pillarLabel}
+                      </span>
+                    </li>
+                  )}
                 <li key={item.key}>
                   <button
                     onClick={() => navigate(item.key)}
@@ -200,7 +213,9 @@ const SwoopSidebar = () => {
                     )}
                   </button>
                 </li>
-              ))}
+                </>
+                );
+              })}
             </ul>
           </div>
         </nav>
