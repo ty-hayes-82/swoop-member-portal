@@ -77,7 +77,7 @@ const CONCIERGE_TOOLS = [
   {
     name: 'send_request_to_club',
     description: 'Send a special request or message to the club staff on behalf of the member',
-    input_schema: { type: 'object', properties: { department: { type: 'string', enum: ['golf_ops', 'dining', 'events', 'membership', 'facilities', 'general'] }, message: { type: 'string', description: 'The request or message to send' }, urgency: { type: 'string', enum: ['normal', 'high'], default: 'normal' } }, required: ['department', 'message'] }
+    input_schema: { type: 'object', properties: { department: { type: 'string', enum: ['golf_ops', 'dining', 'events', 'membership', 'facilities', 'general', 'gm', 'front_desk', 'cart_staff', 'fb_pickup'] }, message: { type: 'string', description: 'The request or message to send' }, urgency: { type: 'string', enum: ['normal', 'high'], default: 'normal' } }, required: ['department', 'message'] }
   },
 ];
 
@@ -195,9 +195,9 @@ async function executeConciergeTool(toolName, input, profile, clubId) {
         status: 'request_submitted',
         pending: true,
         request_id: requestId,
-        routed_to: 'F&B Team',
+        routed_to: 'Front Desk',
         details: `Dining reservation request: ${input.date} at ${time} at ${input.outlet || 'Main Dining Room'} for ${party} guests.${input.preferences ? ` Notes: ${input.preferences}` : ''}`,
-        expected_response: 'F&B team will confirm within the hour.',
+        expected_response: 'Front desk will confirm within the hour.',
         member_name: profile.name,
       };
     }
@@ -706,8 +706,9 @@ async function chatHandler(req, res) {
       tools: availableTools,
     });
 
-    // Collect tool call trace for debug mode
+    // Collect tool call trace for debug mode; also track successful submissions for fallback use
     const toolCallLog = [];
+    const successfulSubmissions = [];
 
     // Tool-use loop: execute ALL tool_use blocks per turn, feed results back, repeat until text
     let loopGuard = 0;
@@ -722,7 +723,11 @@ async function chatHandler(req, res) {
           toolResult = await executeConciergeTool(toolUse.name, toolUse.input, profile, clubId);
         } catch (toolErr) {
           console.warn(`[concierge] tool ${toolUse.name} threw:`, toolErr.message);
-          toolResult = { error: 'Tool execution failed', message: 'Unable to complete that action — let me connect you with staff.' };
+          toolResult = { error: 'Tool execution failed', message: 'Unable to complete that action. Let me connect you with staff.' };
+        }
+        // Track successful submissions regardless of debug mode (needed for fallback response)
+        if (toolResult?.status === 'submitted' || toolResult?.status === 'request_submitted') {
+          successfulSubmissions.push({ tool: toolUse.name, result: toolResult });
         }
         if (debug) {
           toolCallLog.push({ tool_name: toolUse.name, arguments: toolUse.input, result: toolResult, ts: new Date().toISOString() });
@@ -753,10 +758,18 @@ async function chatHandler(req, res) {
       responseText = `Hey ${firstName}, I ran into a hiccup processing that — let me flag it for the team. In the meantime, call the front desk and they'll take care of you right away.`;
     }
 
-    // Fallback for empty response (model returned no text block)
+    // Fallback for empty response (model returned no text block).
+    // If a request was actually submitted successfully, confirm it positively rather than apologizing.
     if (!responseText) {
       const firstName = profile.first_name || profile.name?.split(' ')[0] || 'there';
-      responseText = `Hey ${firstName}, something went sideways on my end — sorry about that. Give the front desk a call and they'll sort it out for you.`;
+      if (successfulSubmissions.length > 0) {
+        const sub = successfulSubmissions[0];
+        const dept = sub.result.routed_to || 'the team';
+        const expected = sub.result.expected_response || 'They will follow up shortly.';
+        responseText = `${firstName}, your request has been sent to ${dept}. ${expected}`;
+      } else {
+        responseText = `Hey ${firstName}, I ran into a snag on my end. Give the front desk a call and they will sort it out for you right away.`;
+      }
     }
 
     // Update conversation summary (truncate to last exchange)
