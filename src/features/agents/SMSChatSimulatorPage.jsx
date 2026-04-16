@@ -513,7 +513,7 @@ function AgentInboxPanel({ pending, loading, approve, dismiss, onSwitchMember })
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function SMSChatSimulatorPage() {
+export default function SMSChatSimulatorPage({ embedded = false }) {
   const [selectedMemberId, setSelectedMemberId] = useState('mbr_t01');
   const [messages, setMessages] = useState([]);
   const [toolCalls, setToolCalls] = useState([]);
@@ -584,15 +584,17 @@ export default function SMSChatSimulatorPage() {
 
   return (
     <div className="flex flex-col gap-3 h-full min-h-0">
-      {/* Page header */}
-      <div className="flex items-center justify-between flex-wrap gap-2 flex-shrink-0">
-        <div>
-          <h1 className="text-xl font-bold m-0 text-swoop-text">AI Assistant Simulator</h1>
-          <p className="text-sm text-swoop-text-muted mt-0.5 mb-0">
-            Simulate inbound member messages and preview how Swoop AI would respond. Select a persona and send a test message.
-          </p>
+      {/* Page header — hidden when embedded in a tab */}
+      {!embedded && (
+        <div className="flex items-center justify-between flex-wrap gap-2 flex-shrink-0">
+          <div>
+            <h1 className="text-xl font-bold m-0 text-swoop-text">AI Assistant Simulator</h1>
+            <p className="text-sm text-swoop-text-muted mt-0.5 mb-0">
+              Simulate inbound member messages and preview how Swoop AI would respond. Select a persona and send a test message.
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Persona rail */}
       <PersonaRail selected={selectedMemberId} onSelect={handleMemberChange} />
