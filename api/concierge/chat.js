@@ -798,14 +798,32 @@ async function chatHandler(req, res) {
     });
   }
 
+  // Derive persona flags (mirrors logic in conciergePrompt.js) — used for temperature + opener injection
+  const isGhostMember = profile.archetype === 'Ghost'
+    || profile.status === 'ghost'
+    || (profile.last_visit && (() => {
+        const d = new Date(profile.last_visit);
+        return !isNaN(d) && (Date.now() - d.getTime()) > 90 * 24 * 60 * 60 * 1000;
+      })());
+  const isAtRiskMember = !isGhostMember && (
+    profile.status === 'at-risk'
+    || profile.archetype === 'At Risk'
+    || (typeof profile.health_score === 'number' && profile.health_score < 40)
+  );
+  const hasPriorComplaintFlag = profile.preferences?.notes?.toLowerCase().includes('complaint')
+    || profile.preferences?.notes?.toLowerCase().includes('unresolved');
+  const memberFirstName = (profile.first_name || profile.name?.split(' ')[0] || 'there');
+
   // Sprint D: intent-based temperature selection
+  // Ghost/at-risk members always get 0.5 — warmth must not be overridden by booking efficiency
   // booking-concierge (0) — deterministic for reservations
   // service-recovery-concierge (0.3) — slight warmth for complaint handling
   // personal-concierge (0.5) — conversational for general / re-engagement
   const msgLower = message.toLowerCase();
   const isBookingIntent = /\b(book|reserve|cancel|tee\s*time|reservation|rsvp|sign\s*up|register)\b/.test(msgLower);
   const isComplaintIntent = /\b(complain|complaint|issue|problem|terrible|slow|wrong|never|awful|bad|frustrated|upset|billing|invoice|charge)\b/.test(msgLower);
-  const conciergeTemperature = isComplaintIntent ? 0.3 : isBookingIntent ? 0 : 0.5;
+  const needsWarmth = isGhostMember || isAtRiskMember || hasPriorComplaintFlag;
+  const conciergeTemperature = needsWarmth ? 0.5 : isComplaintIntent ? 0.3 : isBookingIntent ? 0 : 0.5;
 
   // Live mode: call Claude API
   try {
@@ -873,6 +891,22 @@ async function chatHandler(req, res) {
       }));
 
       messages.push({ role: 'assistant', content: result.content });
+
+      // Inject persona opener reminder as final content block in the tool-results user message.
+      // This is read by the model immediately before generating text, ensuring STEP 1 compliance
+      // even after tool calls have run (where the model otherwise jumps to action summary).
+      if (needsWarmth) {
+        const openerLine = isGhostMember
+          ? `"${memberFirstName}! We've missed you so much, it's so great to hear from you!"`
+          : isAtRiskMember
+            ? `"It's so great to hear from you, ${memberFirstName}!"`
+            : `"I know your last experience wasn't what it should have been, and I want to make sure this one is different."`;
+        toolResults.push({
+          type: 'text',
+          text: `[MANDATORY OPENER — write this as your FIRST sentence before anything else: ${openerLine}. Do not skip it. Do not start with the action summary. The opener is sentence one.]`,
+        });
+      }
+
       messages.push({ role: 'user', content: toolResults });
 
       result = await client.messages.create({
