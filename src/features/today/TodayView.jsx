@@ -537,7 +537,7 @@ export default function TodayView() {
                       { text: 'Review now →', color: C.accent, bold: true },
                     ]
                   : [
-                      { text: 'Queue clear — no open actions' },
+                      { text: 'Queue clear: no open actions' },
                     ]
               }
             />
@@ -791,7 +791,7 @@ export default function TodayView() {
             </div>
             <MicroLabel>Staffing Recommendation</MicroLabel>
             {[
-              { name: 'Grill Room', ratio: '2/4', color: C.accent, note: 'Needs coverage — 2 more required' },
+              { name: 'Grill Room', ratio: '2/4', color: C.accent, note: 'Needs coverage: 2 more required' },
               { name: 'Terrace', ratio: '3/3', color: C.success, note: 'Fully staffed' },
               { name: 'Pool Bar', ratio: '1/1', color: C.success, note: 'Fully staffed' },
             ].map((s, i) => (

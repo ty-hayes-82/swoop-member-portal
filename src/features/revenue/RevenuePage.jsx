@@ -30,6 +30,7 @@ import {
 } from '@/services/revenueService';
 import { isGateOpen } from '@/services/demoGate';
 import { getMemberSummary, getAtRiskMembers } from '@/services/memberService';
+import { getMonthlyRevenueSummary } from '@/services/operationsService';
 import AgentUpsell from '@/components/ui/AgentUpsell';
 
 const COLORS = {
@@ -83,6 +84,7 @@ export default function RevenuePage() {
   const bottleneck = useMemo(() => getBottleneckSummary(), []);
   const slowContext = useMemo(() => getSlowRoundContext(), []);
   const dollarPerSlowRound = useMemo(() => getDollarPerSlowRound(), []);
+  const monthlyRevenue = useMemo(() => getMonthlyRevenueSummary(), []);
 
   if (isLoading) {
     return (
@@ -125,7 +127,7 @@ export default function RevenuePage() {
                       <div className="bg-swoop-panel rounded-lg p-3 border border-swoop-border">
                         <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-1">Members Imported</div>
                         <div className="text-2xl font-bold text-swoop-text font-mono">{memberSummary.total || 0}</div>
-                        <div className="text-[11px] text-swoop-text-muted mt-0.5">spending patterns being analyzed</div>
+                        <div className="text-[11px] text-swoop-text-muted mt-0.5">Baseline spend mapped</div>
                       </div>
                       <div className="bg-swoop-panel rounded-lg p-3 border border-swoop-border">
                         <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-1">F&B Transactions</div>
@@ -134,8 +136,8 @@ export default function RevenuePage() {
                       </div>
                       <div className="bg-swoop-panel rounded-lg p-3 border border-swoop-border">
                         <div className="text-[10px] font-bold uppercase tracking-wide text-swoop-text-label mb-1">Revenue Tracked</div>
-                        <div className="text-2xl font-bold text-swoop-text font-mono">POS</div>
-                        <div className="text-[11px] text-swoop-text-muted mt-0.5">spend patterns mapped</div>
+                        <div className="text-2xl font-bold text-brand-500 font-mono">${(monthlyRevenue.fbTotal || 0).toLocaleString()}</div>
+                        <div className="text-[11px] text-swoop-text-muted mt-0.5">F&B revenue this month</div>
                       </div>
                     </div>
                   </div>
@@ -554,14 +556,14 @@ export default function RevenuePage() {
               </button>
             </div>
 
-            {/* Lever 2: Add one server to Friday lunch */}
+            {/* Lever 2: Add one server to Saturday lunch */}
             <div className="mt-3 flex items-center justify-between gap-3 flex-wrap p-4 bg-gradient-to-r from-blue-500/[0.06] to-blue-500/[0.02] border border-blue-500/20 rounded-xl">
               <div>
                 <div className="text-[10px] font-bold uppercase tracking-wide text-blue-600">
                   Lever 2 · Recommended Action
                 </div>
                 <div className="text-sm font-semibold text-swoop-text mt-0.5">
-                  Add one server to Friday lunch based on weather-demand forecast
+                  Add one server to Saturday lunch based on weather-demand forecast
                 </div>
                 <div className="text-xs text-swoop-text-muted mt-0.5">
                   Projected recovery: ~${(leakage.STAFFING_LOSS || 850).toLocaleString()}/mo · closes the Understaffed Fridays root cause
@@ -574,9 +576,9 @@ export default function RevenuePage() {
                     actionSubtype: 'add_friday_server',
                     referenceType: 'revenue_recommendation',
                     referenceId: 'friday_server_lunch',
-                    description: 'Add one server to Friday lunch based on weather-demand forecast',
+                    description: 'Add one server to Saturday lunch based on weather-demand forecast',
                   });
-                  if (showToast) showToast('Friday server call-in queued. Logged to action history.', 'success');
+                  if (showToast) showToast('Saturday lunch server call-in queued. Logged to action history.', 'success');
                 }}
                 className="rounded-lg px-5 py-2.5 text-sm font-semibold cursor-pointer border-none whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-brand-500 bg-blue-500 text-white hover:bg-blue-600"
               >

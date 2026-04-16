@@ -66,7 +66,7 @@ export default function OnboardingChecklist() {
       done: memberTotal >= LOW_DATA_THRESHOLD,
       title: '1. Connect your member roster',
       description: 'Import your members so Swoop can start scoring engagement and surfacing at-risk accounts.',
-      teaser: 'See your complete roster \u2014 tenure, dues, households at a glance',
+      teaser: 'See your complete roster: tenure, dues, households at a glance',
       actionLabel: 'Import members',
       onAction: () => navigate('integrations/csv-import', { category: 'members' }),
     },
@@ -74,7 +74,7 @@ export default function OnboardingChecklist() {
       key: 'tee-sheet',
       done: teeSheetConnected,
       title: '2. Connect your tee sheet',
-      description: 'Connect your tee sheet to unlock today\u2019s rounds, pace of play, and demand forecasting.',
+      description: 'Connect your tee sheet to enable today\u2019s rounds, pace of play, and demand forecasting.',
       teaser: 'Discover which at-risk members are coming in TODAY and when to greet them',
       actionLabel: 'Connect tee sheet',
       onAction: () => navigate('integrations'),
@@ -96,13 +96,13 @@ export default function OnboardingChecklist() {
     <div className="flex flex-col gap-4 w-full">
       <div>
         <h1 className="text-2xl font-bold text-swoop-text m-0">
-          Welcome to Swoop. Let&rsquo;s get your club&rsquo;s data flowing.
+          Gain real-time visibility into member health and F&amp;B revenue.
         </h1>
         <p className="text-sm text-swoop-text-muted mt-1 mb-0">
-          Complete these three steps to unlock the operational cockpit. {doneCount} of {items.length} done.
+          Connect three data sources to activate the operational cockpit. {doneCount} of {items.length} done.
         </p>
       </div>
-      <Panel title="Onboarding checklist" subtitle="Each source you connect unlocks more of Today View.">
+      <Panel title="Onboarding checklist" subtitle="Each source you connect activates more of Today View.">
         <div className="flex flex-col gap-3">
           {items.map(item => (
             <ChecklistItem

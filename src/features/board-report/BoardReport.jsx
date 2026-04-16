@@ -366,7 +366,7 @@ export default function BoardReport() {
                 in real time.
                 {resolutionRate > 0 && <> Service complaint resolution rate: <strong>{resolutionRate}%</strong>.</>}
                 {' '}As behavioral data accumulates, Swoop will identify at-risk members early and surface
-                intervention opportunities, turning insight into retention before members consider leaving.
+                intervention opportunities before members consider leaving.
               </>
             )}
           </p>
@@ -651,21 +651,34 @@ export default function BoardReport() {
               if (posConnected && leakage && leakage.PACE_LOSS > 0) {
                 const dollarPerRound = getDollarPerSlowRound();
                 return (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="bg-swoop-row rounded-xl p-3.5 border border-swoop-border text-center">
-                      <div className="text-2xl font-bold text-error-500">-${Math.round(leakage.PACE_LOSS).toLocaleString()}</div>
-                      <div className="text-xs text-swoop-text-muted">Pace-Driven F&B Loss</div>
-                      <div className="text-[10px] text-swoop-text-label mt-1">from slow rounds this month</div>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-swoop-text-label">Sources:</span>
+                      <SourceBadge system="Tee Sheet" size="xs" />
+                      <SourceBadge system="POS" size="xs" />
+                      <span
+                        className="text-[10px] text-swoop-text-label cursor-help"
+                        title="Formula: slow rounds × avg F&B check delta between fast-round and slow-round dining conversion. Slow rounds = rounds >270 min. Delta = (fast conversion rate − slow conversion rate) × avg check size."
+                      >
+                        &#9432; Formula
+                      </span>
                     </div>
-                    <div className="bg-swoop-row rounded-xl p-3.5 border border-swoop-border text-center">
-                      <div className="text-2xl font-bold text-brand-500">${dollarPerRound}</div>
-                      <div className="text-xs text-swoop-text-muted">Lost per Slow Round</div>
-                      <div className="text-[10px] text-swoop-text-label mt-1">dining conversion gap</div>
-                    </div>
-                    <div className="bg-swoop-row rounded-xl p-3.5 border border-swoop-border text-center">
-                      <div className="text-2xl font-bold text-swoop-text">686</div>
-                      <div className="text-xs text-swoop-text-muted">POS Transactions</div>
-                      <div className="text-[10px] text-swoop-text-label mt-1">spend patterns mapped</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="bg-swoop-row rounded-xl p-3.5 border border-swoop-border text-center">
+                        <div className="text-2xl font-bold text-error-500">-${Math.round(leakage.PACE_LOSS).toLocaleString()}</div>
+                        <div className="text-xs text-swoop-text-muted">Pace-Driven F&B Loss</div>
+                        <div className="text-[10px] text-swoop-text-label mt-1">from slow rounds this month</div>
+                      </div>
+                      <div className="bg-swoop-row rounded-xl p-3.5 border border-swoop-border text-center">
+                        <div className="text-2xl font-bold text-brand-500">${dollarPerRound}</div>
+                        <div className="text-xs text-swoop-text-muted">Lost per Slow Round</div>
+                        <div className="text-[10px] text-swoop-text-label mt-1">dining conversion gap</div>
+                      </div>
+                      <div className="bg-swoop-row rounded-xl p-3.5 border border-swoop-border text-center">
+                        <div className="text-2xl font-bold text-swoop-text">686</div>
+                        <div className="text-xs text-swoop-text-muted">POS Transactions</div>
+                        <div className="text-[10px] text-swoop-text-label mt-1">spend patterns mapped</div>
+                      </div>
                     </div>
                   </div>
                 );

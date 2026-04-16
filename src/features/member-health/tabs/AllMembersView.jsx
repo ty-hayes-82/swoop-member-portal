@@ -7,6 +7,7 @@ import { SourceBadgeRow } from '@/components/ui/SourceBadge.jsx';
 import { getAtRiskMembers, getWatchMembers, getHealthDistribution, getArchetypeProfiles, getAllMemberProfiles, setRosterCache, getMemberRoster, getFullRoster } from '@/services/memberService';
 import { isAuthenticatedClub } from '@/config/constants';
 import DataEmptyState from '@/components/ui/DataEmptyState';
+import { isGateOpen } from '@/services/demoGate';
 
 // Generate full 300-member roster from all available data sources
 const FIRST_NAMES = ['James','Robert','John','Michael','David','William','Richard','Joseph','Thomas','Christopher','Charles','Daniel','Matthew','Anthony','Mark','Steven','Paul','Andrew','Joshua','Kenneth','Kevin','Brian','George','Timothy','Ronald','Edward','Jason','Jeffrey','Ryan','Jacob','Gary','Nicholas','Eric','Jonathan','Stephen','Larry','Justin','Scott','Brandon','Benjamin','Samuel','Patrick','Alexander','Frank','Raymond','Jack','Dennis','Jerry','Tyler','Aaron','Jose','Nathan','Henry','Douglas','Peter','Zachary','Kyle','Noah','Ethan','Jeremy','Walter','Christian','Keith','Roger','Terry','Harry','Ralph','Sean','Jesse','Roy','Louis','Alan','Eugene','Russell','Randy','Philip','Howard','Vincent','Bobby','Dylan','Johnny','Phillip','Victor','Clarence','Travis','Austin','Martha','Donna','Sandra','Gloria','Teresa','Sara','Debra','Alice','Rachel','Emma','Lisa','Nancy','Betty','Margaret','Dorothy','Kimberly','Emily','Donna','Michelle','Carol','Amanda','Melissa','Deborah','Stephanie','Rebecca','Sharon','Laura','Cynthia','Kathleen','Amy','Angela','Shirley','Anna','Brenda','Pamela','Nicole','Samantha','Katherine','Christine','Helen','Debbie','Janet','Catherine','Maria','Heather','Diane','Olivia','Julie','Joyce','Virginia','Victoria','Kelly','Lauren','Christina','Joan','Evelyn','Judith','Andrea','Hannah','Megan','Cheryl','Jacqueline','Martha','Gloria','Teresa','Ann','Sara','Madison','Frances','Kathryn','Janice','Jean','Abigail','Julia','Grace','Judy'];
@@ -101,6 +102,25 @@ function getHealthLevel(score) {
   return 'Critical';
 }
 
+// Build a score tooltip showing which data domains contributed to the health score
+function buildScoreTooltip(member) {
+  const parts = [`Health Score: ${member.score}/100`];
+  const hasTeeSheet = isGateOpen('tee-sheet');
+  const hasPOS = isGateOpen('fb');
+  const risk = (member.topRisk || '').toLowerCase();
+  if (hasTeeSheet) {
+    const golfSignal = /golf|round|tee|frequency/.test(risk) ? ' (declining)' : '';
+    parts.push(`⛳ Golf activity${golfSignal}`);
+  }
+  if (hasPOS) {
+    const fbSignal = /dining|f&b|food|beverage|spend/.test(risk) ? ' (declining)' : '';
+    parts.push(`🍴 F&B spend${fbSignal}`);
+  }
+  const emailSignal = /email|open rate|newsletter/.test(risk) ? ' (declining)' : '';
+  parts.push(`📧 Email engagement${emailSignal}`);
+  return parts.join('\n');
+}
+
 function FilterChip({ label, onRemove, color }) {
   return (
     <span
@@ -154,7 +174,10 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
         {!rosterOnly && (
           <>
             <td className="px-3 sm:px-4 py-2">
-              <div className="flex items-center gap-1.5 flex-wrap">
+              <div
+                className="flex items-center gap-1.5 flex-wrap cursor-help"
+                title={hasScore ? buildScoreTooltip(member) : undefined}
+              >
                 <span className="font-mono font-bold text-sm" style={{ color: healthColor }}>
                   {hasScore ? member.score : '—'}
                 </span>
@@ -177,7 +200,11 @@ function MemberRow({ member, isExpanded, onToggle, index, rosterOnly = false }) 
           </span>
         </td>
         <td className="px-4 py-2 hidden md:table-cell">
-          <span className="font-mono text-xs text-swoop-text-muted">
+          <span
+            className="font-mono text-xs"
+            style={{ color: hasScore && member.score < 50 ? '#ef4444' : undefined }}
+            title={hasScore && member.score < 50 ? 'Dues at risk — member health below 50' : undefined}
+          >
             {(member.duesAnnual || member.memberValueAnnual) ? `$${(member.duesAnnual || member.memberValueAnnual || 0).toLocaleString()}` : '—'}
           </span>
         </td>
