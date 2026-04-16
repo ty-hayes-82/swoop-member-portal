@@ -4,9 +4,10 @@
  *
  * SMS Concierge functionality test + AI scoring pipeline.
  *
- * Sends 30 targeted messages across 5 member personas, captures tool_calls[],
- * takes Playwright screenshots of the UI, then scores with 5 specialist agents
- * focused on concierge FUNCTIONALITY (not UX).
+ * Sends 36 targeted messages across 5 member personas (30 functional + 6 architecture
+ * validation probes for Managed Agents Sprint A-D benefits), captures tool_calls[],
+ * takes Playwright screenshots of the UI, then scores with 7 specialist agents:
+ * 5 focused on concierge FUNCTIONALITY, 2 on ARCHITECTURE REALIZATION.
  *
  * Usage:
  *   ANTHROPIC_API_KEY=<key> APP_URL=http://localhost:3000 node scripts/sms-concierge-score.mjs
@@ -99,6 +100,14 @@ const TEST_MATRIX = [
   { personaIdx: 4, message: "It's been a while, what have I missed?",            expectedTool: 'get_club_calendar',       note: 're-engagement calendar query' },
   { personaIdx: 4, message: "I forgot, when is my tee time exactly?",            expectedTool: 'get_my_schedule',         note: 'recall pattern — no tee time exists' },
   { personaIdx: 4, message: 'I want to cancel everything I have booked this week', expectedTool: 'cancel_tee_time',       note: 'ghost member — nothing to cancel' },
+
+  // ── Architecture validation (Sprints A-D) — managed agents benefit probes ──
+  { personaIdx: 0, message: 'Has my tee time request been confirmed by the pro shop yet?', expectedTool: 'get_my_schedule', note: 'Sprint A: confirmation loop recall — was booking confirmed?' },
+  { personaIdx: 1, message: 'What preferences have you noted about me?',                   expectedTool: 'get_member_profile', note: 'Sprint B: session preference event retrieval' },
+  { personaIdx: 2, message: 'Has my invoice complaint been followed up on?',               expectedTool: 'get_my_schedule', note: 'Sprint B: complaint event retrieval from session log' },
+  { personaIdx: 3, message: 'I need to book golf and dinner for Saturday — can you handle both?', expectedTool: 'book_tee_time', note: 'Sprint D: multi-intent routing across booking + dining brains' },
+  { personaIdx: 4, message: "I haven't been around in ages — what do I need to know and what should I do first?", expectedTool: 'get_club_calendar', note: 'Sprint D: personal concierge intent + ghost re-engagement' },
+  { personaIdx: 0, message: 'Set me up for next Saturday — tee time at 8 and dinner after for me and my client', expectedTool: 'book_tee_time', note: 'Sprint D: multi-request coordination across booking + dining' },
 ];
 
 // ─── Scoring Agent Definitions ────────────────────────────────────────────────
@@ -107,7 +116,7 @@ const SCORING_AGENTS = [
   {
     id: 'tool_accuracy',
     name: 'Tool Selection Accuracy',
-    weight: 0.30,
+    weight: 0.25,
     dimensions: ['correct_tool_fired', 'tool_not_called_when_needed', 'wrong_tool_called', 'ambiguous_handled', 'edge_case_recovery'],
     prompt: `You are a senior QA engineer evaluating an AI concierge for a private country club. Be precise and evidence-based. Do NOT hallucinate evidence. Only cite things actually present in the conversations. Never use em-dashes (—) in your output text: use commas, colons, or periods instead.
 
@@ -145,7 +154,7 @@ Return ONLY valid JSON matching this contract exactly:
   {
     id: 'argument_quality',
     name: 'Argument Quality',
-    weight: 0.25,
+    weight: 0.20,
     dimensions: ['required_args_present', 'date_time_resolution', 'member_id_context', 'fuzzy_input_resolved', 'party_size_inferred'],
     prompt: `You are a senior QA engineer evaluating tool argument quality for a private club AI concierge. Be precise and evidence-based. Only cite arguments you can actually see in the tool_calls[] data. Never use em-dashes (—) in your output text: use commas, colons, or periods instead.
 
@@ -185,7 +194,7 @@ Return ONLY valid JSON matching this contract exactly:
   {
     id: 'response_naturalness',
     name: 'Response Naturalness',
-    weight: 0.20,
+    weight: 0.17,
     dimensions: ['confirmation_clarity', 'error_messaging', 'tone_warmth', 'action_summary', 'follow_up_proactivity'],
     prompt: `You are a hospitality expert and conversation designer evaluating an AI concierge for a private country club. Be precise and evidence-based. Quote actual response text when citing evidence. Never use em-dashes (—) in your output text: use commas, colons, or periods instead.
 
@@ -226,7 +235,7 @@ Return ONLY valid JSON matching this contract exactly:
   {
     id: 'error_recovery',
     name: 'Error Recovery',
-    weight: 0.15,
+    weight: 0.13,
     dimensions: ['fallback_message_quality', 'no_silent_failures', 'simulated_mode_handling', 'retry_suggestion', 'out_of_scope_handling'],
     prompt: `You are a QA engineer specializing in failure modes for AI assistants. Be precise. Only cite observable failures in the actual conversation data. Do not hallucinate failures that aren't present. Never use em-dashes (—) in your output text: use commas, colons, or periods instead.
 
@@ -265,7 +274,7 @@ Return ONLY valid JSON matching this contract exactly:
   {
     id: 'member_context',
     name: 'Member Context Awareness',
-    weight: 0.10,
+    weight: 0.08,
     dimensions: ['persona_appropriate_response', 'at_risk_tone_adjustment', 'ghost_member_warmth', 'history_referenced', 'privacy_maintained'],
     prompt: `You are a member experience director evaluating whether a club concierge treats different members appropriately. Be precise. Quote actual response text as evidence. Do not invent context. Never use em-dashes (—) in your output text: use commas, colons, or periods instead.
 
@@ -297,6 +306,110 @@ Return ONLY valid JSON matching this contract exactly:
   "top_issues": ["<specific issue with quoted evidence from conversation>", "<specific issue>"],
   "recommendations": [
     { "priority": "P0|P1|P2", "surface": "<src/config/conciergePrompt.js>", "change": "<specific actionable change>", "expected_lift": "<dimension_id>" }
+  ],
+  "confidence": <0.0-1.0>
+}`,
+  },
+
+  {
+    id: 'member_concierge_arch',
+    name: 'Member Concierge Architecture Realization',
+    weight: 0.12,
+    dimensions: ['confirmation_loop_closed', 'session_memory_active', 'preference_capture', 'multi_intent_handling', 'per_member_relationship_depth', 'white_glove_readiness'],
+    prompt: `You are an AI systems architect evaluating how well the "one session per member, for life" managed-agents pattern is being realized in practice. You are looking for evidence of six specific architectural benefits in the 36 test conversations. Be precise and evidence-based. Quote actual response text or tool results. Never use em-dashes in output.
+
+THE SIX BENEFITS TO EVALUATE:
+
+1. CONFIRMATION LOOP CLOSED (Sprint A): After booking requests (tee times, dining, RSVPs, cancellations), does the concierge tell the member their request was routed to the right department and what to expect? And when a member asks "has my request been confirmed?", does the concierge give a specific answer rather than a generic fallback?
+
+2. SESSION MEMORY ACTIVE (Sprint B): Across the 36 conversations, is there any evidence of the concierge referencing events from earlier in the session? Do the architecture-validation messages (msgs 31-36) show any session continuity? Look for: acknowledgment of prior requests, preference recall, complaint follow-up.
+
+3. PREFERENCE CAPTURE: When a member asks "what preferences do you have for me?" or similar, does the concierge surface member-specific preferences (tee times, dining habits, family members) OR clearly explain what it knows from the member profile?
+
+4. MULTI-INTENT HANDLING (Sprint D): For messages 34-36 that contain multiple intents (book golf AND dinner, handle everything for Saturday), does the concierge address all intents rather than dropping one? Does it sequence tool calls logically?
+
+5. PER-MEMBER RELATIONSHIP DEPTH: Does the concierge treat each member as a known individual — different tone for James (active) vs Linda (ghost) vs Sandra (complaint history)? Does it volunteer member-specific context without being asked?
+
+6. WHITE-GLOVE READINESS: When members ask broad re-engagement questions ("what have I missed?", "where do I start?"), does the concierge proactively surface relevant club activities and make specific personalized suggestions — or does it just list upcoming events generically?
+
+SCORING CONTEXT:
+- These are EARLY STAGE scores. Sprint B (session log) was just deployed and events won't have had time to accumulate across separate test runs. Score based on foundation presence AND observed behavior.
+- A score of 5 means "foundation is in place but not yet visible in responses." A score of 8 means "actively working in the conversations." A score of 10 means "demonstrably better than stateless alternatives."
+- The 6 architecture-validation messages are conversations 31-36 in the dataset.
+
+SCORE EACH DIMENSION 1-10:
+- confirmation_loop_closed: After booking tool calls with request_submitted, does the response name the department and expected timeline? For "has it been confirmed?" questions, is the answer specific? (10=always closes the loop with specifics, 1=generic "your request is in")
+- session_memory_active: Across the 36 conversations, is there any evidence of cross-turn memory? Preferences recalled, prior requests acknowledged, session continuity? (10=clearly active, 5=infrastructure present but not yet visible, 1=no evidence)
+- preference_capture: For "what preferences do you have?" questions, does the concierge surface real member-specific data rather than deflecting? (10=surfaces specific preferences, 5=shows profile data, 1=deflects or invents)
+- multi_intent_handling: For messages with 2+ intents, does the concierge address all of them — firing multiple tools or sequencing them? (10=all intents handled, 1=only first intent handled, other dropped)
+- per_member_relationship_depth: Across all 5 personas, is the depth of personalization visibly different? James vs Linda vs Sandra? (10=clearly differentiated knowledge depth, 1=same treatment for all)
+- white_glove_readiness: For re-engagement and "where do I start" messages, does the concierge give specific personalized suggestions or generic lists? (10=specific and personalized, 1=generic event list)
+
+Return ONLY valid JSON matching this contract exactly:
+{
+  "agent": "Member Concierge Architecture Realization",
+  "scores": {
+    "confirmation_loop_closed": { "score": <1-10>, "evidence": "<quote a booking response or msg 31 response showing confirmation or its absence>", "rationale": "<1 sentence on what was observed>" },
+    "session_memory_active": { "score": <1-10>, "evidence": "<cite specific cross-turn reference or note 'infrastructure present, not yet visible in responses'>", "rationale": "<1 sentence>" },
+    "preference_capture": { "score": <1-10>, "evidence": "<quote the response to msg 32 'what preferences have you noted'>", "rationale": "<1 sentence>" },
+    "multi_intent_handling": { "score": <1-10>, "evidence": "<cite msg 34-36 tool calls showing single or multiple intents handled>", "rationale": "<1 sentence>" },
+    "per_member_relationship_depth": { "score": <1-10>, "evidence": "<compare a James response to a Linda response showing differentiation or lack>", "rationale": "<1 sentence>" },
+    "white_glove_readiness": { "score": <1-10>, "evidence": "<quote the response to Linda msg 35 or James msg 36>", "rationale": "<1 sentence>" }
+  },
+  "top_strengths": ["<specific architectural strength observed>", "<specific strength>"],
+  "top_issues": ["<specific architectural gap with evidence>", "<gap>"],
+  "recommendations": [
+    { "priority": "P0|P1|P2", "surface": "<api/concierge/chat.js or api/agents/concierge-session.js or src/config/conciergePrompt.js>", "change": "<specific actionable change to realize the benefit>", "expected_lift": "<dimension_id>" }
+  ],
+  "confidence": <0.0-1.0>
+}`,
+  },
+
+  {
+    id: 'gm_concierge_readiness',
+    name: 'GM Concierge Readiness',
+    weight: 0.05,
+    dimensions: ['routing_architecture', 'decision_auditability', 'multi_agent_coordination', 'behavior_learning_foundation', 'succession_readiness'],
+    prompt: `You are an AI systems architect evaluating readiness for a GM-level concierge that routes work to 7 specialist agents and accumulates institutional memory. This feature is NOT YET BUILT — you are scoring the foundation and gaps visible in the current system's 36 test conversations and architecture.
+
+THE GM CONCIERGE VISION:
+- One GM session per GM, permanent. Every approval, override, dismissal becomes a gm_session event.
+- The GM concierge is a routing brain: it calls other agents (member risk, service recovery, revenue analyst, etc.) as tools rather than doing work itself.
+- Preferences emerge from observed behavior (thresholds, tone rules, briefing order) not settings panels.
+- Morning briefings are composed from the event log ("agents did X autonomously, here's what I held for review").
+- Board questions like "why did we comp $4K?" become queries against the decision log.
+- Succession: when a GM leaves, the new GM inherits the session as institutional memory.
+
+WHAT TO EVALUATE (from the 36 conversations and inferred architecture):
+1. ROUTING ARCHITECTURE: Looking at the tool calls in the conversations — is the concierge already routing to the right departments/staff (Pro Shop, Front Desk, Events Team)? Does the agent-events.js handler pattern support plugging in real agent-to-agent routing?
+2. DECISION AUDITABILITY: Are tool calls, results, and routing decisions being logged in a way that supports future queries? (activity_log writes, event_bus routing — infer from booking results showing request_id, routed_to, etc.)
+3. MULTI-AGENT COORDINATION: For complex requests (complaint + follow-up, booking + dining), does the system show any sign of coordinating across multiple tool calls in sequence? Does it pass context between them?
+4. BEHAVIOR LEARNING FOUNDATION: Is there any infrastructure for learning from the GM's decisions — event log schema, session events, preference capture patterns? (infer from what's visible in the member concierge conversations and architecture)
+5. SUCCESSION READINESS: Is the session log being built in a way that survives GM turnover? Is it queryable, portable, and structured enough for a new GM to inherit?
+
+SCORING NOTE: Most of these dimensions will score 3-6 because the GM concierge is not yet built. That is EXPECTED and correct. A score of 3 means "no foundation," 5 means "building blocks present in the member concierge architecture," 7 means "foundation ready, needs GM-specific wiring," 9+ means "actively working."
+
+SCORE EACH DIMENSION 1-10:
+- routing_architecture: Does the member concierge show the routing pattern (department-specific routing, correct staff routing) that the GM concierge will need? Is the agent-events.js pattern extensible? (scoring based on inferred architecture from booking results)
+- decision_auditability: Do booking results include request_id, routed_to, and status fields that form a decision trail? Are events being emitted to a queryable log? (10=full audit trail visible, 1=no traceability)
+- multi_agent_coordination: For requests that require multiple steps, does the system coordinate them? Does it pass results from one tool to the next coherently? (10=full coordination, 1=each tool call isolated)
+- behavior_learning_foundation: Is the session log schema (event_type, payload JSONB) flexible enough to capture GM decision patterns? Are preference_observed events being used in member sessions? (10=foundation ready, 1=no infrastructure)
+- succession_readiness: Is the event log append-only and structured so a new GM could reconstruct decisions? Are payloads descriptive enough to be read by someone with no prior context? (10=fully portable, 1=opaque internal state)
+
+Return ONLY valid JSON matching this contract exactly:
+{
+  "agent": "GM Concierge Readiness",
+  "scores": {
+    "routing_architecture": { "score": <1-10>, "evidence": "<cite specific routed_to values in booking results showing correct department routing>", "rationale": "<1 sentence on routing foundation quality>" },
+    "decision_auditability": { "score": <1-10>, "evidence": "<cite request_id, routed_to, status fields from booking results or event log references>", "rationale": "<1 sentence>" },
+    "multi_agent_coordination": { "score": <1-10>, "evidence": "<cite any multi-tool sequence showing or lacking coordination (msgs 34-36 are the best test)>", "rationale": "<1 sentence>" },
+    "behavior_learning_foundation": { "score": <1-10>, "evidence": "<infer from session event schema and preference_observed patterns visible in conversations>", "rationale": "<1 sentence>" },
+    "succession_readiness": { "score": <1-10>, "evidence": "<evaluate whether event payloads are self-describing enough to be inherited by a new GM>", "rationale": "<1 sentence>" }
+  },
+  "top_strengths": ["<specific foundation strength that GM concierge can build on>", "<strength>"],
+  "top_issues": ["<specific gap that must be closed before GM concierge ships>", "<gap>"],
+  "recommendations": [
+    { "priority": "P0|P1|P2", "surface": "<api/agents/agent-events.js or api/concierge/chat.js or new file>", "change": "<specific actionable change to advance GM concierge readiness>", "expected_lift": "<dimension_id>" }
   ],
   "confidence": <0.0-1.0>
 }`,
@@ -385,7 +498,7 @@ async function main() {
 
   // ── Phase 1: Run all 30 API calls ──────────────────────────────────────────
 
-  console.log('Phase 1 — Sending 30 test messages…\n');
+  console.log('Phase 1 — Sending 36 test messages (30 functional + 6 architecture probes)…\n');
 
   const apiResults = [];
   let simulatedCount = 0;
@@ -397,7 +510,7 @@ async function main() {
     const label = `${i + 1}`.padStart(2, '0');
     const toolSlug = test.expectedTool.replace(/_/g, '-');
 
-    process.stdout.write(`  [${label}/30] ${persona.memberId} — "${test.message.slice(0, 50)}…" `);
+    process.stdout.write(`  [${label}/${TEST_MATRIX.length}] ${persona.memberId} — "${test.message.slice(0, 50)}…" `);
 
     const result = await callConcierge(token, clubId, persona.memberId, test.message);
 
@@ -432,7 +545,7 @@ async function main() {
     if (i < TEST_MATRIX.length - 1) await sleep(800);
   }
 
-  console.log(`\n  Results: ${toolCallCount}/30 had tool calls, ${simulatedCount}/30 simulated`);
+  console.log(`\n  Results: ${toolCallCount}/${TEST_MATRIX.length} had tool calls, ${simulatedCount}/${TEST_MATRIX.length} simulated`);
   if (simulatedCount > 20) {
     console.warn('\n  ⚠ WARNING: Most responses are SIMULATED (no ANTHROPIC_API_KEY on server).');
     console.warn('  Tool accuracy scoring will be limited. Run against local dev server for full results.\n');
@@ -481,7 +594,7 @@ async function main() {
 
   // ── Phase 3: AI Scoring Agents ─────────────────────────────────────────────
 
-  console.log('\nPhase 3 — Running 5 scoring agents…\n');
+  console.log('\nPhase 3 — Running 7 scoring agents (5 functional + 2 architecture)…\n');
 
   const anthropic = new Anthropic({ apiKey: API_KEY });
 
@@ -613,7 +726,7 @@ ${r.error ? `Error: ${r.error}` : ''}`;
     run_timestamp: ts,
     app_url: APP_URL,
     club_id: clubId,
-    total_messages: TEST_MATRIX.length,
+    total_messages: TEST_MATRIX.length, // 30 functional + 6 architecture probes
     simulated_count: simulatedCount,
     tool_call_count: toolCallCount,
     composite,
