@@ -4,7 +4,7 @@
  */
 export default function DataEmptyState({ icon, title, description, dataType, actions }) {
   return (
-    <div role="status" className="p-8 text-center rounded-xl border border-dashed border-swoop-border bg-swoop-row">
+    <div role="status" className="p-10 text-center rounded-xl border border-swoop-border bg-swoop-panel shadow-theme-xs">
       <div className="text-[32px] mb-3 opacity-60">{icon || '\uD83D\uDCCA'}</div>
       <div className="text-sm font-bold text-swoop-text mb-1">
         {title || 'No data available'}

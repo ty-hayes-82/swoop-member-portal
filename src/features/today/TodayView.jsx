@@ -16,7 +16,7 @@ import { SkeletonDashboard } from '@/components/ui/SkeletonLoader';
 import PageTransition from '@/components/ui/PageTransition';
 import { isAuthenticatedClub } from '@/config/constants';
 import { getDataMode, isGateOpen } from '@/services/demoGate';
-import { hasRealMemberData, getMemberSummary } from '@/services/memberService';
+import { hasRealMemberData, getMemberSummary, getAtRiskMembers, getWatchMembers } from '@/services/memberService';
 import OnboardingChecklist from './OnboardingChecklist';
 import { getTodayTeeSheet } from '@/services/operationsService';
 import { getHealthRollup } from '@/services/apiHealthService';
@@ -229,6 +229,12 @@ export default function TodayView() {
   // Data-source gates — used to suppress phantom KPIs when a source isn't connected.
   // Fixes the 1_today P1 where tee-sheet / staffing numbers appeared out of thin air.
   const teeSheetConnected = isGateOpen('tee-sheet') || roundsToday > 0;
+
+  // Priority member counts — derived live so empty states can't collide with headers
+  const atRiskCount = getAtRiskMembers().length;
+  const watchCount = getWatchMembers().length;
+  const priorityMemberCount = Math.min(atRiskCount + watchCount, 5);
+  const hasActivityData = isGateOpen('tee-sheet') || isGateOpen('fb') || isGateOpen('email');
 
 
   const [isLoading, setIsLoading] = useState(true);
@@ -606,8 +612,10 @@ export default function TodayView() {
         <SwoopSection
           title="Priority Member Alerts"
           titleColor={C.danger}
-          count="5 critical"
-          peek="Linda Leonard · Kevin Hurst · Robert Callahan · Anne Jordan · Robert Mills"
+          count={priorityMemberCount > 0 ? `${priorityMemberCount} priority` : 'Awaiting activity data'}
+          peek={priorityMemberCount > 0
+            ? `${atRiskCount} at-risk · ${watchCount} on watch`
+            : 'Connect POS / Tee Sheet to surface at-risk members'}
         >
           <MemberAlerts />
         </SwoopSection>
@@ -616,8 +624,10 @@ export default function TodayView() {
         <SwoopSection
           title="Action Queue"
           titleColor={C.accent}
-          count={pendingAgentCount || 20}
-          peek="3 high-priority · F&B capture, member engagement, service recovery"
+          count={pendingAgentCount > 0 ? pendingAgentCount : 'Awaiting activity data'}
+          peek={pendingAgentCount > 0
+            ? `${pendingAgentCount} pending · F&B capture, member engagement, service recovery`
+            : 'Agents populate this queue once POS and tee sheet are connected'}
         >
           <PendingActionsInline topPriority={topPriority} />
         </SwoopSection>

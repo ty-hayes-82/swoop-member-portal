@@ -10,6 +10,7 @@ import { getLeakageData } from '@/services/revenueService';
 import { useApp } from '@/context/AppContext';
 import { getDailyBriefing } from '@/services/briefingService';
 import { getTodayTeeSheet } from '@/services/operationsService';
+import { isGateOpen } from '@/services/demoGate';
 
 function briefTimestamp() {
   const now = new Date();
@@ -22,8 +23,20 @@ function briefTimestamp() {
   return run.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
 }
 
-function buildBullets({ memberSummary, leakage, pendingCount, briefing, teeSheet }) {
+function buildBullets({ memberSummary, leakage, pendingCount, briefing, teeSheet, hasActivityData }) {
   const bullets = [];
+
+  // Stage 1 honesty: members imported but no activity data — don't fabricate risk narrative
+  if (!hasActivityData && memberSummary.total > 0) {
+    bullets.push({
+      icon: '📥',
+      text: `${memberSummary.total} members imported. Connect POS and tee sheet to establish engagement baselines.`,
+      nav: 'integrations',
+      navOpts: null,
+      urgent: false,
+    });
+    return bullets;
+  }
 
   // 1. At-risk members + dues exposure
   const riskCount = (memberSummary.atRisk || 0) + (memberSummary.critical || 0);
@@ -90,13 +103,16 @@ export default function OvernightBrief() {
   const briefing = getDailyBriefing();
   const teeSheet = getTodayTeeSheet();
 
+  const hasActivityData = isGateOpen('tee-sheet') || isGateOpen('fb') || isGateOpen('email');
+
   const bullets = useMemo(() => buildBullets({
     memberSummary,
     leakage,
     pendingCount: pendingAgentCount || 0,
     briefing,
     teeSheet,
-  }), [memberSummary, leakage, pendingAgentCount, briefing, teeSheet]);
+    hasActivityData,
+  }), [memberSummary, leakage, pendingAgentCount, briefing, teeSheet, hasActivityData]);
 
   // Only render when there's something real to show
   if (bullets.length === 0) return null;
@@ -109,8 +125,8 @@ export default function OvernightBrief() {
       style={{
         background: hasUrgent
           ? 'linear-gradient(135deg, rgba(239,68,68,0.04) 0%, rgba(239,68,68,0.02) 100%)'
-          : 'linear-gradient(135deg, rgba(139,92,246,0.06) 0%, rgba(139,92,246,0.02) 100%)',
-        borderColor: hasUrgent ? 'rgba(239,68,68,0.18)' : 'rgba(139,92,246,0.2)',
+          : 'linear-gradient(135deg, rgba(243,146,45,0.06) 0%, rgba(243,146,45,0.02) 100%)',
+        borderColor: hasUrgent ? 'rgba(239,68,68,0.18)' : 'rgba(243,146,45,0.2)',
       }}
     >
       {/* Header */}
@@ -119,8 +135,8 @@ export default function OvernightBrief() {
           <span
             className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded"
             style={{
-              background: hasUrgent ? 'rgba(239,68,68,0.1)' : 'rgba(139,92,246,0.12)',
-              color: hasUrgent ? '#ef4444' : '#8b5cf6',
+              background: hasUrgent ? 'rgba(239,68,68,0.1)' : 'rgba(243,146,45,0.12)',
+              color: hasUrgent ? '#ef4444' : '#f3922d',
             }}
           >
             Overnight Brief

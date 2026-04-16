@@ -244,23 +244,32 @@ export default function HealthOverview() {
     <div className="flex flex-col gap-6">
 
       {scoresMissing && (
-        <div className="rounded-xl border border-warning-500/30 bg-warning-500/[0.08] px-5 py-4 flex items-start gap-3">
-          <span className="text-lg leading-none mt-0.5">◆</span>
+        <div className="rounded-xl border border-brand-500/30 bg-brand-500/[0.08] px-5 py-4 flex items-start gap-3">
+          <span className="text-lg leading-none mt-0.5 text-brand-500">◆</span>
           <div className="flex-1">
             <div className="text-sm font-semibold text-swoop-text">
-              {allMembers.length} members imported, but health scores haven't been computed yet.
+              {allMembers.length} members imported · connect golf and dining data to unlock member health scores
             </div>
-            <div className="text-xs text-swoop-text-muted mt-1">
-              Run Re-Score to populate the distribution cards below — or connect POS, tee sheet, and email sources to unlock richer signals.
+            <div className="text-xs text-swoop-text-muted mt-1 leading-relaxed">
+              Detect 82→61 health score drops, track the cross-domain decay sequence, and protect $32K+ in at-risk annual dues per member save.
             </div>
-            <button
-              type="button"
-              onClick={handleRescore}
-              disabled={rescoring}
-              className="mt-2 px-3 py-1.5 rounded-md text-xs font-bold bg-brand-500 text-white hover:bg-brand-600 disabled:opacity-60"
-            >
-              {rescoring ? 'Computing…' : 'Re-Score Now →'}
-            </button>
+            <div className="mt-3 flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={() => { window.location.hash = '#integrations'; }}
+                className="px-3 py-1.5 rounded-md text-xs font-bold bg-brand-500 text-white hover:bg-brand-600"
+              >
+                Connect Integrations →
+              </button>
+              <button
+                type="button"
+                onClick={handleRescore}
+                disabled={rescoring}
+                className="px-3 py-1.5 rounded-md text-xs font-semibold bg-transparent text-swoop-text-muted border border-swoop-border hover:text-swoop-text disabled:opacity-60"
+              >
+                {rescoring ? 'Computing…' : 'Or re-score now'}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -270,10 +279,12 @@ export default function HealthOverview() {
         {dist.map((d) => {
           const delta = Number.isFinite(d?.delta) ? d.delta : 0;
           const descriptor = levelDescriptions[d.level] ?? 'are in this state';
-          const deltaColor = delta > 0 ? '#ef4444' : delta < 0 ? '#12b76a' : '#9CA3AF';
-          const deltaCopy = delta === 0
-            ? 'same as last month.'
-            : `${Math.abs(delta)} ${delta > 0 ? 'more' : 'fewer'} than last month.`;
+          const deltaColor = scoresMissing ? '#9CA3AF' : delta > 0 ? '#ef4444' : delta < 0 ? '#12b76a' : '#9CA3AF';
+          const deltaCopy = scoresMissing
+            ? 'Pending computation — tease $32K+ dues save per member.'
+            : delta === 0
+              ? 'same as last month.'
+              : `${Math.abs(delta)} ${delta > 0 ? 'more' : 'fewer'} than last month.`;
           return (
             <div
               key={d.level}
@@ -283,10 +294,10 @@ export default function HealthOverview() {
             >
               <div className="flex justify-between mb-2">
                 <span className="text-xs text-swoop-text-label uppercase tracking-wide">{d.level}</span>
-                <span className="text-xs" style={{ color: d.color }}>{(d.percentage * 100).toFixed(0)}%</span>
+                <span className="text-xs" style={{ color: d.color }}>{scoresMissing ? '—' : `${(d.percentage * 100).toFixed(0)}%`}</span>
               </div>
-              <div className="text-[28px] font-mono font-bold" style={{ color: d.color }}>{d.count}</div>
-              <div className="text-xs text-swoop-text-label">members</div>
+              <div className="text-[28px] font-mono font-bold" style={{ color: d.color }}>{scoresMissing ? '—' : d.count}</div>
+              <div className="text-xs text-swoop-text-label">{scoresMissing ? 'pending integration' : 'members'}</div>
               <div className="h-1 bg-swoop-border rounded-sm mt-2">
                 <div className="h-full rounded-sm" style={{ background: d.color, width: `${d.percentage * 100}%` }} />
               </div>

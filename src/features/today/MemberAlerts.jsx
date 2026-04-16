@@ -1,9 +1,10 @@
 // MemberAlerts — Top 5 priority members needing attention this week
 // Uses live API data from memberService (not static demo data)
 import { useState } from 'react';
-import { getAtRiskMembers, getWatchMembers } from '@/services/memberService';
+import { getAtRiskMembers, getWatchMembers, getMemberSummary } from '@/services/memberService';
 import { getDailyBriefing } from '@/services/briefingService';
 import { getComplaintCorrelation } from '@/services/staffingService';
+import { isGateOpen } from '@/services/demoGate';
 import MemberLink from '@/components/MemberLink';
 import { useNavigation } from '@/context/NavigationContext';
 import SourceBadge from '@/components/ui/SourceBadge';
@@ -164,6 +165,36 @@ export default function MemberAlerts() {
   };
 
   if (members.length === 0) {
+    const summary = getMemberSummary();
+    const rosterImported = (summary.total || 0) > 0;
+    const hasActivityData = isGateOpen('tee-sheet') || isGateOpen('fb') || isGateOpen('email');
+
+    // Stage 1: members imported but no activity — next step is connecting activity sources,
+    // not re-importing members. Teases $32K dues save opportunity.
+    if (rosterImported && !hasActivityData) {
+      return (
+        <div className="alerts-section-enhanced fade-in-up fade-delay-1">
+          <div className="alerts-header">Priority Member Alerts</div>
+          <div className="alerts-empty" style={{ flexWrap: 'wrap' }}>
+            <div className="alerts-empty-icon">◆</div>
+            <div style={{ flex: '1 1 0%', minWidth: 200 }}>
+              <div className="alerts-empty-title">{summary.total} members imported · awaiting activity data</div>
+              <div className="alerts-empty-desc">
+                Connect POS and tee sheet to spot at-risk members before they resign — catch 82→61 health drops and protect $32K+ in annual dues per save.
+              </div>
+            </div>
+            <button
+              className="alerts-cta"
+              onClick={() => navigate('integrations')}
+              style={{ background: 'rgb(243,146,45)', color: '#fff' }}
+            >
+              Connect POS / Tee Sheet →
+            </button>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="alerts-section-enhanced fade-in-up fade-delay-1">
         <div className="alerts-header">Priority Member Alerts</div>
@@ -173,7 +204,7 @@ export default function MemberAlerts() {
             <div className="alerts-empty-title">All Members in Good Standing</div>
             <div className="alerts-empty-desc">No at-risk members detected. Import member data and engagement sources to activate priority alerts.</div>
           </div>
-          <button className="alerts-cta" onClick={() => navigate('integrations/csv-import', { category: 'members' })}>📥 Import Member Data</button>
+          <button className="alerts-cta" onClick={() => navigate('integrations/csv-import', { category: 'members' })}>Import Member Data</button>
         </div>
       </div>
     );

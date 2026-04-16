@@ -31,8 +31,8 @@ export default function MembersView() {
       <PageTransition>
         <DataEmptyState
           icon="👥"
-          title="Connect your club systems to see member intelligence"
-          description="Swoop pulls members, rounds, spend, and engagement directly from Jonas, Clubessential, Northstar, and similar systems. Once connected, health scores, archetypes, and at-risk alerts populate automatically."
+          title="Connect your club systems to unlock member intelligence"
+          description="Identify $32K+ in at-risk annual dues per member, track cross-domain decay sequences, and catch 82→61 health score drops before members resign. Swoop pulls members, rounds, spend, and engagement directly from Jonas, Clubessential, Northstar, and similar systems."
           dataType="members"
           actions={
             <>
