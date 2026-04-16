@@ -2,12 +2,14 @@ import { useState, lazy, Suspense } from 'react';
 import ActivityLog from './ActivityLog';
 import CourtReservationsPanel from './CourtReservationsPanel';
 import FBOrdersPanel from './FBOrdersPanel';
+import VoiceConciergePanel from './VoiceConciergePanel';
 
 const SMSChatSimulatorPage = lazy(() => import('@/features/agents/SMSChatSimulatorPage'));
 
 const TABS = [
   { key: 'activity',   label: 'Activity',      icon: '📋' },
-  { key: 'sms',        label: 'SMS Simulator', icon: '💬' },
+  { key: 'voice',      label: 'Voice',         icon: '🎙' },
+  { key: 'sms',        label: 'SMS',           icon: '💬' },
   { key: 'courts',     label: 'Court Bookings',icon: '🎾' },
   { key: 'fb',         label: 'F&B Orders',    icon: '🍽' },
 ];
@@ -45,6 +47,7 @@ export default function OperationsHub() {
 
       <div role="tabpanel">
         {activeTab === 'activity' && <ActivityLog />}
+        {activeTab === 'voice' && <VoiceConciergePanel />}
         {activeTab === 'sms' && (
           <Suspense fallback={<div className="text-sm text-swoop-text-muted py-6 text-center">Loading SMS Simulator...</div>}>
             <SMSChatSimulatorPage embedded={true} />
