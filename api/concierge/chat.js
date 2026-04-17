@@ -1710,6 +1710,8 @@ async function chatHandler(req, res) {
           .replace(/^([A-Z][a-z]+!)\s+(?:you\s+made\s+my\s+day|so\s+glad\s+you\s+(?:reached\s+out|did)|so\s+good\s+to\s+hear\s+from\s+you)(?:\s+\w+){0,3}[.!]\s*/i, '$1 ')
           // Strip hollow T2 warmth clause when confirming a booking after prior offer
           .replace(/^[^,!]+[,!]\s+(?:I'?m\s+)?(?:so\s+(?:glad|happy)\s+you\s+reached\s+out|always\s+love\s+hearing\s+from\s+you|great\s+to\s+hear\s+from\s+you|so\s+good\s+to\s+hear\s+from\s+you|you\s+made\s+my\s+day)[^,!.]*[,!.]\s*/i, `${memberFirstName}, `)
+          // Strip spurious "and" after name in dining confirmations: "Anne, and I've booked" → "Anne, I've booked"
+          .replace(/^([A-Z][a-z]+,)\s+and\s+(?=I'?(?:ve|'m)\s)/i, '$1 ')
           .replace(/\s+\.$/, '.')
           .trim();
       }
@@ -1777,6 +1779,14 @@ async function chatHandler(req, res) {
         responseText = responseText
           .replace(
             /^([A-Z][a-z]+!\s+[^.!\n]+[.!])\s+(?:So\s+great|Great|Wonderful|Really\s+glad|Glad\s+to\s+hear|So\s+glad|So\s+happy|Love\s+hearing|Happy\s+to\s+hear|Miss\s+you|You\s+just\s+made)[^.!\n]*[.!]\s*/i,
+            '$1 '
+          )
+          // Strip hollow ", and I'm happy to share what's on the calendar" clause embedded in opener
+          .replace(/,\s+and\s+I'?m\s+(?:so\s+)?(?:happy|glad|delighted|thrilled|excited)\s+to\s+(?:share|tell\s+you(?:\s+about)?)\s+(?:what'?s\s+(?:on|happening|coming\s+up)\s+(?:on\s+the\s+)?(?:calendar|schedule|lineup)[^.!]*|all\s+about\s+it[^.!]*)/gi, '')
+          // Collapse hollow warm opener sentence entirely when followed by event content — saves a sentence
+          // e.g. "Linda! It's been so wonderful to have you back." → "Linda!" before "We have..."
+          .replace(
+            /^([A-Z][a-z]+[!,])\s+(?:It'?s\s+been\s+(?:so\s+)?(?:wonderful|great|good|lovely|amazing)\s+to\s+(?:have\s+you\s+back|see\s+you\s+again|hear\s+from\s+you)|(?:So|How)\s+(?:wonderful|great|good|lovely)\s+to\s+(?:have\s+you\s+back|hear\s+from\s+you)|What\s+a\s+(?:wonderful|great|lovely)\s+(?:surprise|day)\s+to\s+hear\s+from\s+you)[^.!]*[.!]\s+(?=[A-Z])/i,
             '$1 '
           )
           .trim();
