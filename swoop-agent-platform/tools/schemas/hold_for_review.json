@@ -1,0 +1,14 @@
+{
+  "type": "custom",
+  "name": "hold_for_review",
+  "description": "When an autonomous action exceeds the GM's approved threshold or involves a sensitive scenario (bereavement, high-value member at risk, etc.), hold for human review instead of executing. Writes a hold event to the GM's morning briefing queue.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "gm_session_id": { "type": "string" },
+      "proposed_action": { "type": "object" },
+      "hold_reason": { "type": "string" }
+    },
+    "required": ["gm_session_id", "proposed_action", "hold_reason"]
+  }
+}

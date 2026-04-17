@@ -33,7 +33,7 @@ async function handler(req, res) {
       }
 
       await sql`
-        INSERT INTO activity_log (action_type, action_subtype, actor, member_id, member_name, agent_id, reference_id, reference_type, description, meta, club_id)
+        INSERT INTO activity_log_v1 (action_type, action_subtype, actor, member_id, member_name, agent_id, reference_id, reference_type, description, meta, club_id)
         VALUES (${actionType}, ${actionSubtype ?? null}, ${actor}, ${memberId ?? null}, ${memberName ?? null}, ${agentId ?? null}, ${referenceId ?? null}, ${referenceType ?? null}, ${description ?? null}, ${JSON.stringify(meta ?? {})}, ${clubId})
       `;
 
@@ -71,7 +71,7 @@ async function handler(req, res) {
         actor, sessionClubId, targetClubId: clubId, ip,
       });
 
-      const delResult = await sql`DELETE FROM activity_log WHERE club_id = ${clubId}`;
+      const delResult = await sql`DELETE FROM activity_log_v1 WHERE club_id = ${clubId}`;
       const deletedRows = delResult?.rowCount ?? 0;
       logWarn('/api/activity', 'audit log DELETE complete', {
         actor, sessionClubId, targetClubId: clubId, deletedRows, ip,
@@ -81,18 +81,34 @@ async function handler(req, res) {
 
     // GET — fetch activity feed
     const limit = Math.min(parseInt(req.query.limit) || 100, 500);
+    const status = req.query.status;
     const type = req.query.type;
     const memberId = req.query.memberId;
 
+    // Confirmation queue (platform table) — keyed by status=pending_confirmation|confirmed|dismissed
+    if (status) {
+      const result = await sql`
+        SELECT confirmation_id, action_type, recipient_role, description AS action_description,
+               source_system, context_data AS context, status, session_id, agent_name,
+               expected_completion, resolved_at, created_at
+        FROM activity_log
+        WHERE status = ${status}
+        ORDER BY created_at DESC
+        LIMIT ${limit}
+      `;
+      return res.status(200).json(result.rows);
+    }
+
+    // Legacy general activity feed (backed-up v1 table)
     let result;
     if (type && memberId) {
-      result = await sql`SELECT * FROM activity_log WHERE club_id = ${clubId} AND action_type = ${type} AND member_id = ${memberId} ORDER BY created_at DESC LIMIT ${limit}`;
+      result = await sql`SELECT * FROM activity_log_v1 WHERE club_id = ${clubId} AND action_type = ${type} AND member_id = ${memberId} ORDER BY created_at DESC LIMIT ${limit}`;
     } else if (type) {
-      result = await sql`SELECT * FROM activity_log WHERE club_id = ${clubId} AND action_type = ${type} ORDER BY created_at DESC LIMIT ${limit}`;
+      result = await sql`SELECT * FROM activity_log_v1 WHERE club_id = ${clubId} AND action_type = ${type} ORDER BY created_at DESC LIMIT ${limit}`;
     } else if (memberId) {
-      result = await sql`SELECT * FROM activity_log WHERE club_id = ${clubId} AND member_id = ${memberId} ORDER BY created_at DESC LIMIT ${limit}`;
+      result = await sql`SELECT * FROM activity_log_v1 WHERE club_id = ${clubId} AND member_id = ${memberId} ORDER BY created_at DESC LIMIT ${limit}`;
     } else {
-      result = await sql`SELECT * FROM activity_log WHERE club_id = ${clubId} ORDER BY created_at DESC LIMIT ${limit}`;
+      result = await sql`SELECT * FROM activity_log_v1 WHERE club_id = ${clubId} ORDER BY created_at DESC LIMIT ${limit}`;
     }
 
     res.status(200).json({ activities: result.rows });

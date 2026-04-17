@@ -1,3 +1,4 @@
+// SUPERSEDED: cron-labor now handles this via labor_optimizer session. Remove after 7-day parallel-run validation.
 /**
  * Staffing-Demand Monitor Cron
  * Schedule: Every 6 hours (0 0,6,12,18 * * *)

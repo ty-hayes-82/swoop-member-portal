@@ -1,0 +1,22 @@
+{
+  "type": "custom",
+  "name": "log_decision",
+  "description": "Write a decision event to a role agent's session. Captures the reasoning chain, approved/overridden/dismissed status, and outcome target. This is the audit trail that powers board reporting and GM succession handoff.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "session_id": { "type": "string" },
+      "decision_type": { "type": "string" },
+      "disposition": {
+        "type": "string",
+        "enum": ["approved", "overridden", "dismissed", "escalated"]
+      },
+      "reasoning_chain": {
+        "type": "array",
+        "items": { "type": "object" }
+      },
+      "expected_outcome": { "type": "string" }
+    },
+    "required": ["session_id", "decision_type", "disposition"]
+  }
+}

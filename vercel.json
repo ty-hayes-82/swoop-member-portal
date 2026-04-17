@@ -18,7 +18,14 @@
     { "path": "/api/cron/staff-briefings", "schedule": "0 6 * * *" },
     { "path": "/api/cron/concierge-engagement", "schedule": "0 7 * * *" },
     { "path": "/api/cron/renewal-intelligence", "schedule": "0 8 1 * *" },
-    { "path": "/api/cron/arrival-scan", "schedule": "*/15 * * * *" }
+    { "path": "/api/cron/arrival-scan", "schedule": "*/15 * * * *" },
+    { "path": "/api/agents/cron-member-pulse",     "schedule": "0 * * * *"    },
+    { "path": "/api/agents/cron-service-recovery", "schedule": "*/30 * * * *" },
+    { "path": "/api/agents/cron-revenue",          "schedule": "0 6 * * *"    },
+    { "path": "/api/agents/cron-labor",            "schedule": "0 5 * * *"    },
+    { "path": "/api/agents/cron-engagement",       "schedule": "0 7 * * *"    },
+    { "path": "/api/agents/cron-board-report",     "schedule": "0 8 1 * *"    },
+    { "path": "/api/agents/cron-dormancy-sweep",   "schedule": "0 2 * * *"    }
   ],
   "headers": [
     {

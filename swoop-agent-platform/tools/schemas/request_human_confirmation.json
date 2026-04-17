@@ -1,0 +1,22 @@
+{
+  "type": "custom",
+  "name": "request_human_confirmation",
+  "description": "Surface an action to a staff member for them to complete in the source system. Swoop does not book, charge, send, or modify state — humans do. This tool shows the staff member the action, the context, and a confirm button. The agent receives a confirmation_id immediately and the handoff.confirmed event fires when the staff member acts.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "recipient_role": { "type": "string" },
+      "action_description": { "type": "string" },
+      "context_for_human": { "type": "object" },
+      "source_system": {
+        "type": "string",
+        "enum": ["jonas", "foretees", "toast", "clubessential", "northstar", "other"]
+      },
+      "expected_completion": {
+        "type": "string",
+        "description": "ISO 8601 timestamp or descriptor like 'within 15 minutes'"
+      }
+    },
+    "required": ["recipient_role", "action_description", "source_system"]
+  }
+}
