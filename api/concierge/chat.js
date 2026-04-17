@@ -1719,7 +1719,7 @@ async function chatHandler(req, res) {
         try {
           const isEventQuery = /\b(?:what'?s?\s+(?:happening|going\s+on|on|new)\s+(?:at\s+(?:the\s+)?club|this\s+weekend|this\s+week)|what\s+have\s+I\s+missed|events?\s+(?:this|at|coming|upcoming)|this\s+weekend|club\s+events?|what(?:'s|\s+is)\s+(?:new|on|happening)\s+(?:at\s+)?(?:the\s+)?club|what(?:'s|\s+is)\s+on\s+(?:at\s+the\s+)?club)\b/i.test(message);
           const calendarFired = [...seenToolCalls].some(k => k.startsWith('get_club_calendar:'));
-          if (isEventQuery && !calendarFired) {
+          if (isEventQuery && !calendarFired && !isCancelRequest) {
             console.warn('[concierge] CALENDAR GUARD: event query with no get_club_calendar — firing it');
             const calResult = await executeAndLogTool('get_club_calendar', {});
             // If model deferred to events team instead of giving real info, replace response
@@ -1836,6 +1836,8 @@ async function chatHandler(req, res) {
         responseText = responseText
           // Strip hollow T2 opener like "Robert, I'm so glad you reached out..." or "Robert! So glad..."
           .replace(/^([^,!]+[,!])\s+(?:I'?m\s+)?(?:so\s+glad\s+you\s+reached\s+out|always\s+love\s+hearing\s+from\s+you|great\s+to\s+hear\s+from\s+you)[^,.!]*[,.!]\s*/i, '$1 ')
+          // Strip hollow re-engagement opener like "Robert! It's been too long, we miss having you around."
+          .replace(/^([A-Z][a-z]+!)\s+(?:it'?s\s+been\s+(?:too\s+long|a\s+while)|we\s+(?:really\s+)?miss\s+(?:having\s+you|you))[^.!]*[.!]\s*/i, '$1 ')
           // Replace "I've sent your RSVP for X to [our/the] events team" with "You're on the list for X"
           .replace(/I'?ve\s+sent\s+your\s+(?:RSVP|registration|details?)\s+for\s+([^.!,]+?)\s+to\s+(?:our\s+|the\s+)?(?:events?\s+(?:team|coordinator)|club\s+team)[^.!]*/gi, "You're on the list for $1")
           // Strip "with/to the events team" / "with/to our events team" process language
