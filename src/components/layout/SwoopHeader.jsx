@@ -7,7 +7,6 @@ import { memberProfiles } from "@/data/members";
 import { loadStaticDemo, hasRealClub } from "@/services/demoSession";
 import { isGateOpen } from "@/services/demoGate";
 import { useApp } from "@/context/AppContext";
-import StaffDutyPanel from "@/features/staff/StaffDutyPanel";
 
 // Client-side fallback: used when /api/search returns empty (e.g. demo mode).
 function localMemberSearch(q) {
@@ -328,9 +327,6 @@ const SwoopHeader = () => {
               </span>
             </button>
           )}
-
-          {/* Staff duty indicator */}
-          <StaffDutyPanel />
 
           {/* Notification bell */}
           <div className="relative" ref={notifRef}>
