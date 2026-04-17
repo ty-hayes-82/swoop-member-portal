@@ -1298,6 +1298,13 @@ async function chatHandler(req, res) {
         const dedupedCalls = fnCalls.filter(({ functionCall: fc }) => {
           const key = `${fc.name}:${JSON.stringify(fc.args)}`;
           if (seenToolCalls.has(key)) { console.warn(`[concierge] dedup: skipping duplicate ${fc.name}`); return false; }
+          // Block additional get_club_calendar calls regardless of arg variation —
+          // model occasionally fires it twice with slightly different args.
+          // Check BEFORE seenToolCalls.add so the first call always passes through.
+          if (fc.name === 'get_club_calendar' && [...seenToolCalls].some(k => k.startsWith('get_club_calendar:'))) {
+            console.warn('[concierge] CALENDAR DEDUP: blocking extra get_club_calendar call');
+            return false;
+          }
           seenToolCalls.add(key);
           return true;
         });
@@ -1377,13 +1384,6 @@ async function chatHandler(req, res) {
               rsvpBlockedNeedsTeeTime = true;
               return false;
             }
-          }
-          // ── CALENDAR DEDUP GUARD ──────────────────────────────────────────────
-          // Block duplicate get_club_calendar calls in the same turn — model
-          // occasionally fires it twice with slightly different args.
-          if (fc.name === 'get_club_calendar' && [...seenToolCalls].some(k => k.startsWith('get_club_calendar:'))) {
-            console.warn('[concierge] CALENDAR DEDUP: blocking duplicate get_club_calendar call');
-            return false;
           }
           return true;
         });
@@ -1609,6 +1609,23 @@ async function chatHandler(req, res) {
                 : `${memberFirstName}, when would you like the reservation, and for how many guests?`;
             }
           }
+        }
+      }
+
+      // ── POST-LOOP DINING BARE-REQUEST GUARD ─────────────────────────────────
+      // When member sent a bare dining request with no date/time/party size and
+      // the model responded with invented defaults ("How about dinner for 2 at
+      // 7pm this Saturday? Say yes and I'll book it"), replace with a direct ask.
+      // Only fires for standard members — at-risk/ghost personas should propose.
+      if (responseText && !isAtRiskMember && !isGhostMember) {
+        const hasDiningInMsg = /\b(?:dining|dinner|lunch|reservation)\b/i.test(message);
+        const hasDateInMsg = /\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|today|tonight|tomorrow|this\s+(?:weekend|week))\b/i.test(message);
+        const hasTimeInMsg = /\b\d{1,2}(?::\d{2})?\s*(?:am|pm)\b/i.test(message) || /\b\d{2}:\d{2}\b/.test(message);
+        const hasPartySizeInMsg = /\bfor\s+\d+\b|\b\d+\s+(?:people|guests?|of\s+us)\b/i.test(message);
+        const modelProposedInvented = /\bhow\s+about\s+dinner\s+for\s+\d+/i.test(responseText) && /say\s+yes\s+and\s+I'?ll\s+book/i.test(responseText);
+        if (hasDiningInMsg && !hasDateInMsg && !hasTimeInMsg && !hasPartySizeInMsg && modelProposedInvented) {
+          responseText = `${memberFirstName}, happy to set that up! What date, time, and party size are you thinking?`;
+          console.warn('[concierge] DINING BARE-REQUEST GUARD: replaced proposal with direct ask (no details in message)');
         }
       }
 
