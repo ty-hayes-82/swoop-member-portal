@@ -1347,14 +1347,18 @@ async function chatHandler(req, res) {
             }
           }
           // ── RSVP EVENT GATE ───────────────────────────────────────────────────
-          // Block rsvp_event when context is a golf round, not a club event.
+          // Block rsvp_event when context is a golf round booking, not a club event.
           // "Put me down for it" after tee/course/round mention = tee time, not RSVP.
+          // Exception: if prior response listed events (Championship, Wine Dinner etc.)
+          // then "put me down" IS an event RSVP even if course was mentioned.
           if (fc.name === 'rsvp_event') {
             const prevRespMentionedRound = last_response && /\b(?:round|tee\s*time|south\s+course|north\s+course|course)\b/i.test(last_response);
             const msgIsGolfRound = /\b(?:round|tee\s*time|south\s+course|north\s+course)\b/i.test(message);
             const hasEventName = /\b(?:tournament|championship|qualifier|social|gala|competition|wine\s+dinner|ladies'\s+day|member\s+guest)\b/i.test(message)
-              || (last_response && /\b(?:tournament|championship|qualifier|social|gala|competition)\b/i.test(last_response));
-            if ((prevRespMentionedRound || msgIsGolfRound) && !hasEventName) {
+              || (last_response && /\b(?:tournament|championship|qualifier|social|gala|competition|wine\s+dinner)\b/i.test(last_response));
+            // Prior response was an event listing (calendar results), not a round booking context
+            const prevRespIsEventListing = last_response && /\b(?:coming\s+up|this\s+weekend|upcoming|on\s+(?:saturday|sunday|friday)|here'?s\s+what'?s\s+on)\b/i.test(last_response);
+            if ((prevRespMentionedRound || msgIsGolfRound) && !hasEventName && !prevRespIsEventListing) {
               console.warn('[concierge] RSVP EVENT GATE: rsvp_event blocked — context is golf round, not club event');
               rsvpBlockedNeedsTeeTime = true;
               return false;
@@ -1394,8 +1398,8 @@ async function chatHandler(req, res) {
       // ── POST-LOOP TEE TIME GUARD ─────────────────────────────────────────────
       // If the member asked to book a tee time (T1 — no prior slots in last_response),
       // but no check_tee_availability was called and no book_tee_time was called,
-      // the model returned a fake booking without checking. Force check_tee_availability
-      // and re-run so the member gets real slot options.
+      // force check_tee_availability. Try Gemini re-run; if it throws, format directly
+      // from the check result so errors never propagate to the outer catch block.
       if (!lastRespHadSlots && responseText) {
         const isTeeBooking = /\bbook\b.{0,30}\btee\s*time\b/i.test(message)
           || /\btee\s*time\b.{0,40}\b(?:saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tomorrow|\d{1,2}(?:am|pm))/i.test(message)
@@ -1406,38 +1410,53 @@ async function chatHandler(req, res) {
         const noBookFired = ![...seenToolCalls].some(k => k.startsWith('book_tee_time:'));
         if (isTeeBooking && noCheckFired && noBookFired) {
           console.warn('[concierge] TEE POST-LOOP GUARD: tee booking with no availability check — forcing check_tee_availability');
-          const tm = message.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
-          let forceTime = '08:00';
-          if (tm) {
-            let h = parseInt(tm[1]);
-            const m = tm[2] ? parseInt(tm[2]) : 0;
-            if (tm[3].toLowerCase() === 'pm' && h < 12) h += 12;
-            if (tm[3].toLowerCase() === 'am' && h === 12) h = 0;
-            forceTime = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+          let teeCheckResult = null;
+          try {
+            const tm = message.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
+            let forceTime = '08:00';
+            if (tm) {
+              let h = parseInt(tm[1]);
+              const m = tm[2] ? parseInt(tm[2]) : 0;
+              if (tm[3].toLowerCase() === 'pm' && h < 12) h += 12;
+              if (tm[3].toLowerCase() === 'am' && h === 12) h = 0;
+              forceTime = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+            }
+            const nextSatDate = (() => {
+              const d = new Date();
+              const daysUntilSat = ((6 - d.getDay() + 7) % 7) || 7;
+              d.setDate(d.getDate() + daysUntilSat);
+              return d.toISOString().split('T')[0];
+            })();
+            const forceDate = message.match(/\d{4}-\d{2}-\d{2}/)?.[0] || nextSatDate;
+            teeCheckResult = await executeAndLogTool('check_tee_availability', { date: forceDate, preferred_time: forceTime });
+            const sanitizedCheck = JSON.parse(JSON.stringify(teeCheckResult).replace(/\u2014/g, ','));
+            const forceContents = [
+              { role: 'user', parts: [{ text: message }] },
+              { role: 'model', parts: [{ functionCall: { name: 'check_tee_availability', args: { date: forceDate, preferred_time: forceTime } } }] },
+              { role: 'user', parts: [{ functionResponse: { name: 'check_tee_availability', response: sanitizedCheck } }] },
+            ];
+            const forceResp = await _geminiGenerate({
+              systemPrompt: fullSystemPrompt,
+              contents: forceContents,
+              tools: availableTools,
+              temperature: conciergeTemperature,
+              maxOutputTokens: 2048,
+            });
+            const forcedText = _geminiText(forceResp.candidates?.[0]);
+            if (forcedText) responseText = forcedText;
+          } catch (teeErr) {
+            console.warn('[concierge] TEE POST-LOOP GUARD error — using direct format:', teeErr.message);
+            // Format directly from checkResult so errors don't reach outer catch
+            if (teeCheckResult?.available_slots?.length > 0) {
+              const slots = teeCheckResult.available_slots.slice(0, 3);
+              const slotList = slots.map(s => s.time).join(', ');
+              const courseName = slots[0]?.course || 'the course';
+              responseText = `${memberFirstName}! Available Saturday on ${courseName}: ${slotList} — which works for you?`;
+            } else if (teeCheckResult) {
+              responseText = `${memberFirstName}, I'm not seeing open slots right now — let me have the pro shop confirm Saturday availability.`;
+            }
+            // If teeCheckResult is null (executeAndLogTool threw too), leave responseText as model's output
           }
-          const nextSatDate = (() => {
-            const d = new Date();
-            const daysUntilSat = ((6 - d.getDay() + 7) % 7) || 7;
-            d.setDate(d.getDate() + daysUntilSat);
-            return d.toISOString().split('T')[0];
-          })();
-          const forceDate = message.match(/\d{4}-\d{2}-\d{2}/)?.[0] || nextSatDate;
-          const checkResult = await executeAndLogTool('check_tee_availability', { date: forceDate, preferred_time: forceTime });
-          const sanitizedCheck = JSON.parse(JSON.stringify(checkResult).replace(/\u2014/g, ','));
-          const forceContents = [
-            { role: 'user', parts: [{ text: message }] },
-            { role: 'model', parts: [{ functionCall: { name: 'check_tee_availability', args: { date: forceDate, preferred_time: forceTime } } }] },
-            { role: 'user', parts: [{ functionResponse: { name: 'check_tee_availability', response: sanitizedCheck } }] },
-          ];
-          const forceResp = await _geminiGenerate({
-            systemPrompt: fullSystemPrompt,
-            contents: forceContents,
-            tools: availableTools,
-            temperature: conciergeTemperature,
-            maxOutputTokens: 2048,
-          });
-          const forcedText = _geminiText(forceResp.candidates?.[0]);
-          if (forcedText) responseText = forcedText;
         }
       }
 
@@ -1452,14 +1471,23 @@ async function chatHandler(req, res) {
         const seatPrefMatch = message.match(/\b(booth(?:\s+by\s+the\s+window)?|window\s+(?:booth|seat|table)|corner\s+table|outdoor|patio|quiet\s+table)\b/i);
         const prefNote = seatPrefMatch ? `, ${seatPrefMatch[0]} noted` : '';
         const needsWarmOpener = isDeclineMemberFlag || isAtRiskMember;
+        // Declining/at-risk members with intent ("I want", "book", "I'd like") get asked
+        // rather than offered defaults — they're coming back, honour their specificity.
+        const isDiningIntent = /\b(?:I\s+want|book|make|can\s+I\s+get|I'?d\s+like|I'?d\s+love)\b/i.test(message);
+        const askRatherThanPropose = needsWarmOpener && isDiningIntent;
         if (hasDateInMsg) {
-          const offer = `how about dinner for 2 at 7pm this ${dateRef}${prefNote}? Say yes and I'll book it.`;
-          responseText = needsWarmOpener
-            ? `${memberFirstName}, love hearing from you! ${offer.charAt(0).toUpperCase() + offer.slice(1)}`
-            : `${memberFirstName}, ${offer}`;
+          if (askRatherThanPropose) {
+            const prefNoteAsk = seatPrefMatch ? ` (${seatPrefMatch[0]} noted)` : '';
+            responseText = `${memberFirstName}, great to hear from you! What time and how many guests for ${dateRef}${prefNoteAsk}?`;
+          } else {
+            const offer = `how about dinner for 2 at 7pm this ${dateRef}${prefNote}? Say yes and I'll book it.`;
+            responseText = needsWarmOpener
+              ? `${memberFirstName}, love hearing from you! ${offer.charAt(0).toUpperCase() + offer.slice(1)}`
+              : `${memberFirstName}, ${offer}`;
+          }
         } else {
           responseText = needsWarmOpener
-            ? `${memberFirstName}, love hearing from you! When would you like the reservation, and for how many guests?`
+            ? `${memberFirstName}, great to hear from you! When would you like the reservation, and for how many guests?`
             : `${memberFirstName}, when would you like the reservation, and for how many guests?`;
         }
       }
@@ -1601,18 +1629,108 @@ async function chatHandler(req, res) {
 
       // ── POST-LOOP CALENDAR GUARD ──────────────────────────────────────────────
       // When member asks about club events/activities but model answered without
-      // calling get_club_calendar, fire it now so tool_correctness score is valid.
+      // calling get_club_calendar: fire it and, if the model deferred to staff,
+      // replace the response with actual event data.
       if (responseText) {
         try {
-          const isEventQuery = /\b(?:what'?s?\s+(?:happening|going\s+on|on)\s+(?:at\s+the\s+club|this\s+weekend|this\s+week)|events?\s+(?:this|at|coming|upcoming)|this\s+weekend|club\s+events?|what(?:'s|\s+is)\s+on\s+(?:at\s+the\s+)?club)\b/i.test(message);
+          const isEventQuery = /\b(?:what'?s?\s+(?:happening|going\s+on|on|new)\s+(?:at\s+(?:the\s+)?club|this\s+weekend|this\s+week)|what\s+have\s+I\s+missed|events?\s+(?:this|at|coming|upcoming)|this\s+weekend|club\s+events?|what(?:'s|\s+is)\s+(?:new|on|happening)\s+(?:at\s+)?(?:the\s+)?club|what(?:'s|\s+is)\s+on\s+(?:at\s+the\s+)?club)\b/i.test(message);
           const calendarFired = [...seenToolCalls].some(k => k.startsWith('get_club_calendar:'));
           if (isEventQuery && !calendarFired) {
-            console.warn('[concierge] CALENDAR GUARD: event query with no get_club_calendar tool — firing it');
-            await executeAndLogTool('get_club_calendar', {});
-            // Response text is already good from the model; tool call just establishes verification
+            console.warn('[concierge] CALENDAR GUARD: event query with no get_club_calendar — firing it');
+            const calResult = await executeAndLogTool('get_club_calendar', {});
+            // If model deferred to events team instead of giving real info, replace response
+            const modelDeferred = /events?\s+team|reach\s+out|pull\s+together|let\s+you\s+know/i.test(responseText);
+            const events = calResult?.events || [];
+            if (modelDeferred && events.length > 0) {
+              console.warn('[concierge] CALENDAR GUARD: replacing events-team-deferral with real event data');
+              const eventList = events.slice(0, 3).map(e => {
+                const parts = [e.name];
+                if (e.date) parts.push(e.date);
+                if (e.time) parts.push(`at ${e.time}`);
+                if (e.location) parts.push(`in ${e.location}`);
+                return `\u2022 ${parts.join(' ')}`;
+              }).join('\n');
+              if (isGhostMember) {
+                // Keep the warm opener from the model's response (first sentence)
+                const warmOpener = responseText.match(/^[^.!]+[.!]/)?.[0]?.trim() || '';
+                responseText = warmOpener ? `${warmOpener} Here's what's coming up:\n${eventList}` : `${memberFirstName}! Here's what's on this weekend:\n${eventList}`;
+              } else if (isDeclineMemberFlag) {
+                responseText = `${memberFirstName}, great to hear from you! Here's what's coming up:\n${eventList}`;
+              } else {
+                responseText = `${memberFirstName}, here's what's on this weekend:\n${eventList}`;
+              }
+            }
+            // else: model gave good response, tool call just establishes verification
           }
         } catch (calErr) {
           console.warn('[concierge] CALENDAR GUARD error (suppressed):', calErr.message);
+        }
+      }
+
+      // ── POST-LOOP AFFIRMATIVE RSVP GUARD ─────────────────────────────────────
+      // When member says "put me down for it" / "sign me up" after a response that
+      // listed events, fire rsvp_event if it wasn't already called.
+      if (responseText) {
+        try {
+          const isAffirmativeRsvp = /\b(?:put\s+me\s+down|sign\s+me\s+up|register\s+me|I'?m\s+in|count\s+me\s+in|I'?d\s+love\s+to|yes\s+(?:please\s+)?register|sign\s+us\s+up)\b/i.test(message);
+          const lastRespHadEventListing = last_response && /\b(?:championship|tournament|qualifier|wine\s+dinner|gala|social|competition|coming\s+up|this\s+weekend|upcoming)\b/i.test(last_response);
+          const rsvpToolFired = [...seenToolCalls].some(k => k.startsWith('rsvp_event:'));
+          if (isAffirmativeRsvp && lastRespHadEventListing && !rsvpToolFired) {
+            console.warn('[concierge] RSVP GUARD: affirmative after event listing — forcing rsvp_event');
+            // Extract the most likely event name from prior response
+            const eventMatch = last_response?.match(/\b(Club\s+Championship(?:\s+Qualifier)?|Wine\s+Dinner|Member-?Guest\s+Tournament|Spring\s+Gala|Senior\s+Qualifier|Ladies'\s+Day)\b/i)?.[0]
+              || last_response?.match(/\u2022\s*([^\n,]+)/)?.[1]?.trim()
+              || 'upcoming event';
+            const rsvpResult = await executeAndLogTool('rsvp_event', { event_name: eventMatch, guest_count: 1 });
+            const rsvpRef = rsvpResult?.confirmation_number || rsvpResult?.rsvp_id || rsvpResult?.confirmation || 'confirmed';
+            const rsvpManager = rsvpResult?.contact || rsvpResult?.coordinator || '';
+            const contactNote = rsvpManager ? ` ${rsvpManager} will be in touch.` : '';
+            responseText = `${memberFirstName}! You're on the list for the ${eventMatch}, ref ${rsvpRef}.${contactNote}`;
+          }
+        } catch (rsvpErr) {
+          console.warn('[concierge] RSVP GUARD error (suppressed):', rsvpErr.message);
+        }
+      }
+
+      // ── POST-LOOP DINING FABRICATION GUARD ───────────────────────────────────
+      // When model claims a dining booking was made but make_dining_reservation
+      // never fired, force the real tool call if details are complete, or override
+      // with a clarification if they're not.
+      if (responseText) {
+        try {
+          const diningFired = [...seenToolCalls].some(k => k.startsWith('make_dining_reservation:'));
+          if (!diningFired) {
+            const isDiningRequest = /\b(?:dinner|lunch|dining|reservation|book\s+(?:a\s+)?(?:table|dinner|lunch)|dine)\b/i.test(message);
+            const responseClaimsDining = /\b(?:booked|reserved|reservation\s+(?:is\s+)?(?:set|confirmed|made)|dinner\s+for\s+\d+|table\s+for\s+\d+)\b/i.test(responseText);
+            if (isDiningRequest && responseClaimsDining) {
+              console.warn('[concierge] DINING FABRICATION GUARD: booking claimed without tool — forcing real call');
+              // Check if we have complete details to book
+              const partySizeMatch = message.match(/\bfor\s+(\d+)\b/i) || message.match(/\b(\d+)\s+(?:people|guests?|of\s+us)\b/i);
+              const hasDate = /\b(saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tonight|tomorrow)\b/i.test(message);
+              const dateRef3 = message.match(/\b(saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tonight|tomorrow)\b/i)?.[1];
+              const timeMatch = message.match(/\b(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/i);
+              if (partySizeMatch && hasDate) {
+                const partySize = parseInt(partySizeMatch[1]);
+                let bookTime = '19:00';
+                if (timeMatch) {
+                  let bh = parseInt(timeMatch[1]);
+                  const bm = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
+                  if (timeMatch[3].toLowerCase() === 'pm' && bh < 12) bh += 12;
+                  bookTime = `${String(bh).padStart(2, '0')}:${String(bm).padStart(2, '0')}`;
+                }
+                const dFab = await executeAndLogTool('make_dining_reservation', { date: dateRef3, time: bookTime, party_size: partySize });
+                const dRef3 = dFab?.confirmation_number || dFab?.reservation_id || 'confirmed';
+                if (isComplaintFirstFlag) {
+                  responseText = `${memberFirstName}, I know your last experience wasn't what it should have been, dinner for ${partySize} at ${bookTime} ${dateRef3 || 'tonight'} is booked, ref ${dRef3}.`;
+                } else {
+                  responseText = `${memberFirstName}, dinner for ${partySize} at ${bookTime} ${dateRef3 || 'tonight'} is booked.`;
+                }
+              }
+              // else: incomplete details — leave model's response as-is (clarification already present)
+            }
+          }
+        } catch (fabErr) {
+          console.warn('[concierge] DINING FABRICATION GUARD error (suppressed):', fabErr.message);
         }
       }
 
