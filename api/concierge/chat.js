@@ -612,43 +612,67 @@ async function executeConciergeTool(toolName, input, profile, clubId) {
         if (all.length === 0) {
           try {
             const since = new Date(Date.now() - 14 * 24 * 3600 * 1000).toISOString();
-            const activityRows = await sql`
-              SELECT action_subtype, reference_id, description, status, meta, created_at
-              FROM activity_log
-              WHERE member_id = ${memberId}
-                AND action_type = 'concierge_request'
-                AND created_at >= ${since}
-              ORDER BY created_at DESC
-              LIMIT 10
-            `;
-            for (const row of activityRows.rows) {
-              const meta = row.meta || {};
-              const ts = row.created_at ? new Date(row.created_at) : null;
-              const hoursAgo = ts ? Math.round((Date.now() - ts.getTime()) / 3600000) : null;
-              const timeLabel = hoursAgo !== null
-                ? (hoursAgo < 1 ? 'less than an hour ago' : hoursAgo === 1 ? '1 hour ago' : `${hoursAgo} hours ago`)
-                : 'recently';
-              const requestType = row.action_subtype === 'tee_time' ? 'tee_time_request'
-                : row.action_subtype === 'dining_reservation' ? 'dining_request'
-                : row.action_subtype === 'event_rsvp' ? 'event_rsvp'
-                : row.action_subtype === 'tee_time_cancel' ? 'tee_time_cancellation'
-                : row.action_subtype === 'dining_cancel' ? 'dining_cancellation'
-                : row.action_subtype;
-              const routedTo = meta.routed_to
-                || (row.action_subtype === 'tee_time' || row.action_subtype === 'tee_time_cancel' ? 'Pro Shop'
-                : row.action_subtype === 'dining_reservation' || row.action_subtype === 'dining_cancel' ? 'Front Desk'
-                : row.action_subtype === 'event_rsvp' ? 'Events Team'
-                : 'Club Staff');
-              all.push({
-                request_id: row.reference_id,
-                request_type: requestType,
-                routed_to: routedTo,
-                details: row.description,
-                submitted_at: ts?.toISOString(),
-                time_label: timeLabel,
-                status: row.status === 'pending_staff_confirmation' ? 'pending' : (row.status || 'pending'),
-                summary: `${requestType} sent to ${routedTo} ${timeLabel} — ${row.status === 'pending_staff_confirmation' ? 'awaiting confirmation' : row.status}.`,
-              });
+            // Map request_type filter to activity_log action_subtype values
+            const requestTypeFilter = input.request_type && input.request_type !== 'all' ? input.request_type : null;
+            const subtypeMap = {
+              tee_time: ['tee_time', 'tee_time_cancel'],
+              dining: ['dining_reservation', 'dining_cancel'],
+              event: ['event_rsvp'],
+              complaint: [], // complaints go to feedback table, not activity_log
+            };
+            const allowedSubtypes = requestTypeFilter ? (subtypeMap[requestTypeFilter] || null) : null;
+
+            // Skip activity_log for complaint-only queries (complaints are in feedback table)
+            if (requestTypeFilter !== 'complaint') {
+              const activityRows = allowedSubtypes
+                ? await sql`
+                    SELECT action_subtype, reference_id, description, status, meta, created_at
+                    FROM activity_log
+                    WHERE member_id = ${memberId}
+                      AND action_type = 'concierge_request'
+                      AND action_subtype = ANY(${allowedSubtypes})
+                      AND created_at >= ${since}
+                    ORDER BY created_at DESC
+                    LIMIT 10
+                  `
+                : await sql`
+                    SELECT action_subtype, reference_id, description, status, meta, created_at
+                    FROM activity_log
+                    WHERE member_id = ${memberId}
+                      AND action_type = 'concierge_request'
+                      AND created_at >= ${since}
+                    ORDER BY created_at DESC
+                    LIMIT 10
+                  `;
+              for (const row of activityRows.rows) {
+                const meta = row.meta || {};
+                const ts = row.created_at ? new Date(row.created_at) : null;
+                const hoursAgo = ts ? Math.round((Date.now() - ts.getTime()) / 3600000) : null;
+                const timeLabel = hoursAgo !== null
+                  ? (hoursAgo < 1 ? 'less than an hour ago' : hoursAgo === 1 ? '1 hour ago' : `${hoursAgo} hours ago`)
+                  : 'recently';
+                const requestType = row.action_subtype === 'tee_time' ? 'tee_time_request'
+                  : row.action_subtype === 'dining_reservation' ? 'dining_request'
+                  : row.action_subtype === 'event_rsvp' ? 'event_rsvp'
+                  : row.action_subtype === 'tee_time_cancel' ? 'tee_time_cancellation'
+                  : row.action_subtype === 'dining_cancel' ? 'dining_cancellation'
+                  : row.action_subtype;
+                const routedTo = meta.routed_to
+                  || (row.action_subtype === 'tee_time' || row.action_subtype === 'tee_time_cancel' ? 'Pro Shop'
+                  : row.action_subtype === 'dining_reservation' || row.action_subtype === 'dining_cancel' ? 'Front Desk'
+                  : row.action_subtype === 'event_rsvp' ? 'Events Team'
+                  : 'Club Staff');
+                all.push({
+                  request_id: row.reference_id,
+                  request_type: requestType,
+                  routed_to: routedTo,
+                  details: row.description,
+                  submitted_at: ts?.toISOString(),
+                  time_label: timeLabel,
+                  status: row.status === 'pending_staff_confirmation' ? 'pending' : (row.status || 'pending'),
+                  summary: `${requestType} sent to ${routedTo} ${timeLabel} — ${row.status === 'pending_staff_confirmation' ? 'awaiting confirmation' : row.status}.`,
+                });
+              }
             }
           } catch (actErr) {
             console.warn('[concierge] get_request_status activity_log fallback failed:', actErr.message);
