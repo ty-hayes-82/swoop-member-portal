@@ -1284,6 +1284,7 @@ async function chatHandler(req, res) {
 
       let loopGuard = 0;
       const seenToolCalls = new Set();
+      let lastCalendarResult = null; // cache first calendar result to avoid ghost-reformat double-fetch
       let diningNeedsPartySizeOffer = false;
       let rsvpBlockedNeedsTeeTime = false;
       // Computed once — whether the prior response already listed tee time slots (T2 confirmation context)
@@ -1392,6 +1393,7 @@ async function chatHandler(req, res) {
 
         const responseParts = await Promise.all(intercepted.map(async ({ functionCall: fc }) => {
           const toolResult = await executeAndLogTool(fc.name, fc.args);
+          if (fc.name === 'get_club_calendar' && !lastCalendarResult) lastCalendarResult = toolResult;
           const sanitized = JSON.parse(JSON.stringify(toolResult).replace(/\u2014/g, ','));
           return { functionResponse: { name: fc.name, response: sanitized } };
         }));
@@ -1817,10 +1819,11 @@ async function chatHandler(req, res) {
           .replace(/,\s+and\s+I'?m\s+(?:so\s+)?(?:happy|glad|delighted|thrilled|excited)\s+to\s+(?:share|tell\s+you(?:\s+about)?)\s+(?:what'?s\s+(?:on|happening|coming\s+up)\s+(?:on\s+the\s+)?(?:calendar|schedule|lineup)[^.!]*|all\s+about\s+it[^.!]*)/gi, '')
           .trim();
         // If model cherry-picked 1 event (no bullet points) but tool may have returned 2+,
-        // re-fetch and reformat with full list.
+        // reformat with full list using cached result (avoids a second calendar API call).
         if (!responseText.includes('\u2022')) {
           try {
-            const gcResult = await executeAndLogTool('get_club_calendar', {});
+            const gcResult = lastCalendarResult || await executeAndLogTool('get_club_calendar', {});
+            if (!lastCalendarResult) lastCalendarResult = gcResult;
             const gcEvents = gcResult?.events || [];
             if (gcEvents.length >= 2) {
               const gcList = gcEvents.slice(0, 3).map(e => {
@@ -2117,6 +2120,11 @@ async function chatHandler(req, res) {
         responseText = `Hey ${firstName}, I ran into a snag on my end. Give the front desk a call and they will sort it out for you right away.`;
       }
     }
+
+    // ── FINAL RESPONSE CLEANUP ────────────────────────────────────────────────
+    // Remove any spurious space(s) before a comma — artifact left by various scrubs.
+    // " ," → "," throughout the response (covers calendar event titles, sentence joins, etc.)
+    if (responseText) responseText = responseText.replace(/ +,/g, ',');
 
     // Emit agent_response event to durable log (Sprint B)
     try {
