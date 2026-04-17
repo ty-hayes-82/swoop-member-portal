@@ -1649,8 +1649,14 @@ async function chatHandler(req, res) {
             const isRepeatComplaint = /\bagain\b/i.test(message);
             const needsComplaintAck = isComplaintFirstFlag || isAtRiskMember || isDeclineMemberFlag || isRepeatComplaint;
             if (needsComplaintAck) {
-              const ackPhrase = isRepeatComplaint ? `I'm so sorry this happened again` : `I'm so sorry about this`;
-              responseText = `${memberFirstName}, ${ackPhrase}, filed with ${manager}, ref ${ref}. They'll follow up within 24 hours.`;
+              // Stronger ack for repeat complaints with prior complaint history
+              const isHeavyAck = isRepeatComplaint && hasPriorComplaintFlag;
+              const ackPhrase = isHeavyAck
+                ? `this is completely unacceptable, especially after your previous experience`
+                : isRepeatComplaint
+                  ? `I'm so sorry this happened again`
+                  : `I'm so sorry about this`;
+              responseText = `${memberFirstName}, ${ackPhrase}. Filed with ${manager}, ref ${ref}. They'll follow up within 24 hours.`;
             } else {
               responseText = `${memberFirstName}, filed with ${manager}, ref ${ref}. They'll follow up within 24 hours.`;
             }
@@ -1696,7 +1702,10 @@ async function chatHandler(req, res) {
           .replace(/[,;]\s+(?:the\s+front\s+desk|they'?ll)\s+(?:will\s+)?confirm\s+(?:within|in)\s+[^.!]*/gi, '')
           .replace(/[.!]\s+[Tt]hey'?ll\s+confirm\s+(?:within|in)\s+[^.!]*[.!]/gi, '.')
           // Strip hollow T2 warmth when confirming a booking after prior offer
-          .replace(/^[^,!]+[,!]\s+(?:so\s+glad\s+you\s+reached\s+out|always\s+love\s+hearing\s+from\s+you|great\s+to\s+hear\s+from\s+you)[,!]\s*/i, `${memberFirstName}, `)
+          .replace(/^[^,!]+[,!]\s+(?:so\s+glad\s+you\s+reached\s+out|always\s+love\s+hearing\s+from\s+you|great\s+to\s+hear\s+from\s+you|so\s+good\s+to\s+hear\s+from\s+you|you\s+made\s+my\s+day)[,!]\s*/i, `${memberFirstName}, `)
+          // Strip "our front desk team will follow up" process language
+          .replace(/,\s+and\s+our\s+front\s+desk\s+team\s+will\s+follow\s+up[^.!]*/gi, '')
+          .replace(/[.!]\s+Our\s+front\s+desk\s+team\s+will\s+(?:follow\s+up|reach\s+out)[^.!]*[.!]/gi, '.')
           .replace(/\s+\.$/, '.')
           .trim();
       }
@@ -1775,12 +1784,44 @@ async function chatHandler(req, res) {
         responseText = responseText
           // Strip hollow T2 opener like "Robert! So glad you reached out, ..."
           .replace(/^([^,!]+[,!])\s+(?:so\s+glad\s+you\s+reached\s+out|always\s+love\s+hearing\s+from\s+you|great\s+to\s+hear\s+from\s+you)[,!]\s*/i, '$1 ')
-          // Strip "with the events team" / "with our team"
-          .replace(/\s+with\s+(?:the\s+)?(?:events?\s+team|our\s+team)[,.]?/gi, '')
+          // Strip "with the events team" / "with our events team" / "with our team"
+          .replace(/\s+with\s+(?:the\s+|our\s+)?(?:events?\s+team|our\s+team)[,.]?/gi, '')
           // Strip process-language sentences about follow-up confirmation
           .replace(/[.!]\s+They'?ll\s+follow\s+up\s+with\s+(?:a\s+)?confirmation[^.!]*[.!]/gi, '.')
           .replace(/[,;]\s+they'?ll\s+follow\s+up\s+with\s+(?:a\s+)?confirmation[^.!]*/gi, '')
+          .replace(/[,;]\s+(?:and\s+)?they'?ll\s+confirm\s+your\s+spot[^.!]*/gi, '')
+          .replace(/[,;]\s+(?:and\s+)?they'?ll\s+confirm\s+(?:within|in)\s+[^.!]*/gi, '')
           .replace(/[.!]\s+(?:The\s+events?\s+team|They)\s+will\s+(?:reach\s+out|contact\s+you|follow\s+up)[^.!]*[.!]/gi, '.')
+          .replace(/\s+\.$/, '.')
+          .trim();
+      }
+
+      // ── POST-LOOP AT-RISK DINING WARM OPENER ─────────────────────────────────
+      // When at-risk/declining member sends a dining request and the model responds
+      // by asking clarification (missing time/party size), ensure response has a
+      // warm opener. The isDeclineMemberFlag may be false for DB members who lack
+      // archetype data, so this guard uses isAtRiskMember as the broader check but
+      // only fires when the response is a clarification ask (not a proposal).
+      if ((isAtRiskMember || isDeclineMemberFlag) && responseText) {
+        const isDiningMsg3 = /\b(?:dinner|lunch|dining|reservation|book.*table|dine)\b/i.test(message);
+        const respIsAsk = /\b(?:what\s+time|how\s+many|how\s+many\s+guests|party\s+size|what\s+date|how\s+large|for\s+how\s+many)\b/i.test(responseText);
+        const hasWarmOpener = /\b(?:love\s+hearing|great\s+to\s+hear|miss\s+you|we'?ve\s+missed|glad\s+you|love\s+to\s+have\s+you|always\s+love|you\s+made\s+my|love\s+having|wonderful\s+to\s+hear)\b/i.test(responseText);
+        if (isDiningMsg3 && respIsAsk && !hasWarmOpener) {
+          // Prepend warm opener: strip existing "{Name}, " prefix and re-add with warmth
+          const withoutPrefix = responseText.replace(/^[^,]+,\s*/, '');
+          responseText = `${memberFirstName}, love hearing from you! ${withoutPrefix.charAt(0).toUpperCase()}${withoutPrefix.slice(1)}`;
+          console.warn('[concierge] AT-RISK DINING WARM OPENER: prepended warm opener for at-risk member clarification ask');
+        }
+      }
+
+      // ── POST-LOOP TRAILING OFFER SCRUB ───────────────────────────────────────
+      // Strip hollow trailing offers and closers that add sentence count without value.
+      // Only run when these hollow phrases actually appear — not a broad scrub.
+      if (responseText) {
+        responseText = responseText
+          .replace(/[.!]\s+[Ll]et\s+me\s+know\s+if\s+you'?d?\s+(?:like\s+me\s+to\s+look\s+into\s+anything|like\s+anything\s+else|need\s+anything\s+else|have\s+any\s+questions)[^.!]*[.!]?/gi, '.')
+          .replace(/[.!]\s+[Ff]eel\s+free\s+to\s+reach\s+out\s+(?:if|anytime)[^.!]*[.!]?/gi, '.')
+          .replace(/[,;]\s+[Ll]et\s+me\s+know\s+if\s+(?:there\s+is|there'?s)\s+anything\s+else[^.!]*/gi, '')
           .replace(/\s+\.$/, '.')
           .trim();
       }
