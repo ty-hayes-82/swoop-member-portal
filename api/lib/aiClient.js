@@ -19,7 +19,7 @@ const PROVIDERS = {
     extractText: (data) => data?.content?.[0]?.text || '',
   },
   gemini: {
-    url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`,
+    url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent`,
     getHeaders: () => ({
       'Content-Type': 'application/json',
       'x-goog-api-key': process.env.GOOGLE_AI_API_KEY,

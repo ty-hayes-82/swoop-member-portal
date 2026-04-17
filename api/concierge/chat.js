@@ -827,7 +827,7 @@ async function executeConciergeTool(toolName, input, profile, clubId) {
 
 // ─── GEMINI INTEGRATION ─────────────────────────────────────────────────────
 const GEMINI_API_KEY = process.env.VITE_GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
-const GEMINI_MODEL = 'gemini-3.1-pro-preview-customtools';
+const GEMINI_MODEL = 'gemini-3.1-flash-lite-preview';
 
 function _toGeminiType(t) {
   const m = { string: 'STRING', integer: 'INTEGER', number: 'NUMBER', boolean: 'BOOLEAN', object: 'OBJECT', array: 'ARRAY' };
@@ -1372,7 +1372,7 @@ async function chatHandler(req, res) {
     // Sanitize em-dashes from final response (belt-and-suspenders, model also instructed to avoid them)
     responseText = responseText.replace(/\u2014/g, ',');
 
-    // Thinking-chain extractor — gemini-3.1-pro-preview-customtools outputs its reasoning as plain text
+    // Thinking-chain extractor — Gemini may output its reasoning as plain text
     // before the actual response. When detected, extract only the last clean paragraph.
     // Signals: bracket-format planning blocks, "Let's write", "Wait," meta-commentary.
     const THINKING_SIGNAL = /\[(?:ACTION SUMMARY|PROACTIVE SUGGESTION|CHECK:|MANDATORY|STEP \d|OPENER)\b|Let'?s write\b|Let me (?:check|refine|write)\b/i;
