@@ -15,10 +15,13 @@
  * @param {string} clubName - Club name for branding
  * @returns {string} system prompt
  */
-export function buildConciergePrompt(member, clubName = 'the club') {
+export function buildConciergePrompt(member, clubName = 'the club', messageContext = {}) {
   const name = member.name || 'Member';
   const firstName = name.split(' ')[0];
   const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD for date resolution
+  // Only inject complaint opener when the current message actually has complaint signals.
+  // This prevents the complaint preamble from appearing on every routine booking/RSVP message.
+  const currentMessageIsComplaint = messageContext.isComplaintRelated || false;
   const household = (member.household || [])
     .map(h => h.name)
     .join(', ');
@@ -52,8 +55,11 @@ export function buildConciergePrompt(member, clubName = 'the club') {
   // with warm re-engagement. The complaint is addressed briefly at the END, not as the opener.
   const isDeclineMember = notesLower.startsWith('declining')
     || (typeof member.archetype === 'string' && member.archetype.toLowerCase().includes('declining'));
-  // Complaint-first framing only when the complaint IS the primary persona driver
-  const isComplaintFirst = isAtRisk && hasPriorComplaint && !isDeclineMember;
+  // Complaint-first framing only when: (1) complaint IS the primary persona driver AND
+  // (2) the current message actually contains complaint signals.
+  // On routine requests (booking, RSVP, schedule), this is false — Sandra gets
+  // the standard at-risk reactivation tone, not the complaint opener.
+  const isComplaintFirst = isAtRisk && hasPriorComplaint && !isDeclineMember && currentMessageIsComplaint;
 
   // Build a specific complaint acknowledgment line (never generic if we can be specific)
   // Each complaint type gets 3 options — model is instructed to rotate, never repeat same phrase twice
@@ -79,7 +85,9 @@ ${firstName} has been away for a long time. MANDATORY: Your VERY FIRST sentence 
   e) "${firstName}! The club hasn't been the same without you."
 Pick whichever fits: joyful message → (a) or (b); returning after long break → (c) or (e); anything else → (b) or (d). NEVER use the same opener twice in consecutive messages. This welcome comes before EVERYTHING else — before the booking, before the calendar, before any logistics.
 
-Tone for the entire conversation: reunion warmth. They are returning to a place that cares about them. Every response should feel like a friend at the club who genuinely lights up when they walk in.`;
+Tone for the entire conversation: reunion warmth. They are returning to a place that cares about them. Every response should feel like a friend at the club who genuinely lights up when they walk in.
+
+GHOST PERSONALIZED HOOK: After the warm welcome, end each response with ONE specific, personalized re-engagement detail drawn from their preferences (not a generic "we'd love to see you"). Examples: "The wine dinners have been incredible lately — I know you love those." | "Your usual booth is waiting." | "Coach Davis has been asking about you." Reference their ACTUAL preferences${preferences ? ` which include: ${JSON.stringify(member.preferences)}` : ''}.`;
   } else if (isComplaintFirst) {
     personaTone = `
 
@@ -139,7 +147,7 @@ Example: "${firstName}, ugh. 40 minutes with nobody checking on you? That's comp
 YOUR FIRST WORD MUST BE THE MEMBER'S NAME.
 SPECIFIC DETAIL RULE: Echo back the member's EXACT details. If they said "47 minutes", say "47 minutes". If they said "Grill Room", say "Grill Room". "I know you had a bad experience" FAILS. "47 minutes at the Grill without one check-in — that's not okay" SUCCEEDS. Never paraphrase their complaint into a vague summary.
 
-COMPLAINT FILING SUMMARY RULE: ABSOLUTE. After every file_complaint tool call, your response MUST include ALL FOUR of: (1) what was filed and which team it was routed to by name, (2) expected response timeline ("within 24 hours" or "today"), (3) specific empathy echoing their EXACT words (say "47 minutes" not "a long wait", say "Grill Room" not "the restaurant"), (4) one immediate recovery offer. Missing any of these four is a failure.
+COMPLAINT FILING SUMMARY RULE: ABSOLUTE. After every file_complaint tool call, your response MUST include ALL FOUR of: (1) what was filed and which NAMED manager it was routed to (e.g. "F&B Director Maya Chen", "GM Sarah Mitchell") — never just "the team", (2) expected response timeline ("within 24 hours" or "today"), (3) specific empathy echoing their EXACT words (say "47 minutes" not "a long wait", say "Grill Room" not "the restaurant"), (4) one recovery offer OR personal follow-up commitment ("I will personally make sure [manager name] calls you today"). Missing the named manager is a failure.
 
 COMPLAINT OPENER CONDITION: The complaint acknowledgment opener fires ONLY when the member's current message contains complaint language, frustration signals, or a direct reference to the prior issue. On routine requests (booking, RSVP, calendar, preferences, schedule): do NOT lead with the complaint opener. Handle the request first. You may append a brief "Still working on that for you, ${firstName}" at the END only — and vary this phrase, never repeat it verbatim.
 

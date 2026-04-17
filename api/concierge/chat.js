@@ -719,8 +719,13 @@ async function chatHandler(req, res) {
     console.warn('[concierge/chat] club lookup error (using fallback):', e.message);
   }
 
-  // Build system prompt
-  const systemPrompt = buildConciergePrompt(profile, clubName);
+  // Detect message intent before building the prompt so complaint protocol
+  // is only injected when the current message is actually complaint-related.
+  const msgLowerForPrompt = (message || '').toLowerCase();
+  const currentMessageIsComplaint = /\b(complain|complaint|issue|problem|terrible|slow|wrong|never|awful|bad|frustrated|upset|billing|invoice|charge|unresolved|follow.?up|any.?news|what.?happened|still.?waiting|nobody|ignored|no.?one|no.?callback|no.?response)\b/.test(msgLowerForPrompt);
+
+  // Build system prompt with message intent context
+  const systemPrompt = buildConciergePrompt(profile, clubName, { isComplaintRelated: currentMessageIsComplaint });
 
   // ── Filter tools by data gates ──────────────────────────────────────
   // In guided-demo mode the client sends X-Demo-Gates listing which data
