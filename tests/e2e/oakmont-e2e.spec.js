@@ -76,6 +76,18 @@ async function postJson(ctx, url, body, headers = {}) {
   return { status: res.status(), json, text };
 }
 
+async function patchJson(ctx, url, body, headers = {}) {
+  const res = await ctx.patch(url, {
+    data: body,
+    headers: { 'Content-Type': 'application/json', ...headers },
+    failOnStatusCode: false,
+  });
+  const text = await res.text();
+  let json = null;
+  try { json = JSON.parse(text); } catch {}
+  return { status: res.status(), json, text };
+}
+
 async function getJson(ctx, url, headers = {}) {
   const res = await ctx.get(url, { headers, failOnStatusCode: false });
   const text = await res.text();
@@ -460,7 +472,7 @@ test.describe('Suite 6 — Capability Toggle', () => {
     test.skip(!apiReachable || !auth, 'Skipping');
 
     // Disable tee_time_booking
-    const disable = await postJson(ctx, '/api/club/capabilities', { capability: 'tee_time_booking', enabled: false }, authHeaders);
+    const disable = await patchJson(ctx, '/api/club/capabilities', { capability: 'tee_time_booking', enabled: false }, authHeaders);
     if (disable.status !== 200) {
       addIssue({ severity: 'high', suite: 'Suite 6', description: `PATCH /api/club/capabilities returned ${disable.status}`, expected: '200', actual: String(disable.status) });
       return;
@@ -474,7 +486,7 @@ test.describe('Suite 6 — Capability Toggle', () => {
     expect(cap?.enabled).toBe(false);
 
     // Re-enable
-    const enable = await postJson(ctx, '/api/club/capabilities', { capability: 'tee_time_booking', enabled: true }, authHeaders);
+    const enable = await patchJson(ctx, '/api/club/capabilities', { capability: 'tee_time_booking', enabled: true }, authHeaders);
     expect(enable.json?.enabled).toBe(true);
     console.log('[suite6] tee_time_booking re-enabled');
   });
@@ -483,18 +495,23 @@ test.describe('Suite 6 — Capability Toggle', () => {
     test.skip(!apiReachable || !auth, 'Skipping');
 
     // Disable dining_reservations
-    await postJson(ctx, '/api/club/capabilities', { capability: 'dining_reservations', enabled: false }, authHeaders);
+    await patchJson(ctx, '/api/club/capabilities', { capability: 'dining_reservations', enabled: false }, authHeaders);
+
+    // Use first real member from the roster
+    const rosterR = await getJson(ctx, '/api/members?limit=1', authHeaders);
+    const firstMember = rosterR.json?.memberRoster?.[0] ?? rosterR.json?.members?.[0];
+    const testMemberId = firstMember?.member_id ?? 'mbr_oak_001';
 
     // Send a dining request through the concierge
     const r = await postJson(
       ctx,
       '/api/concierge/chat',
-      { message: 'Book a table for 2 at 7pm Saturday', club_id: CLUB_ID, member_id: 'test_member_001' },
+      { message: 'Book a table for 2 at 7pm Saturday', member_id: testMemberId },
       authHeaders,
     );
 
     // Re-enable first (regardless of result)
-    await postJson(ctx, '/api/club/capabilities', { capability: 'dining_reservations', enabled: true }, authHeaders);
+    await patchJson(ctx, '/api/club/capabilities', { capability: 'dining_reservations', enabled: true }, authHeaders);
 
     console.log(`[suite6] concierge response (status ${r.status}): ${r.text?.slice(0, 200)}`);
 

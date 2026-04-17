@@ -18,12 +18,16 @@ async function main() {
   console.log(`Session: ${managedSessionId} (created=${created})`);
 
   console.log('Sending message and streaming...');
-  const response = await sendAndConsumeStream(managedSessionId, message, ALL_HANDLERS, (chunk) => {
+  const { text, toolCalls } = await sendAndConsumeStream(managedSessionId, message, ALL_HANDLERS, (chunk) => {
     process.stdout.write(chunk);
   });
 
   console.log('\n--- Full response ---');
-  console.log(response || '(empty)');
+  console.log(text || '(empty)');
+  if (toolCalls.length) {
+    console.log('--- Tool calls ---');
+    toolCalls.forEach(tc => console.log(` ${tc.name}:`, JSON.stringify(tc.input)));
+  }
 }
 
 main().catch(err => { console.error(err); process.exit(1); });

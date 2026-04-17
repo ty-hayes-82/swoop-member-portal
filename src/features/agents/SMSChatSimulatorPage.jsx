@@ -8,8 +8,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { apiFetch, getClubId } from '@/services/apiClient';
 
-// ── Member profiles available for testing ────────────────────────────────────
-const TEST_MEMBERS = [
+// ── Default fallback member profiles (Pinetree test data) ────────────────────
+const DEFAULT_MEMBERS = [
   { id: 'mbr_t01', name: 'James Whitfield',  first: 'James',  type: 'Full Golf',  status: 'active',    statusColor: 'bg-emerald-100 text-emerald-700' },
   { id: 'mbr_t04', name: 'Anne Jordan',      first: 'Anne',   type: 'Full Golf',  status: 'at-risk',   statusColor: 'bg-yellow-100 text-yellow-700' },
   { id: 'mbr_t05', name: 'Robert Callahan',  first: 'Robert', type: 'Corporate',  status: 'declining', statusColor: 'bg-orange-100 text-orange-700' },
@@ -17,7 +17,24 @@ const TEST_MEMBERS = [
   { id: 'mbr_t07', name: 'Linda Leonard',    first: 'Linda',  type: 'Full Golf',  status: 'ghost',     statusColor: 'bg-red-100 text-red-700' },
 ];
 
-const MEMBER_BY_ID = Object.fromEntries(TEST_MEMBERS.map(m => [m.id, m]));
+const STATUS_COLORS = {
+  active:    'bg-emerald-100 text-emerald-700',
+  'at-risk': 'bg-yellow-100 text-yellow-700',
+  declining: 'bg-orange-100 text-orange-700',
+  ghost:     'bg-red-100 text-red-700',
+};
+
+function memberFromRoster(m) {
+  const status = m.health_tier?.toLowerCase().replace('_', '-') ?? m.status ?? 'active';
+  return {
+    id: m.member_id ?? m.id,
+    name: `${m.first_name ?? ''} ${m.last_name ?? ''}`.trim() || m.name || 'Member',
+    first: m.first_name ?? m.name?.split(' ')[0] ?? 'Member',
+    type: m.membership_type ?? m.type ?? 'Member',
+    status,
+    statusColor: STATUS_COLORS[status] ?? STATUS_COLORS.active,
+  };
+}
 
 // ── Quick-send scenarios per member ──────────────────────────────────────────
 const QUICK_MESSAGES = {
@@ -104,10 +121,10 @@ function initials(name) {
 }
 
 // ── PersonaRail ───────────────────────────────────────────────────────────────
-function PersonaRail({ selected, onSelect }) {
+function PersonaRail({ selected, onSelect, members }) {
   return (
     <div className="flex-shrink-0 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-      {TEST_MEMBERS.map(m => {
+      {members.map(m => {
         const active = m.id === selected;
         return (
           <button
@@ -514,7 +531,8 @@ function AgentInboxPanel({ pending, loading, approve, dismiss, onSwitchMember })
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function SMSChatSimulatorPage({ embedded = false }) {
-  const [selectedMemberId, setSelectedMemberId] = useState('mbr_t01');
+  const [testMembers, setTestMembers] = useState(DEFAULT_MEMBERS);
+  const [selectedMemberId, setSelectedMemberId] = useState(DEFAULT_MEMBERS[0].id);
   const [messages, setMessages] = useState([]);
   const [toolCalls, setToolCalls] = useState([]);
   const [input, setInput] = useState('');
@@ -526,7 +544,22 @@ export default function SMSChatSimulatorPage({ embedded = false }) {
   // Single hook instance shared between the badge and AgentInboxPanel
   const { pending: pendingActions, loading: inboxLoading, approve: inboxApprove, dismiss: inboxDismiss } = useAgentInbox();
 
-  const selectedMember = MEMBER_BY_ID[selectedMemberId] || TEST_MEMBERS[0];
+  // Load real members for this club on mount
+  useEffect(() => {
+    apiFetch('/api/members?limit=5')
+      .then(data => {
+        const roster = data?.memberRoster ?? data?.members ?? [];
+        if (roster.length > 0) {
+          const mapped = roster.slice(0, 5).map(memberFromRoster);
+          setTestMembers(mapped);
+          setSelectedMemberId(mapped[0].id);
+        }
+      })
+      .catch(() => {}); // fall back to DEFAULT_MEMBERS on error
+  }, []);
+
+  const memberById = Object.fromEntries(testMembers.map(m => [m.id, m]));
+  const selectedMember = memberById[selectedMemberId] || testMembers[0];
   const quickMessages = QUICK_MESSAGES[selectedMemberId] || [];
 
   useEffect(() => {
@@ -597,7 +630,7 @@ export default function SMSChatSimulatorPage({ embedded = false }) {
       )}
 
       {/* Persona rail */}
-      <PersonaRail selected={selectedMemberId} onSelect={handleMemberChange} />
+      <PersonaRail selected={selectedMemberId} onSelect={handleMemberChange} members={testMembers} />
 
       {/* Main content: chat + debug panel */}
       <div
