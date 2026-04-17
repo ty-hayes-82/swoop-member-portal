@@ -27,7 +27,7 @@ async function capabilitiesHandler(req, res) {
       WHERE club_id = ${clubId}
     `;
 
-    const configMap: Record<string, boolean> = {};
+    const configMap = {};
     for (const row of result.rows) {
       configMap[row.capability] = row.enabled;
     }
