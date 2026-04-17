@@ -1518,37 +1518,33 @@ async function chatHandler(req, res) {
 
       // ── POST-LOOP COMPLAINT GUARD ─────────────────────────────────────────────
       // If message is a specific complaint (location OR incident details present)
-      // but file_complaint was not called, force the tool regardless of response text.
-      // Catches both fake-reference fabrication and front-desk deflection.
+      // but file_complaint was not called, force the tool and format the response
+      // directly — no second Gemini call to avoid API error propagation.
       if (responseText) {
-        const hasComplaintLocation = /\b(?:grill|pro\s*shop|dining\s+room|restaurant|bar|kitchen|locker|course|pool|gym|spa|club\s*house|front\s+nine|back\s+nine)\b/i.test(message);
-        const hasSpecificIncident = /\b(?:cold|wrong\s+order|incorrect\s+order|waited?\s+\d+|wait(?:ed|ing)?\s+(?:\d+|too\s+long|forever)|overcharged|missing\s+item|order\s+wrong)\b/i.test(message);
-        const hasComplaintKeyword = /\b(?:complaint|terrible|disappointed|unacceptable|awful|horrible|issue\s+with|problem\s+with)\b/i.test(message);
-        const isSpecificComplaint = (hasComplaintLocation || hasSpecificIncident || hasComplaintKeyword);
-        const complaintFired = [...seenToolCalls].some(k => k.startsWith('file_complaint:'));
-        if (isSpecificComplaint && !complaintFired) {
-          console.warn('[concierge] COMPLAINT GUARD: specific complaint with no file_complaint tool — forcing it');
-          const category = /\b(?:food|grill|dining|meal|drink|cold|order)\b/i.test(message) ? 'food_and_beverage'
-            : /\b(?:golf|course|tee|green|cart)\b/i.test(message) ? 'golf_operations'
-            : /\b(?:facility|locker|pool|gym|spa)\b/i.test(message) ? 'facilities'
-            : /\b(?:staff|service|rude|employee)\b/i.test(message) ? 'staff'
-            : 'other';
-          const complaintResult = await executeAndLogTool('file_complaint', { category, description: message });
-          const sanitizedComplaint = JSON.parse(JSON.stringify(complaintResult).replace(/\u2014/g, ','));
-          const complaintContents = [
-            { role: 'user', parts: [{ text: message }] },
-            { role: 'model', parts: [{ functionCall: { name: 'file_complaint', args: { category, description: message } } }] },
-            { role: 'user', parts: [{ functionResponse: { name: 'file_complaint', response: sanitizedComplaint } }] },
-          ];
-          const complaintResp = await _geminiGenerate({
-            systemPrompt: fullSystemPrompt,
-            contents: complaintContents,
-            tools: availableTools,
-            temperature: conciergeTemperature,
-            maxOutputTokens: 2048,
-          });
-          const complaintText = _geminiText(complaintResp.candidates?.[0]);
-          if (complaintText) responseText = complaintText;
+        try {
+          const hasComplaintLocation = /\b(?:grill|pro\s*shop|dining\s+room|restaurant|bar|kitchen|locker|course|pool|gym|spa|club\s*house|front\s+nine|back\s+nine)\b/i.test(message);
+          const hasSpecificIncident = /\b(?:cold|wrong\s+order|incorrect\s+order|waited?\s+\d+|wait(?:ed|ing)?\s+(?:\d+|too\s+long|forever)|overcharged|missing\s+item|order\s+wrong)\b/i.test(message);
+          const hasComplaintKeyword = /\b(?:complaint|terrible|disappointed|unacceptable|awful|horrible|issue\s+with|problem\s+with)\b/i.test(message);
+          const isSpecificComplaint = (hasComplaintLocation || hasSpecificIncident || hasComplaintKeyword);
+          const complaintFired = [...seenToolCalls].some(k => k.startsWith('file_complaint:'));
+          if (isSpecificComplaint && !complaintFired) {
+            console.warn('[concierge] COMPLAINT GUARD: specific complaint with no file_complaint tool — forcing it');
+            const category = /\b(?:food|grill|dining|meal|drink|cold|order)\b/i.test(message) ? 'food_and_beverage'
+              : /\b(?:golf|course|tee|green|cart)\b/i.test(message) ? 'golf_operations'
+              : /\b(?:facility|locker|pool|gym|spa)\b/i.test(message) ? 'facilities'
+              : /\b(?:staff|service|rude|employee)\b/i.test(message) ? 'staff'
+              : 'other';
+            // Sanitize message before passing to tool (strip em-dashes etc.)
+            const cleanDescription = message.replace(/\u2014/g, ',').replace(/\u2013/g, '-');
+            const complaintResult = await executeAndLogTool('file_complaint', { category, description: cleanDescription });
+            // Format response directly — no Gemini re-run to avoid API error propagation
+            const ref = complaintResult?.complaint_id || complaintResult?.reference_number || 'on file';
+            const manager = complaintResult?.assigned_manager || 'our team';
+            responseText = `${memberFirstName}, filed with ${manager}, ref ${ref}. They'll follow up within 24 hours.`;
+          }
+        } catch (guardErr) {
+          console.warn('[concierge] COMPLAINT GUARD error (suppressed):', guardErr.message);
+          // Leave responseText unchanged — don't let guard failure crash the request
         }
       }
 
