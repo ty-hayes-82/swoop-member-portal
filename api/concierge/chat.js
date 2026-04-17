@@ -44,7 +44,7 @@ const CONCIERGE_TOOLS = [
   },
   {
     name: 'book_tee_time',
-    description: 'Book a tee time for the member',
+    description: 'ONLY call this after check_tee_availability has already been called in this conversation and slots were presented to the member. FORBIDDEN as a first action on a new tee time request. The member must have picked a specific slot from your presented options before you call this.',
     input_schema: { type: 'object', properties: { date: { type: 'string' }, time: { type: 'string' }, course: { type: 'string' }, players: { type: 'integer' } }, required: ['date', 'time'] }
   },
   {
@@ -1201,11 +1201,10 @@ async function chatHandler(req, res) {
 
   // Live mode: call AI (Gemini primary, Claude fallback when GEMINI_API_KEY absent)
   try {
-    // Inject previous response context AT THE TOP so Gemini sees it first — affirmative handling depends on this
     const lastResponseContext = last_response
-      ? `CURRENT TURN CONTEXT: Your previous response to ${member?.name?.split(' ')[0] || 'this member'} was: "${last_response.slice(0, 400)}"\nThe member's current message is a reply to that. If it is an affirmative ("Yes", "Yes please", "Sure", "Please do", "Go ahead", "sounds good", "that works", "perfect") or a direct slot pick ("7am", "the first one", "Saturday works") — you MUST call the appropriate tool NOW and confirm in 1 sentence. Do NOT repeat your previous message. Do NOT say the team will confirm again.\n\n`
+      ? `\n\nYOUR PREVIOUS RESPONSE: "${last_response.slice(0, 400)}"\nThe member's current message is a reply to that. If it is an affirmative ("Yes", "Yes please", "Sure", "Please do", "Go ahead", "sounds good", "that works", "perfect") or a direct slot pick ("7am", "the first one", "Saturday works") — RULE 4 applies: call the appropriate tool NOW and confirm in 1 sentence. Do NOT repeat your previous message.`
       : '';
-    const fullSystemPrompt = lastResponseContext + systemPrompt + conversationContext + pendingRequestsContext + recommendationContext;
+    const fullSystemPrompt = systemPrompt + conversationContext + pendingRequestsContext + recommendationContext + lastResponseContext;
 
     // Collect tool call trace for debug mode; also track successful submissions for fallback use
     const toolCallLog = [];
@@ -1295,7 +1294,22 @@ async function chatHandler(req, res) {
         });
         if (!dedupedCalls.length) break;
 
-        const responseParts = await Promise.all(dedupedCalls.map(async ({ functionCall: fc }) => {
+        // Server-side tee time gate: if book_tee_time is called without a prior
+        // check_tee_availability in this session, intercept and redirect.
+        const intercepted = dedupedCalls.filter(({ functionCall: fc }) => {
+          if (fc.name === 'book_tee_time' && !seenToolCalls.has(`check_tee_availability:intercepted`)) {
+            const alreadyChecked = [...seenToolCalls].some(k => k.startsWith('check_tee_availability:'));
+            if (!alreadyChecked) {
+              console.warn('[concierge] TEE GATE: book_tee_time called before check_tee_availability — intercepting');
+              seenToolCalls.add('check_tee_availability:intercepted');
+              fc.name = 'check_tee_availability'; // redirect to availability check
+              fc.args = { date: fc.args.date, preferred_time: fc.args.time };
+            }
+          }
+          return true;
+        });
+
+        const responseParts = await Promise.all(intercepted.map(async ({ functionCall: fc }) => {
           const toolResult = await executeAndLogTool(fc.name, fc.args);
           const sanitized = JSON.parse(JSON.stringify(toolResult).replace(/\u2014/g, ','));
           return { functionResponse: { name: fc.name, response: sanitized } };
