@@ -1692,10 +1692,12 @@ async function chatHandler(req, res) {
           // Strip "our front desk team will confirm/follow up/reach out" variants
           .replace(/,\s+and\s+(?:the\s+|our\s+)?front\s+desk(?:\s+team)?\s+will\s+(?:confirm|follow\s+up|reach\s+out)[^.!]*/gi, '')
           .replace(/[.!]\s+(?:The\s+|Our\s+)?[Ff]ront\s+desk(?:\s+team)?\s+will\s+(?:confirm|follow\s+up|reach\s+out)[^.!]*[.!]/gi, '.')
+          // Strip "I've sent that/it to our/the front desk team" variants
+          .replace(/,\s+and\s+I'?ve\s+sent\s+(?:that|it|the\s+\w+)\s+to\s+(?:our\s+|the\s+)?front\s+desk(?:\s+team)?[^.!]*/gi, '')
           // Strip hollow T2 standalone warm sentence before confirmation (e.g. "Anne! You made my day reaching out.")
           .replace(/^([A-Z][a-z]+!)\s+(?:you\s+made\s+my\s+day[^.!]*|so\s+glad\s+you\s+(?:reached\s+out|did)[^.!]*|so\s+good\s+to\s+hear\s+from\s+you[^.!]*)[.!]\s*/i, '$1 ')
           // Strip hollow T2 warmth clause when confirming a booking after prior offer
-          .replace(/^[^,!]+[,!]\s+(?:so\s+glad\s+you\s+reached\s+out|always\s+love\s+hearing\s+from\s+you|great\s+to\s+hear\s+from\s+you|so\s+good\s+to\s+hear\s+from\s+you|you\s+made\s+my\s+day)[,!]\s*/i, `${memberFirstName}, `)
+          .replace(/^[^,!]+[,!]\s+(?:I'?m\s+)?(?:so\s+glad\s+you\s+reached\s+out|always\s+love\s+hearing\s+from\s+you|great\s+to\s+hear\s+from\s+you|so\s+good\s+to\s+hear\s+from\s+you|you\s+made\s+my\s+day)[^,!.]*[,!.]\s*/i, `${memberFirstName}, `)
           .replace(/\s+\.$/, '.')
           .trim();
       }
@@ -1753,6 +1755,20 @@ async function chatHandler(req, res) {
           .trim();
       }
 
+      // ── POST-LOOP GHOST CALENDAR DOUBLE-WARMTH SCRUB ─────────────────────────
+      // Ghost members get warm welcome, but model sometimes generates TWO warmth
+      // sentences before the event info: "Linda! You just made my day. So great to
+      // hear from you." = 2 sentences before any content → 4 total, exceeds limit.
+      // Collapse any second warmth sentence immediately after the opener.
+      if (isGhostMember && responseText && [...seenToolCalls].some(k => k.startsWith('get_club_calendar:'))) {
+        responseText = responseText
+          .replace(
+            /^([A-Z][a-z]+!\s+[^.!\n]+[.!])\s+(?:So\s+great|Great|Wonderful|Really\s+glad|Glad\s+to\s+hear|So\s+glad|So\s+happy|Love\s+hearing|Happy\s+to\s+hear|Miss\s+you|You\s+just\s+made)[^.!\n]*[.!]\s*/i,
+            '$1 '
+          )
+          .trim();
+      }
+
       // ── POST-LOOP AFFIRMATIVE RSVP GUARD ─────────────────────────────────────
       // When member says "put me down for it" / "sign me up" after a response that
       // listed events, fire rsvp_event if it wasn't already called.
@@ -1783,8 +1799,8 @@ async function chatHandler(req, res) {
       // and process-language from the confirmation response.
       if (responseText && [...seenToolCalls].some(k => k.startsWith('rsvp_event:'))) {
         responseText = responseText
-          // Strip hollow T2 opener like "Robert! So glad you reached out, ..."
-          .replace(/^([^,!]+[,!])\s+(?:so\s+glad\s+you\s+reached\s+out|always\s+love\s+hearing\s+from\s+you|great\s+to\s+hear\s+from\s+you)[,!]\s*/i, '$1 ')
+          // Strip hollow T2 opener like "Robert, I'm so glad you reached out..." or "Robert! So glad..."
+          .replace(/^([^,!]+[,!])\s+(?:I'?m\s+)?(?:so\s+glad\s+you\s+reached\s+out|always\s+love\s+hearing\s+from\s+you|great\s+to\s+hear\s+from\s+you)[^,.!]*[,.!]\s*/i, '$1 ')
           // Strip "with the events team" / "with our events team" / "with our team"
           .replace(/\s+with\s+(?:the\s+|our\s+)?(?:events?\s+team|our\s+team)[,.]?/gi, '')
           // Strip process-language sentences about follow-up confirmation
@@ -1792,7 +1808,9 @@ async function chatHandler(req, res) {
           .replace(/[,;]\s+they'?ll\s+follow\s+up\s+with\s+(?:a\s+)?confirmation[^.!]*/gi, '')
           .replace(/[,;]\s+(?:and\s+)?they'?ll\s+confirm\s+your\s+spot[^.!]*/gi, '')
           .replace(/[,;]\s+(?:and\s+)?they'?ll\s+confirm\s+(?:within|in)\s+[^.!]*/gi, '')
-          .replace(/[.!]\s+(?:The\s+events?\s+team|They)\s+will\s+(?:reach\s+out|contact\s+you|follow\s+up)[^.!]*[.!]/gi, '.')
+          .replace(/[.!]\s+(?:The\s+events?\s+team|They)\s+will\s+(?:reach\s+out|contact\s+you|follow\s+up|confirm)[^.!]*[.!]/gi, '.')
+          // Strip trailing "and the events team will confirm your spot shortly"
+          .replace(/,?\s+and\s+(?:the\s+)?events?\s+team\s+will\s+confirm[^.!]*/gi, '')
           .replace(/\s+\.$/, '.')
           .trim();
       }
@@ -1836,14 +1854,20 @@ async function chatHandler(req, res) {
           const diningFired = [...seenToolCalls].some(k => k.startsWith('make_dining_reservation:'));
           if (!diningFired) {
             const isDiningRequest = /\b(?:dinner|lunch|dining|reservation|book\s+(?:a\s+)?(?:table|dinner|lunch)|dine)\b/i.test(message);
+            // Also detect follow-up messages (e.g. "Saturday at 7 for 2") where T1 established dining context
+            const isDiningFollowUp = !isDiningRequest && !!last_response
+              && /when\s+would\s+you\s+like|what\s+time|how\s+many|party\s+size|for\s+how\s+many/i.test(last_response)
+              && (/\b(?:saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tonight|tomorrow)\b/i.test(message) || /\b\d{1,2}(?::\d{2})?\s*(?:am|pm)\b/i.test(message) || /\bfor\s+\d+\b/i.test(message));
             const responseClaimsDining = /\b(?:booked|reserved|reservation\s+(?:is\s+)?(?:set|confirmed|made)|dinner\s+for\s+\d+|table\s+for\s+\d+)\b/i.test(responseText);
-            if (isDiningRequest && responseClaimsDining) {
+            if ((isDiningRequest || isDiningFollowUp) && responseClaimsDining) {
               console.warn('[concierge] DINING FABRICATION GUARD: booking claimed without tool — forcing real call');
               // Check if we have complete details to book
               const partySizeMatch = message.match(/\bfor\s+(\d+)\b/i) || message.match(/\b(\d+)\s+(?:people|guests?|of\s+us)\b/i);
               const hasDate = /\b(saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tonight|tomorrow)\b/i.test(message);
               const dateRef3 = message.match(/\b(saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tonight|tomorrow)\b/i)?.[1];
               const timeMatch = message.match(/\b(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/i);
+              // Also match bare hour like "at 7" or "at 7:30" without am/pm (assume pm for dining hours 1-11)
+              const bareTimeMatch = !timeMatch && message.match(/\bat\s+(\d{1,2})(?::(\d{2}))?\b/i);
               if (partySizeMatch && hasDate) {
                 const partySize = parseInt(partySizeMatch[1]);
                 let bookTime = '19:00';
@@ -1851,6 +1875,12 @@ async function chatHandler(req, res) {
                   let bh = parseInt(timeMatch[1]);
                   const bm = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
                   if (timeMatch[3].toLowerCase() === 'pm' && bh < 12) bh += 12;
+                  bookTime = `${String(bh).padStart(2, '0')}:${String(bm).padStart(2, '0')}`;
+                } else if (bareTimeMatch) {
+                  let bh = parseInt(bareTimeMatch[1]);
+                  const bm = bareTimeMatch[2] ? parseInt(bareTimeMatch[2]) : 0;
+                  // Treat 1–11 as PM for dining context (7 → 19:00)
+                  if (bh >= 1 && bh <= 11) bh += 12;
                   bookTime = `${String(bh).padStart(2, '0')}:${String(bm).padStart(2, '0')}`;
                 }
                 const dFab = await executeAndLogTool('make_dining_reservation', { date: dateRef3, time: bookTime, party_size: partySize });
