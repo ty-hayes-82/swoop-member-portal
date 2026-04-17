@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Swoop Concierge — Test Chat</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,66 +20,71 @@
       --accent: #10b981;
       --accent-hover: #059669;
       --user-bubble: #2563eb;
-      --user-text: #fff;
       --bot-bubble: #1e2535;
-      --bot-text: #e8edf5;
       --shadow: rgba(0,0,0,0.35);
     }
 
-    html, body {
+    html {
       height: 100%;
+      overflow-x: hidden;
+    }
+    body {
+      height: 100%;
+      overflow-x: hidden;
       background: var(--bg);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      overflow: hidden;
+      -webkit-text-size-adjust: 100%;
     }
 
     #app {
       display: flex;
       flex-direction: column;
       height: 100dvh;
+      width: 100%;
       max-width: 760px;
       margin: 0 auto;
+      overflow: hidden;
     }
 
-    /* ── Member selector ── */
+    /* ─────────────────────────────────────────
+       MEMBER BAR — 5 equal columns, no scroll
+    ───────────────────────────────────────── */
     #member-bar {
       flex-shrink: 0;
       background: var(--panel);
       border-bottom: 1px solid var(--border);
-      padding: 8px 12px;
+      padding: 8px 8px 6px;
       display: flex;
-      gap: 6px;
-      overflow-x: auto;
-      scrollbar-width: none;
+      width: 100%;
     }
-    #member-bar::-webkit-scrollbar { display: none; }
 
     .member-btn {
+      flex: 1;
+      min-width: 0;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-radius: 14px;
+      gap: 4px;
+      padding: 6px 2px;
+      border-radius: 10px;
       border: none;
       cursor: pointer;
-      flex-shrink: 0;
-      background: var(--row);
-      color: var(--text2);
+      background: transparent;
+      color: var(--muted);
       transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
     }
-    .member-btn:hover { background: var(--row-hover); }
-    .member-btn.active { background: #1e3a5f; color: var(--text); }
+    .member-btn:active { background: var(--row-hover); }
+    .member-btn.active { background: var(--row); color: var(--text); }
 
     .avatar {
-      width: 34px;
-      height: 34px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #fff;
-      font-size: 11px;
       font-weight: 700;
       flex-shrink: 0;
     }
@@ -89,168 +94,234 @@
     .av-purple { background: #7c3aed; }
     .av-gray   { background: #6b7280; }
 
-    .member-btn-info { text-align: left; }
-    .member-btn-name { font-size: 12px; font-weight: 600; line-height: 1.2; }
-    .member-btn-arch { font-size: 10px; line-height: 1.2; color: var(--muted); }
-    .member-btn.active .member-btn-arch { color: var(--label); }
-
-    .health-dot {
-      width: 20px;
-      height: 20px;
+    /* Avatar in member bar: 36px with health dot overlay */
+    .bar-avatar-wrap {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+    }
+    .bar-avatar {
+      width: 36px;
+      height: 36px;
+      font-size: 11px;
+    }
+    .bar-health {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
       color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
+      border: 2px solid var(--panel);
     }
+    .member-btn.active .bar-health { border-color: var(--row); }
+
     .health-green  { background: #10b981; }
     .health-amber  { background: #f59e0b; }
     .health-red    { background: #ef4444; }
 
-    /* ── Member context strip ── */
+    .bar-name {
+      font-size: 10px;
+      font-weight: 600;
+      line-height: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      padding: 0 2px;
+      color: var(--muted);
+    }
+    .member-btn.active .bar-name { color: var(--text2); }
+
+    /* ─────────────────────────────────────────
+       CONTEXT STRIP
+    ───────────────────────────────────────── */
     #context-strip {
       flex-shrink: 0;
       background: var(--row);
       border-bottom: 1px solid var(--border);
-      padding: 10px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    #context-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 0;
-    }
-    #context-info { min-width: 0; }
-    #context-name-row {
+      padding: 8px 12px;
       display: flex;
       align-items: center;
       gap: 8px;
+      width: 100%;
     }
-    #context-name { font-size: 14px; font-weight: 600; }
-    #context-revenue { font-size: 12px; color: var(--muted); }
-    #context-signal { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #ctx-avatar {
+      width: 38px;
+      height: 38px;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    #context-info {
+      flex: 1;
+      min-width: 0;
+    }
+    #context-name-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+    #context-name {
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #context-revenue {
+      font-size: 11px;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
     .health-badge {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 1px 6px;
+      padding: 1px 5px;
       border-radius: 999px;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
       color: #fff;
+      flex-shrink: 0;
     }
-
-    #context-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    #context-signal {
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #context-actions {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
     .btn-sm {
-      font-size: 12px;
-      padding: 4px 10px;
+      font-size: 11px;
+      padding: 5px 9px;
       border-radius: 6px;
       border: 1px solid var(--border);
       background: transparent;
       color: var(--muted);
       cursor: pointer;
-      transition: color 0.1s;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
     }
-    .btn-sm:hover { color: var(--text2); }
-    .btn-sm.danger:hover { color: #f87171; border-color: #f87171; }
+    .btn-sm:active { color: var(--text2); }
+    .btn-sm.danger:active { color: #f87171; border-color: #f87171; }
 
-    /* ── Chat area ── */
+    /* ─────────────────────────────────────────
+       CHAT AREA
+    ───────────────────────────────────────── */
     #chat-outer {
       flex: 1;
       display: flex;
       min-height: 0;
+      width: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #chat-col {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+      width: 100%;
     }
 
     #messages {
       flex: 1;
       overflow-y: auto;
-      padding: 16px 12px;
+      overflow-x: hidden;
+      padding: 14px 12px;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      scrollbar-width: thin;
-      scrollbar-color: var(--border) transparent;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
     }
 
-    /* ── Empty state ── */
+    /* ─────────────────────────────────────────
+       EMPTY STATE
+    ───────────────────────────────────────── */
     #empty-state {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100%;
-      gap: 16px;
-      padding: 24px;
-    }
-    #empty-avatar-wrap {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      flex: 1;
+      gap: 14px;
+      padding: 20px 16px;
+      min-height: 0;
     }
     #empty-name { font-size: 14px; font-weight: 500; color: var(--text2); text-align: center; }
-    #empty-sub { font-size: 12px; color: var(--muted); text-align: center; margin-top: 2px; }
-    #suggestions { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 400px; }
+    #empty-sub  { font-size: 12px; color: var(--muted); text-align: center; margin-top: 2px; }
+    #suggestions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      max-width: 420px;
+    }
     .suggestion-btn {
       text-align: left;
       font-size: 13px;
       background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 12px 16px;
+      border-radius: 12px;
+      padding: 11px 14px;
       color: var(--text2);
       cursor: pointer;
-      transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      width: 100%;
     }
-    .suggestion-btn:hover { background: var(--row-hover); }
+    .suggestion-btn:active { background: var(--row-hover); }
 
-    /* ── Message bubbles ── */
-    .msg-row {
-      display: flex;
-    }
+    /* ─────────────────────────────────────────
+       MESSAGE BUBBLES
+    ───────────────────────────────────────── */
+    .msg-row { display: flex; max-width: 100%; }
     .msg-row.user { justify-content: flex-end; }
     .msg-row.bot  { justify-content: flex-start; }
 
     .bubble {
-      max-width: 80%;
+      max-width: 82%;
       border-radius: 18px;
       padding: 10px 14px;
       font-size: 14px;
       line-height: 1.5;
       white-space: pre-wrap;
       word-break: break-word;
+      overflow-wrap: anywhere;
     }
     .bubble.user {
       background: var(--user-bubble);
-      color: var(--user-text);
+      color: #fff;
       border-bottom-right-radius: 4px;
     }
     .bubble.bot {
       background: var(--bot-bubble);
-      color: var(--bot-text);
+      color: var(--text);
       border-bottom-left-radius: 4px;
       box-shadow: 0 1px 4px var(--shadow);
     }
-    .bubble-time {
-      font-size: 10px;
-      margin-top: 4px;
-    }
-    .bubble.user .bubble-time { color: rgba(255,255,255,0.55); }
+    .bubble-time { font-size: 10px; margin-top: 4px; }
+    .bubble.user .bubble-time { color: rgba(255,255,255,0.5); }
     .bubble.bot  .bubble-time { color: var(--label); }
 
-    /* ── Typing indicator ── */
-    #typing-indicator {
-      display: none;
-      justify-content: flex-start;
-    }
+    /* ─────────────────────────────────────────
+       TYPING INDICATOR
+    ───────────────────────────────────────── */
+    #typing-indicator { display: none; justify-content: flex-start; }
     #typing-indicator.visible { display: flex; }
     .typing-bubble {
       background: var(--bot-bubble);
@@ -265,8 +336,7 @@
     .typing-text { font-size: 12px; color: var(--muted); }
     .dots { display: flex; gap: 3px; }
     .dot {
-      width: 6px;
-      height: 6px;
+      width: 6px; height: 6px;
       border-radius: 50%;
       background: var(--label);
       animation: bounce 1.2s infinite;
@@ -275,21 +345,22 @@
     .dot:nth-child(3) { animation-delay: 0.3s; }
     @keyframes bounce {
       0%, 80%, 100% { transform: translateY(0); }
-      40% { transform: translateY(-5px); }
+      40%           { transform: translateY(-5px); }
     }
 
-    /* ── Suggestion chips (active conversation) ── */
+    /* ─────────────────────────────────────────
+       CHIPS — wrapping, no horizontal scroll
+    ───────────────────────────────────────── */
     #chips {
       flex-shrink: 0;
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding: 4px 12px;
-      scrollbar-width: none;
+      display: none;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 6px 12px 4px;
+      width: 100%;
     }
-    #chips::-webkit-scrollbar { display: none; }
+    #chips.visible { display: flex; }
     .chip {
-      white-space: nowrap;
       font-size: 12px;
       background: var(--border);
       color: var(--text2);
@@ -297,40 +368,49 @@
       padding: 5px 12px;
       border: none;
       cursor: pointer;
-      flex-shrink: 0;
-      transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .chip:hover { background: var(--row-hover); }
+    .chip:active { background: var(--row-hover); }
 
-    /* ── Input bar ── */
+    /* ─────────────────────────────────────────
+       INPUT BAR
+    ───────────────────────────────────────── */
     #input-bar {
       flex-shrink: 0;
       background: var(--panel);
       border-top: 1px solid var(--border);
-      padding: 10px 12px;
+      padding: 8px 10px;
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       gap: 8px;
+      width: 100%;
     }
     #chat-input {
       flex: 1;
+      min-width: 0;
       border-radius: 999px;
       border: 1px solid var(--border);
       background: var(--row);
       color: var(--text);
-      padding: 10px 18px;
-      font-size: 14px;
+      padding: 10px 16px;
+      font-size: 16px; /* 16px prevents iOS zoom on focus */
       outline: none;
-      transition: border-color 0.15s;
       font-family: inherit;
+      -webkit-appearance: none;
+      width: 100%;
     }
     #chat-input:focus { border-color: var(--accent); }
     #chat-input::placeholder { color: var(--label); }
     #chat-input:disabled { opacity: 0.5; }
 
     #send-btn {
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
       background: var(--accent);
       border: none;
@@ -340,41 +420,98 @@
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
     }
-    #send-btn:hover:not(:disabled) { background: var(--accent-hover); }
-    #send-btn:disabled { opacity: 0.4; cursor: default; }
+    #send-btn:active:not(:disabled) { background: var(--accent-hover); }
+    #send-btn:disabled { opacity: 0.4; }
 
-    /* ── Sidebar ── */
-    #sidebar {
-      width: 280px;
-      flex-shrink: 0;
-      background: var(--panel);
-      border-left: 1px solid var(--border);
-      overflow-y: auto;
-      padding: 16px;
+    /* ─────────────────────────────────────────
+       SIDEBAR — overlay on mobile, inline on desktop
+    ───────────────────────────────────────── */
+
+    /* Mobile: full-width bottom sheet */
+    #sidebar-overlay {
       display: none;
-      gap: 16px;
-      flex-direction: column;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 100;
     }
-    #sidebar.open { display: flex; }
+    #sidebar-overlay.open { display: block; }
+
+    #sidebar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      max-height: 70dvh;
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+      border-radius: 16px 16px 0 0;
+      overflow-y: auto;
+      padding: 16px 16px max(16px, env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      z-index: 101;
+      transform: translateY(100%);
+      transition: transform 0.25s ease;
+    }
+    #sidebar.open { transform: translateY(0); }
+
+    /* Drag handle */
+    #sidebar::before {
+      content: '';
+      display: block;
+      width: 36px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: -6px auto 6px;
+      flex-shrink: 0;
+    }
+
+    /* Desktop: side panel inline */
+    @media (min-width: 640px) {
+      #sidebar-overlay { display: none !important; }
+
+      #sidebar {
+        position: static;
+        transform: none;
+        max-height: none;
+        border-top: none;
+        border-left: 1px solid var(--border);
+        border-radius: 0;
+        width: 260px;
+        flex-shrink: 0;
+        display: none;
+        transition: none;
+        padding: 16px;
+      }
+      #sidebar.open {
+        display: flex;
+        transform: none;
+      }
+      #sidebar::before { display: none; }
+    }
 
     .sidebar-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-shrink: 0;
     }
     .sidebar-title { font-size: 14px; font-weight: 600; }
     .close-btn {
       background: none;
       border: none;
       color: var(--label);
-      font-size: 20px;
+      font-size: 22px;
       cursor: pointer;
       line-height: 1;
-      padding: 0;
+      padding: 2px 4px;
+      -webkit-tap-highlight-color: transparent;
     }
-    .close-btn:hover { color: var(--muted); }
 
     .stat-grid {
       display: grid;
@@ -387,7 +524,7 @@
       padding: 8px 12px;
     }
     .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
-    .stat-val { font-size: 13px; font-weight: 600; margin-top: 2px; }
+    .stat-val   { font-size: 13px; font-weight: 600; margin-top: 2px; }
 
     .risk-box {
       background: rgba(220,38,38,0.08);
@@ -397,7 +534,6 @@
       font-size: 12px;
       color: #fca5a5;
     }
-
     .section-label {
       font-size: 11px;
       font-weight: 600;
@@ -406,7 +542,6 @@
       color: var(--muted);
       margin-bottom: 6px;
     }
-
     .sidebar-suggestion {
       width: 100%;
       text-align: left;
@@ -414,65 +549,55 @@
       background: var(--row);
       border: none;
       border-radius: 8px;
-      padding: 8px 12px;
+      padding: 9px 12px;
       color: var(--text2);
       cursor: pointer;
       margin-bottom: 4px;
-      transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
     }
-    .sidebar-suggestion:hover { background: var(--row-hover); }
+    .sidebar-suggestion:active { background: var(--row-hover); }
 
-    /* ── Footer ── */
+    /* ─────────────────────────────────────────
+       FOOTER
+    ───────────────────────────────────────── */
     #footer {
       flex-shrink: 0;
       background: var(--panel);
       text-align: center;
-      padding: 6px;
+      padding: 5px;
       font-size: 10px;
       color: var(--label);
       letter-spacing: 0.04em;
-      border-top: 1px solid var(--border);
     }
-    #footer span { font-weight: 600; color: var(--muted); }
-
-    #scroll-anchor {}
+    #footer strong { font-weight: 600; color: var(--muted); }
   </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- Member selector bar -->
   <div id="member-bar"></div>
 
-  <!-- Context strip -->
   <div id="context-strip">
-    <div id="context-left">
-      <div id="ctx-avatar" class="avatar"></div>
-      <div id="context-info">
-        <div id="context-name-row">
-          <span id="context-name"></span>
-          <span id="context-revenue"></span>
-          <span id="ctx-health-badge" class="health-badge"></span>
-        </div>
-        <div id="context-signal"></div>
+    <div id="ctx-avatar" class="avatar"></div>
+    <div id="context-info">
+      <div id="context-name-row">
+        <span id="context-name"></span>
+        <span id="context-revenue"></span>
+        <span id="ctx-health-badge" class="health-badge"></span>
       </div>
+      <div id="context-signal"></div>
     </div>
     <div id="context-actions">
-      <button class="btn-sm" id="profile-btn">Profile</button>
+      <button class="btn-sm" id="profile-btn">Info</button>
       <button class="btn-sm danger" id="clear-btn" style="display:none">Clear</button>
     </div>
   </div>
 
-  <!-- Chat outer (messages + sidebar) -->
   <div id="chat-outer">
-
-    <!-- Left: messages + input -->
-    <div style="display:flex; flex-direction:column; flex:1; min-width:0;">
+    <div id="chat-col">
       <div id="messages">
         <div id="empty-state">
-          <div id="empty-avatar-wrap">
-            <div id="empty-avatar" class="avatar" style="width:48px;height:48px;font-size:16px;"></div>
-          </div>
+          <div id="empty-avatar" class="avatar" style="width:52px;height:52px;font-size:17px;"></div>
           <div>
             <div id="empty-name"></div>
             <div id="empty-sub"></div>
@@ -481,11 +606,9 @@
         </div>
         <div id="typing-indicator" class="msg-row bot">
           <div class="typing-bubble">
-            <span class="typing-text">Concierge is typing</span>
+            <span class="typing-text">Typing</span>
             <div class="dots">
-              <div class="dot"></div>
-              <div class="dot"></div>
-              <div class="dot"></div>
+              <div class="dot"></div><div class="dot"></div><div class="dot"></div>
             </div>
           </div>
         </div>
@@ -495,8 +618,8 @@
       <div id="chips"></div>
 
       <form id="input-bar" onsubmit="return false;">
-        <input id="chat-input" type="text" autocomplete="off" />
-        <button id="send-btn" type="submit" disabled>
+        <input id="chat-input" type="text" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="send" />
+        <button id="send-btn" type="submit" disabled aria-label="Send">
           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0l-7 7m7-7l7 7"/>
           </svg>
@@ -504,7 +627,7 @@
       </form>
     </div>
 
-    <!-- Right: sidebar -->
+    <!-- Desktop side panel (shown inline on ≥640px) -->
     <div id="sidebar">
       <div class="sidebar-header">
         <div class="sidebar-title">Member Profile</div>
@@ -512,163 +635,82 @@
       </div>
       <div id="sidebar-content"></div>
     </div>
-
   </div>
 
-  <div id="footer">Powered by <span>Swoop AI</span></div>
+  <div id="footer">Powered by <strong>Swoop AI</strong></div>
 </div>
+
+<!-- Mobile overlay backdrop -->
+<div id="sidebar-overlay"></div>
 
 <script>
 const TEST_CLUB = 'seed_pinetree';
 
 const MEMBERS = [
-  {
-    id: 'mbr_t01',
-    name: 'James Whitfield',
-    initials: 'JW',
-    archetype: 'Balanced Active',
-    health: 42,
-    revenue: '$18K',
-    signal: 'Unresolved complaint, declining rounds',
-    avClass: 'av-blue',
-    suggestions: [
-      'My lunch was really slow',
-      'Book my usual Saturday 7 AM',
-      'Get Erin on the wine dinner list',
-      "What's happening at the club this weekend?",
-    ],
-  },
-  {
-    id: 'mbr_t04',
-    name: 'Anne Jordan',
-    initials: 'AJ',
-    archetype: 'Weekend Warrior',
-    health: 28,
-    revenue: '$14K',
-    signal: '3 missed waitlists, walked off Jan 7',
-    avClass: 'av-amber',
-    suggestions: [
-      "Why can't I get a Saturday tee time?",
-      'What events are coming up?',
-      'I tried to book last weekend and couldn\'t',
-      'Is there a ladies golf group?',
-    ],
-  },
-  {
-    id: 'mbr_t05',
-    name: 'Robert Callahan',
-    initials: 'RC',
-    archetype: 'Declining',
-    health: 22,
-    revenue: '$18K',
-    signal: 'Hitting exact F&B minimum, 9-day complaint unresolved',
-    avClass: 'av-red',
-    suggestions: [
-      'I want to cancel my membership',
-      'Make a dinner reservation',
-      'Nobody follows up on anything here',
-      'What are the cancellation fees?',
-    ],
-  },
-  {
-    id: 'mbr_t06',
-    name: 'Margaret Chen',
-    initials: 'MC',
-    archetype: 'Social Butterfly',
-    health: 36,
-    revenue: '$9K',
-    signal: 'Dining cliff $142 to $18',
-    avClass: 'av-purple',
-    suggestions: [
-      "What's happening this weekend?",
-      'Get me a table at the Grill Room',
-      'Are there any wine tastings coming up?',
-      'Book a table for 6 on Friday',
-    ],
-  },
-  {
-    id: 'mbr_t07',
-    name: 'Linda Leonard',
-    initials: 'LL',
-    archetype: 'Ghost',
-    health: 12,
-    revenue: '$18K',
-    signal: 'Zero visits since October, widow',
-    avClass: 'av-gray',
-    suggestions: [
-      "I haven't been to the club in a while",
-      "What's new?",
-      'Are there any social events for singles?',
-      'Is the Sunday brunch still happening?',
-    ],
-  },
+  { id: 'mbr_t01', name: 'James Whitfield',  initials: 'JW', archetype: 'Balanced Active',  health: 42, revenue: '$18K', signal: 'Unresolved complaint, declining rounds',            avClass: 'av-blue',   suggestions: ['My lunch was really slow','Book my usual Saturday 7 AM','Get Erin on the wine dinner list',"What's happening at the club this weekend?"] },
+  { id: 'mbr_t04', name: 'Anne Jordan',       initials: 'AJ', archetype: 'Weekend Warrior',  health: 28, revenue: '$14K', signal: '3 missed waitlists, walked off Jan 7',              avClass: 'av-amber',  suggestions: ["Why can't I get a Saturday tee time?",'What events are coming up?',"I tried to book last weekend and couldn't",'Is there a ladies golf group?'] },
+  { id: 'mbr_t05', name: 'Robert Callahan',   initials: 'RC', archetype: 'Declining',         health: 22, revenue: '$18K', signal: 'Hitting exact F&B minimum, complaint unresolved',   avClass: 'av-red',    suggestions: ['I want to cancel my membership','Make a dinner reservation','Nobody follows up on anything here','What are the cancellation fees?'] },
+  { id: 'mbr_t06', name: 'Margaret Chen',     initials: 'MC', archetype: 'Social Butterfly',  health: 36, revenue: '$9K',  signal: 'Dining cliff $142 to $18',                         avClass: 'av-purple', suggestions: ["What's happening this weekend?",'Get me a table at the Grill Room','Are there any wine tastings coming up?','Book a table for 6 on Friday'] },
+  { id: 'mbr_t07', name: 'Linda Leonard',     initials: 'LL', archetype: 'Ghost',             health: 12, revenue: '$18K', signal: 'Zero visits since October, widow',                  avClass: 'av-gray',   suggestions: ["I haven't been to the club in a while","What's new?",'Are there any social events for singles?','Is the Sunday brunch still happening?'] },
 ];
 
-/* ── State ── */
 let selectedId = MEMBERS[0].id;
 let loading = false;
 let sidebarOpen = false;
 
-function chatsKey(id) { return `swoop_chat_test_${id}`; }
-function loadChats(id) { try { return JSON.parse(localStorage.getItem(chatsKey(id))) || []; } catch { return []; } }
-function saveChats(id, msgs) { localStorage.setItem(chatsKey(id), JSON.stringify(msgs)); }
+const chatsKey = id => `swoop_chat_test_${id}`;
+const loadChats = id => { try { return JSON.parse(localStorage.getItem(chatsKey(id))) || []; } catch { return []; } };
+const saveChats = (id, m) => localStorage.setItem(chatsKey(id), JSON.stringify(m));
+const member = () => MEMBERS.find(m => m.id === selectedId);
+const msgs = () => loadChats(selectedId);
+const healthClass = s => s >= 40 ? 'health-green' : s >= 25 ? 'health-amber' : 'health-red';
+const now = () => new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\n/g,'<br>');
 
-function member() { return MEMBERS.find(m => m.id === selectedId); }
-function msgs() { return loadChats(selectedId); }
-
-function healthClass(score) {
-  if (score >= 40) return 'health-green';
-  if (score >= 25) return 'health-amber';
-  return 'health-red';
-}
-
-function now() {
-  return new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-}
-
-/* ── Render member bar ── */
+/* ── Member bar ── */
 function renderMemberBar() {
   const bar = document.getElementById('member-bar');
   bar.innerHTML = MEMBERS.map(m => `
-    <button class="member-btn ${m.id === selectedId ? 'active' : ''}" data-id="${m.id}">
-      <div class="avatar ${m.avClass}" style="width:32px;height:32px;">${m.initials}</div>
-      <div class="member-btn-info">
-        <div class="member-btn-name">${m.name.split(' ')[0]}</div>
-        <div class="member-btn-arch">${m.archetype}</div>
+    <button class="member-btn ${m.id === selectedId ? 'active' : ''}" data-id="${m.id}" aria-label="${m.name}">
+      <div class="bar-avatar-wrap">
+        <div class="avatar bar-avatar ${m.avClass}">${m.initials}</div>
+        <div class="bar-health ${healthClass(m.health)}">${m.health}</div>
       </div>
-      <div class="health-dot ${healthClass(m.health)}">${m.health}</div>
+      <div class="bar-name">${m.name.split(' ')[0]}</div>
     </button>
   `).join('');
-
-  bar.querySelectorAll('.member-btn').forEach(btn => {
-    btn.addEventListener('click', () => selectMember(btn.dataset.id));
-  });
+  bar.querySelectorAll('.member-btn').forEach(btn =>
+    btn.addEventListener('click', () => selectMember(btn.dataset.id))
+  );
 }
 
-/* ── Render context strip ── */
+/* ── Context strip ── */
 function renderContextStrip() {
   const m = member();
-  const el = id => document.getElementById(id);
-  el('ctx-avatar').className = `avatar ${m.avClass}`;
-  el('ctx-avatar').textContent = m.initials;
-  el('context-name').textContent = m.name;
-  el('context-revenue').textContent = m.revenue;
-  const hb = el('ctx-health-badge');
+  document.getElementById('ctx-avatar').className = `avatar ${m.avClass}`;
+  document.getElementById('ctx-avatar').style.cssText = 'width:38px;height:38px;font-size:13px;flex-shrink:0;';
+  document.getElementById('ctx-avatar').textContent = m.initials;
+  document.getElementById('context-name').textContent = m.name;
+  document.getElementById('context-revenue').textContent = m.revenue;
+  const hb = document.getElementById('ctx-health-badge');
   hb.className = `health-badge ${healthClass(m.health)}`;
   hb.textContent = m.health;
-  el('context-signal').textContent = `${m.archetype} \u00b7 ${m.signal}`;
-  el('clear-btn').style.display = msgs().length > 0 ? '' : 'none';
-  el('profile-btn').textContent = sidebarOpen ? 'Hide' : 'Profile';
+  document.getElementById('context-signal').textContent = `${m.archetype} \u00b7 ${m.signal}`;
+  document.getElementById('clear-btn').style.display = msgs().length > 0 ? '' : 'none';
+  document.getElementById('profile-btn').textContent = sidebarOpen ? 'Hide' : 'Info';
 }
 
-/* ── Render sidebar ── */
+/* ── Sidebar ── */
 function renderSidebar() {
   const m = member();
   const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
   sidebar.className = sidebarOpen ? 'open' : '';
+  overlay.className = sidebarOpen ? 'open' : '';
+
   document.getElementById('sidebar-content').innerHTML = `
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
-      <div class="avatar ${m.avClass}" style="width:44px;height:44px;">${m.initials}</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="avatar ${m.avClass}" style="width:44px;height:44px;font-size:14px;">${m.initials}</div>
       <div>
         <div style="font-weight:600;font-size:14px;">${m.name}</div>
         <div style="font-size:11px;color:var(--muted)">${m.id}</div>
@@ -677,9 +719,8 @@ function renderSidebar() {
     <div class="stat-grid">
       <div class="stat-card">
         <div class="stat-label">Health</div>
-        <div class="stat-val" style="display:flex;align-items:center;gap:6px;">
-          <span class="health-dot ${healthClass(m.health)}" style="width:10px;height:10px;"></span>
-          ${m.health}
+        <div class="stat-val" style="display:flex;align-items:center;gap:5px;">
+          <span style="width:9px;height:9px;border-radius:50%;display:inline-block;" class="${healthClass(m.health)}"></span>${m.health}
         </div>
       </div>
       <div class="stat-card">
@@ -693,23 +734,29 @@ function renderSidebar() {
     </div>
     <div>
       <div class="section-label">Risk Signal</div>
-      <div class="risk-box">${m.signal}</div>
+      <div class="risk-box">${esc(m.signal)}</div>
     </div>
     <div>
-      <div class="section-label">Suggestions</div>
-      ${m.suggestions.map(s => `<button class="sidebar-suggestion" data-text="${s.replace(/"/g,'&quot;')}">${s}</button>`).join('')}
+      <div class="section-label">Try saying</div>
+      ${m.suggestions.map(s => `<button class="sidebar-suggestion" data-text="${s.replace(/"/g,'&quot;')}">${esc(s)}</button>`).join('')}
     </div>
   `;
 
-  document.querySelectorAll('.sidebar-suggestion').forEach(btn => {
+  document.querySelectorAll('.sidebar-suggestion').forEach(btn =>
     btn.addEventListener('click', () => {
+      closeSidebar();
       sendMessage(btn.dataset.text);
-      if (window.innerWidth < 640) { sidebarOpen = false; renderSidebar(); renderContextStrip(); }
-    });
-  });
+    })
+  );
 }
 
-/* ── Render messages ── */
+function closeSidebar() {
+  sidebarOpen = false;
+  renderSidebar();
+  renderContextStrip();
+}
+
+/* ── Messages ── */
 function renderMessages() {
   const messages = msgs();
   const container = document.getElementById('messages');
@@ -717,83 +764,78 @@ function renderMessages() {
   const typing = document.getElementById('typing-indicator');
   const chips = document.getElementById('chips');
 
-  // Empty state
   if (messages.length === 0 && !loading) {
     emptyState.style.display = 'flex';
     const m = member();
     document.getElementById('empty-avatar').className = `avatar ${m.avClass}`;
+    document.getElementById('empty-avatar').style.cssText = 'width:52px;height:52px;font-size:17px;';
     document.getElementById('empty-avatar').textContent = m.initials;
     document.getElementById('empty-name').textContent = `Chatting as ${m.name}`;
     document.getElementById('empty-sub').textContent = `${m.archetype} \u00b7 Health ${m.health} \u00b7 ${m.revenue}`;
     document.getElementById('suggestions').innerHTML = m.suggestions.map(s =>
-      `<button class="suggestion-btn" data-text="${s.replace(/"/g,'&quot;')}">${s}</button>`
+      `<button class="suggestion-btn" data-text="${s.replace(/"/g,'&quot;')}">${esc(s)}</button>`
     ).join('');
-    document.querySelectorAll('.suggestion-btn').forEach(btn => {
-      btn.addEventListener('click', () => sendMessage(btn.dataset.text));
-    });
-    chips.innerHTML = '';
-    chips.style.display = 'none';
+    document.querySelectorAll('.suggestion-btn').forEach(btn =>
+      btn.addEventListener('click', () => sendMessage(btn.dataset.text))
+    );
+    chips.className = 'chips';
   } else {
     emptyState.style.display = 'none';
-    chips.style.display = messages.length > 0 && !loading ? 'flex' : 'none';
-    if (chips.style.display === 'flex') {
-      const used = new Set(messages.filter(m => m.role === 'user').map(m => m.text));
-      const available = member().suggestions.filter(s => !used.has(s)).slice(0, 3);
+    const used = new Set(messages.filter(m => m.role === 'user').map(m => m.text));
+    const available = member().suggestions.filter(s => !used.has(s)).slice(0, 3);
+    if (available.length > 0 && !loading) {
+      chips.className = 'visible';
       chips.innerHTML = available.map(s =>
-        `<button class="chip" data-text="${s.replace(/"/g,'&quot;')}">${s}</button>`
+        `<button class="chip" data-text="${s.replace(/"/g,'&quot;')}">${esc(s)}</button>`
       ).join('');
-      chips.querySelectorAll('.chip').forEach(btn => {
-        btn.addEventListener('click', () => sendMessage(btn.dataset.text));
-      });
+      chips.querySelectorAll('.chip').forEach(btn =>
+        btn.addEventListener('click', () => sendMessage(btn.dataset.text))
+      );
+    } else {
+      chips.className = '';
+      chips.innerHTML = '';
     }
   }
 
-  // Remove previous message rows (keep emptyState, typing, scroll-anchor)
   container.querySelectorAll('.msg-row:not(#typing-indicator)').forEach(el => el.remove());
 
-  // Insert messages before typing indicator
   const anchor = document.getElementById('typing-indicator');
   messages.forEach(msg => {
     const div = document.createElement('div');
     div.className = `msg-row ${msg.role === 'user' ? 'user' : 'bot'}`;
-    div.innerHTML = `
-      <div class="bubble ${msg.role === 'user' ? 'user' : 'bot'}">
-        <div>${escHtml(msg.text)}</div>
-        <div class="bubble-time">${msg.time}</div>
-      </div>
-    `;
+    div.innerHTML = `<div class="bubble ${msg.role === 'user' ? 'user' : 'bot'}"><div>${esc(msg.text)}</div><div class="bubble-time">${msg.time}</div></div>`;
     container.insertBefore(div, anchor);
   });
 
-  // Typing indicator
   typing.className = `msg-row bot ${loading ? 'visible' : ''}`;
-
-  // Scroll to bottom
   document.getElementById('scroll-anchor').scrollIntoView({ behavior: messages.length > 3 ? 'smooth' : 'instant' });
 }
 
-function escHtml(str) {
-  return String(str)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/\n/g,'<br>');
+function renderAll() {
+  renderMemberBar();
+  renderContextStrip();
+  renderSidebar();
+  renderMessages();
+  updateInput();
 }
 
-/* ── Select member ── */
+function updateInput() {
+  const input = document.getElementById('chat-input');
+  const btn = document.getElementById('send-btn');
+  input.placeholder = `Message as ${member().name.split(' ')[0]}...`;
+  input.disabled = loading;
+  btn.disabled = loading || !input.value.trim();
+}
+
 function selectMember(id) {
   selectedId = id;
   renderAll();
-  setTimeout(() => document.getElementById('chat-input').focus(), 80);
 }
 
-/* ── Send message ── */
 async function sendMessage(text) {
-  if (!text || !text.trim() || loading) return;
+  if (!text?.trim() || loading) return;
   const trimmed = text.trim();
   loading = true;
-
   const current = loadChats(selectedId);
   current.push({ role: 'user', text: trimmed, time: now() });
   saveChats(selectedId, current);
@@ -821,53 +863,19 @@ async function sendMessage(text) {
   document.getElementById('chat-input').focus();
 }
 
-/* ── Render all ── */
-function renderAll() {
-  renderMemberBar();
-  renderContextStrip();
-  renderSidebar();
-  renderMessages();
-  updateInput();
-}
-
-function updateInput() {
-  const input = document.getElementById('chat-input');
-  const sendBtn = document.getElementById('send-btn');
-  const m = member();
-  input.placeholder = `Message as ${m.name.split(' ')[0]}...`;
-  input.disabled = loading;
-  sendBtn.disabled = loading || !input.value.trim();
-}
-
 /* ── Events ── */
 document.getElementById('chat-input').addEventListener('input', updateInput);
 document.getElementById('chat-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage(document.getElementById('chat-input').value);
-  }
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(document.getElementById('chat-input').value); }
 });
-document.getElementById('send-btn').addEventListener('click', () => {
-  sendMessage(document.getElementById('chat-input').value);
-});
-document.getElementById('profile-btn').addEventListener('click', () => {
-  sidebarOpen = !sidebarOpen;
-  renderSidebar();
-  renderContextStrip();
-});
-document.getElementById('sidebar-close').addEventListener('click', () => {
-  sidebarOpen = false;
-  renderSidebar();
-  renderContextStrip();
-});
-document.getElementById('clear-btn').addEventListener('click', () => {
-  localStorage.removeItem(chatsKey(selectedId));
-  renderAll();
-});
+document.getElementById('send-btn').addEventListener('click', () => sendMessage(document.getElementById('chat-input').value));
+document.getElementById('profile-btn').addEventListener('click', () => { sidebarOpen = !sidebarOpen; renderSidebar(); renderContextStrip(); });
+document.getElementById('sidebar-close').addEventListener('click', closeSidebar);
+document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
+document.getElementById('clear-btn').addEventListener('click', () => { localStorage.removeItem(chatsKey(selectedId)); renderAll(); });
 
 /* ── Init ── */
 renderAll();
-document.getElementById('chat-input').focus();
 </script>
 </body>
 </html>
