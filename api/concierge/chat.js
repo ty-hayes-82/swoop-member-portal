@@ -20,15 +20,16 @@ import { routeEvent } from '../agents/agent-events.js';
 // Tools with no entry (or empty array) are always available.
 // ---------------------------------------------------------------------------
 const TOOL_GATES = {
-  book_tee_time:           ['members', 'tee-sheet'],
-  cancel_tee_time:         ['members', 'tee-sheet'],
-  make_dining_reservation: ['members', 'fb'],
-  get_club_calendar:       ['pipeline'],
-  get_my_schedule:         ['members'],
-  rsvp_event:              ['members', 'email'],
-  file_complaint:          ['members'],
-  get_member_profile:      ['members'],
-  send_request_to_club:    ['members'],
+  book_tee_time:              ['members', 'tee-sheet'],
+  cancel_tee_time:            ['members', 'tee-sheet'],
+  cancel_dining_reservation:  ['members', 'fb'],
+  make_dining_reservation:    ['members', 'fb'],
+  get_club_calendar:          ['pipeline'],
+  get_my_schedule:            ['members'],
+  rsvp_event:                 ['members', 'email'],
+  file_complaint:             ['members'],
+  get_member_profile:         ['members'],
+  send_request_to_club:       ['members'],
 };
 
 // ---------------------------------------------------------------------------
@@ -64,6 +65,11 @@ const CONCIERGE_TOOLS = [
     name: 'cancel_tee_time',
     description: 'Cancel a previously booked tee time for the member',
     input_schema: { type: 'object', properties: { booking_date: { type: 'string', description: 'Date of the tee time to cancel' }, tee_time: { type: 'string', description: 'Time of the tee time to cancel' } }, required: ['booking_date'] }
+  },
+  {
+    name: 'cancel_dining_reservation',
+    description: 'Cancel a previously made dining reservation for the member',
+    input_schema: { type: 'object', properties: { reservation_date: { type: 'string', description: 'Date of the reservation to cancel (YYYY-MM-DD)' }, outlet: { type: 'string', description: 'Dining outlet name (e.g. Grill Room, Main Dining Room)' } }, required: ['reservation_date'] }
   },
   {
     name: 'file_complaint',
@@ -465,6 +471,49 @@ async function executeConciergeTool(toolName, input, profile, clubId) {
         course: bookingInfo?.course_name,
         details: `Cancellation request submitted for tee time on ${input.booking_date}${bookingInfo?.tee_time ? ` at ${bookingInfo.tee_time}` : ''}${bookingInfo?.course_name ? ` on ${bookingInfo.course_name}` : ''}.`,
         expected_response: 'Pro shop will process and confirm the cancellation.',
+        member_name: profile.name,
+      };
+    }
+
+    // ── CANCEL DINING RESERVATION ──────────────────────────────────────
+    case 'cancel_dining_reservation': {
+      const requestId = `req_cdr_${Date.now().toString(36)}`;
+      try {
+        const detail = JSON.stringify({
+          reservation_date: input.reservation_date,
+          outlet: input.outlet,
+          member_id: memberId, member_name: profile.name, request_id: requestId,
+        });
+        await sql`
+          INSERT INTO activity_log (action_type, action_subtype, member_id, member_name, reference_id, reference_type, description, status, meta)
+          VALUES ('concierge_request', 'dining_cancel', ${memberId}, ${profile.name}, ${requestId}, 'booking_request',
+            ${`Dining cancellation request: ${input.reservation_date}${input.outlet ? ` at ${input.outlet}` : ''}`},
+            'pending_staff_confirmation',
+            ${detail}::jsonb)
+        `;
+      } catch (e) {
+        console.warn('[concierge] cancel_dining_reservation log error (continuing):', e.message);
+      }
+      try {
+        await routeEvent(clubId, 'booking_request_submitted', {
+          member_id: memberId,
+          member_name: profile.name,
+          phone: profile.phone || null,
+          request_id: requestId,
+          request_type: 'cancel_dining_reservation',
+          routed_to: 'Front Desk',
+          details: { reservation_date: input.reservation_date, outlet: input.outlet },
+        });
+      } catch (e) { console.warn('[concierge] cancel_dining_reservation event routing error:', e.message); }
+      return {
+        status: 'request_submitted',
+        pending: true,
+        request_id: requestId,
+        routed_to: 'Front Desk',
+        reservation_date: input.reservation_date,
+        outlet: input.outlet,
+        details: `Dining cancellation request submitted for ${input.reservation_date}${input.outlet ? ` at ${input.outlet}` : ''}.`,
+        expected_response: 'Front desk will process and confirm the cancellation.',
         member_name: profile.name,
       };
     }
