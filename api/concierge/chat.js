@@ -1072,6 +1072,11 @@ async function chatHandler(req, res) {
       return required.every(g => openGates.has(g));
     });
   }
+  // Remove get_club_calendar for cancellation requests — model should only use get_my_schedule
+  const isCancelRequest = /\bcancel\b/i.test(message) && /\b(?:tee\s+time|booking|reservation|round)\b/i.test(message);
+  if (isCancelRequest) {
+    availableTools = availableTools.filter(t => t.name !== 'get_club_calendar');
+  }
 
   // Build conversation context (Sprint B: prefer durable event log over text summary)
   const sessionId = `mbr_${member_id}_concierge`;
@@ -1693,6 +1698,10 @@ async function chatHandler(req, res) {
           .replace(/,\s+and\s+I'?ve\s+sent\s+(?:that|it|the\s+\w+)\s+to\s+(?:our\s+|the\s+)?front\s+desk(?:\s+team)?[^.!]*/gi, '')
           // Replace "I've requested a table" with done-deal language
           .replace(/I'?ve\s+requested\s+a\s+table/gi, 'Booked a table')
+          // Strip fabricated venue descriptions and re-engagement padding after confirmation
+          .replace(/[.!]\s+The\s+[A-Z][^.!\n]+(?:has\s+been|is)\s+(?:wonderful|great|excellent|lovely|fantastic|beautiful)[^.!]*[.!]/gi, '.')
+          .replace(/,?\s+and\s+(?:we|I)\s+can'?t\s+wait\s+to\s+have\s+you\s+back[^.!]*/gi, '')
+          .replace(/[.!]\s+(?:We|I)\s+can'?t\s+wait\s+to\s+(?:have\s+you\s+back|see\s+you)[^.!]*[.!]/gi, '.')
           // Strip hollow T2 standalone warm sentence before confirmation (e.g. "Anne! You made my day.")
           // Only strip when the hollow phrase IS the full sentence (ends with . or ! directly, no comma-clause after it)
           .replace(/^([A-Z][a-z]+!)\s+(?:you\s+made\s+my\s+day|so\s+glad\s+you\s+(?:reached\s+out|did)|so\s+good\s+to\s+hear\s+from\s+you)(?:\s+\w+){0,3}[.!]\s*/i, '$1 ')
@@ -1852,7 +1861,7 @@ async function chatHandler(req, res) {
       // so the response closes with warmth that matches the path intent.
       if (isAtRiskMember && !isDeclineMemberFlag && !isGhostMember && responseText &&
           [...seenToolCalls].some(k => k.startsWith('check_tee_availability:'))) {
-        const hasNudge = /\b(?:see\s+you\s+back|love\s+to\s+have\s+you\s+back|so\s+glad\s+you'?re\s+coming|great\s+to\s+have\s+you\s+back|back\s+out\s+there)\b/i.test(responseText);
+        const hasNudge = /\b(?:see\s+you\s+back|love\s+to\s+have\s+you\s+back|so\s+glad\s+you'?re\s+coming|great\s+to\s+have\s+you\s+back|back\s+out\s+there|love\s+to\s+see\s+you|see\s+you\s+out\s+here|love\s+seeing\s+you|see\s+you\s+more|out\s+here\s+more)\b/i.test(responseText);
         if (!hasNudge) {
           responseText = responseText.replace(/\s*$/, '') + ' We\'d love to see you back out there.';
           console.warn('[concierge] AT-RISK RE-ENGAGEMENT NUDGE: appended nudge clause for at-risk tee time check');
