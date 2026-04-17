@@ -10,8 +10,9 @@
 import { withAuth, getReadClubId } from '../lib/withAuth.js';
 import { createMemberSession } from '../../swoop-agent-platform/sessions/bootstrap/create_member_session.ts';
 import { sendAndConsumeStream } from '../../swoop-agent-platform/harness/events.ts';
-import { ALL_HANDLERS } from '../../swoop-agent-platform/tools/handlers/index.ts';
+import { buildHandlers } from '../../swoop-agent-platform/tools/handlers/index.ts';
 import { seedMemberContext } from '../../swoop-agent-platform/sessions/bootstrap/seed_member_context.ts';
+import { getClubContext, formatCapabilitiesNote } from '../../swoop-agent-platform/sessions/club_context.ts';
 
 async function chatHandler(req, res) {
   if (req.method !== 'POST') {
@@ -25,7 +26,10 @@ async function chatHandler(req, res) {
   if (!message || typeof message !== 'string') return res.status(400).json({ error: 'message is required' });
 
   try {
-    const { managedSessionId, created } = await createMemberSession(clubId, member_id);
+    const [{ managedSessionId, created }, ctx] = await Promise.all([
+      createMemberSession(clubId, member_id),
+      getClubContext(clubId),
+    ]);
 
     // Seed Jonas context on first session (fire-and-forget, non-blocking)
     if (created) {
@@ -34,12 +38,16 @@ async function chatHandler(req, res) {
       );
     }
 
-    const responseText = await sendAndConsumeStream(managedSessionId, message, ALL_HANDLERS);
+    // Prepend unavailable-capability context so the agent knows upfront what it can't do
+    const capNote = formatCapabilitiesNote(ctx);
+    const fullMessage = capNote ? `${capNote}\n\n${message}` : message;
+
+    const responseText = await sendAndConsumeStream(managedSessionId, fullMessage, buildHandlers(clubId));
 
     return res.status(200).json({
       session_id: managedSessionId,
       member_id,
-      response: responseText || fallbackResponse(req, member_id),
+      response: responseText || fallbackResponse(),
       simulated: false,
     });
   } catch (err) {
@@ -54,7 +62,7 @@ async function chatHandler(req, res) {
   }
 }
 
-function fallbackResponse(req, memberId) {
+function fallbackResponse() {
   return `Hi, I ran into a snag. Please call the front desk and they'll help you right away.`;
 }
 
