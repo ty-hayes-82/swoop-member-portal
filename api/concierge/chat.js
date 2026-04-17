@@ -39,7 +39,7 @@ const TOOL_GATES = {
 const CONCIERGE_TOOLS = [
   {
     name: 'get_club_calendar',
-    description: 'Get upcoming club events and activities',
+    description: 'Get upcoming club events and activities. Use for event discovery only — do NOT call when the member wants to cancel a tee time or reservation (use get_my_schedule instead).',
     input_schema: { type: 'object', properties: { days_ahead: { type: 'integer', default: 7 } } }
   },
   {
@@ -1760,6 +1760,7 @@ async function chatHandler(req, res) {
       // sentences before the event info: "Linda! You just made my day. So great to
       // hear from you." = 2 sentences before any content → 4 total, exceeds limit.
       // Collapse any second warmth sentence immediately after the opener.
+      // Also enforce full bullet-list for ghost members when model cherry-picked 1 event.
       if (isGhostMember && responseText && [...seenToolCalls].some(k => k.startsWith('get_club_calendar:'))) {
         responseText = responseText
           .replace(
@@ -1767,6 +1768,31 @@ async function chatHandler(req, res) {
             '$1 '
           )
           .trim();
+        // If model cherry-picked 1 event (no bullet points) but tool may have returned 2+,
+        // re-fetch and reformat with full list.
+        if (!responseText.includes('\u2022')) {
+          try {
+            const gcResult = await executeAndLogTool('get_club_calendar', {});
+            const gcEvents = gcResult?.events || [];
+            if (gcEvents.length >= 2) {
+              const gcList = gcEvents.slice(0, 3).map(e => {
+                const evParts = [];
+                const evTitle = e.title || e.name || e.event_name;
+                if (evTitle) evParts.push(evTitle);
+                if (e.date) evParts.push(e.date);
+                if (e.time) evParts.push(`at ${e.time}`);
+                if (e.location) evParts.push(`in ${e.location}`);
+                return `\u2022 ${evParts.join(' ')}`;
+              }).join('\n');
+              const gcWarmOpener = responseText.match(/^[^.!\n]+[.!]/)?.[0]?.trim()
+                || `${memberFirstName}! So great to hear from you.`;
+              responseText = `${gcWarmOpener} Here's what's coming up:\n${gcList}`;
+              console.warn('[concierge] GHOST CALENDAR REFORMAT: enforced full bullet list for ghost member');
+            }
+          } catch (gcErr) {
+            console.warn('[concierge] GHOST CALENDAR REFORMAT error (suppressed):', gcErr.message);
+          }
+        }
       }
 
       // ── POST-LOOP AFFIRMATIVE RSVP GUARD ─────────────────────────────────────
@@ -1801,8 +1827,10 @@ async function chatHandler(req, res) {
         responseText = responseText
           // Strip hollow T2 opener like "Robert, I'm so glad you reached out..." or "Robert! So glad..."
           .replace(/^([^,!]+[,!])\s+(?:I'?m\s+)?(?:so\s+glad\s+you\s+reached\s+out|always\s+love\s+hearing\s+from\s+you|great\s+to\s+hear\s+from\s+you)[^,.!]*[,.!]\s*/i, '$1 ')
-          // Strip "with the events team" / "with our events team" / "with our team"
-          .replace(/\s+with\s+(?:the\s+|our\s+)?(?:events?\s+team|our\s+team)[,.]?/gi, '')
+          // Replace "I've sent your RSVP for X to [our/the] events team" with "You're on the list for X"
+          .replace(/I'?ve\s+sent\s+your\s+(?:RSVP|registration|details?)\s+for\s+([^.!,]+?)\s+to\s+(?:our\s+|the\s+)?(?:events?\s+(?:team|coordinator)|club\s+team)[^.!]*/gi, "You're on the list for $1")
+          // Strip "with/to the events team" / "with/to our events team" process language
+          .replace(/\s+(?:with|to)\s+(?:the\s+|our\s+)?(?:events?\s+team|our\s+team)[,.]?/gi, '')
           // Strip process-language sentences about follow-up confirmation
           .replace(/[.!]\s+They'?ll\s+follow\s+up\s+with\s+(?:a\s+)?confirmation[^.!]*[.!]/gi, '.')
           .replace(/[,;]\s+they'?ll\s+follow\s+up\s+with\s+(?:a\s+)?confirmation[^.!]*/gi, '')
