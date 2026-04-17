@@ -11,15 +11,24 @@ import { handleObservePreference, handleRecallMemberContext, handleLogDecision }
 import { handleSurfaceRecommendation, handleTrackOutcome, handleHoldForReview } from './insight.ts';
 import { handleRequestHumanConfirmation } from './human_confirmation.ts';
 
-/** All Swoop custom tool handlers keyed by tool name. Pass to consumeStream(). */
-export const ALL_HANDLERS: ToolHandlers = {
-  route_to_role_agent: handleRouteToRoleAgent,
-  escalate_to_role: handleEscalateToRole,
-  observe_preference: handleObservePreference,
-  recall_member_context: handleRecallMemberContext,
-  log_decision: handleLogDecision,
-  surface_recommendation: handleSurfaceRecommendation,
-  track_outcome: handleTrackOutcome,
-  hold_for_review: handleHoldForReview,
-  request_human_confirmation: handleRequestHumanConfirmation,
-};
+/**
+ * Build a handler map scoped to a specific club.
+ * The routing handler uses clubId to enforce capability gates (staff on duty + config).
+ * Pass clubId='' for non-member contexts (analyst sessions) to skip gating.
+ */
+export function buildHandlers(clubId: string): ToolHandlers {
+  return {
+    route_to_role_agent: (input) => handleRouteToRoleAgent(input, clubId),
+    escalate_to_role: handleEscalateToRole,
+    observe_preference: handleObservePreference,
+    recall_member_context: handleRecallMemberContext,
+    log_decision: handleLogDecision,
+    surface_recommendation: handleSurfaceRecommendation,
+    track_outcome: handleTrackOutcome,
+    hold_for_review: handleHoldForReview,
+    request_human_confirmation: handleRequestHumanConfirmation,
+  };
+}
+
+/** Ungated handlers for non-member contexts (analyst sessions, test scripts). */
+export const ALL_HANDLERS: ToolHandlers = buildHandlers('');

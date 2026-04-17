@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { sql } from '@vercel/postgres';
+import { getClubContext, isCapabilityAvailable } from '../../sessions/club_context.ts';
 
 const RouteInput = z.object({
   target_role: z.enum(['tee_time', 'fb', 'dining', 'events', 'membership', 'pro_shop', 'controller', 'head_pro']),
@@ -17,12 +18,27 @@ const EscalateInput = z.object({
 
 /**
  * Records the routing intent and returns routing metadata.
- * The actual callable_agent invocation is handled natively by Managed Agents
- * when the agent definition has callable_agents configured — this handler
- * records the routing event for audit purposes.
+ * When clubId is provided, enforces capability gates before allowing the route.
+ * The actual callable_agent invocation is handled natively by Managed Agents.
  */
-export async function handleRouteToRoleAgent(input: Record<string, unknown>): Promise<unknown> {
+export async function handleRouteToRoleAgent(
+  input: Record<string, unknown>,
+  clubId: string = '',
+): Promise<unknown> {
   const parsed = RouteInput.parse(input);
+
+  if (clubId) {
+    const ctx = await getClubContext(clubId);
+    const check = isCapabilityAvailable(parsed.target_role, ctx);
+    if (!check.allowed) {
+      return {
+        routed: false,
+        available: false,
+        target_role: parsed.target_role,
+        reason: check.reason ?? 'This capability is not currently available.',
+      };
+    }
+  }
 
   await sql`
     INSERT INTO event_bus (event_type, payload, created_at)
