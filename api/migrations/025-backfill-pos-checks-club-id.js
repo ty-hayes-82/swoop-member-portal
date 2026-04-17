@@ -25,9 +25,9 @@ export default async function handler(req, res) {
 
   await run('backfill_pos_checks_club_id', sql`
     UPDATE pos_checks pc
-    SET    club_id = do.club_id
-    FROM   dining_outlets do
-    WHERE  pc.outlet_id = do.outlet_id
+    SET    club_id = outlets.club_id
+    FROM   dining_outlets outlets
+    WHERE  pc.outlet_id = outlets.outlet_id
       AND  pc.club_id IS NULL
   `);
 
