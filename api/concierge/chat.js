@@ -792,7 +792,7 @@ async function _geminiGenerate({ systemPrompt, contents, tools, temperature, max
   const body = {
     systemInstruction: { parts: [{ text: systemPrompt }] },
     contents,
-    generationConfig: { temperature: temperature ?? 0.5, maxOutputTokens: maxOutputTokens ?? 2048, thinkingConfig: { thinkingBudget: 0 } },
+    generationConfig: { temperature: temperature ?? 0.5, maxOutputTokens: maxOutputTokens ?? 2048 },
     tools: [{ functionDeclarations: tools.map(t => ({ name: t.name, description: t.description, parameters: _toGeminiSchema(t.input_schema) })) }],
   };
   const res = await fetch(url, {
@@ -1308,17 +1308,28 @@ async function chatHandler(req, res) {
     // Sanitize em-dashes from final response (belt-and-suspenders, model also instructed to avoid them)
     responseText = responseText.replace(/\u2014/g, ',');
 
-    // Strip bracket-format instruction leaks — e.g. [MANDATORY OPENER...], [CHECK: ...], [ACTION SUMMARY...]
-    // Gemini occasionally mirrors bracket-style instructions verbatim when they appear in context.
-    // Lines that are ENTIRELY a bracket block (typical when Gemini outputs a checklist) are removed;
-    // inline brackets within a sentence get their brackets stripped but the content kept if short (<60 chars).
-    if (/\[(?:MANDATORY|CHECK|ACTION SUMMARY|STEP \d|NOTE:|OPENER|REMINDER)[^\]]{0,300}\]/i.test(responseText)) {
-      console.warn('[concierge/chat] bracket instruction leak detected — stripping');
+    // Thinking-chain extractor — gemini-3.1-pro-preview-customtools outputs its reasoning as plain text
+    // before the actual response. When detected, extract only the last clean paragraph.
+    // Signals: bracket-format planning blocks, "Let's write", "Wait," meta-commentary.
+    const THINKING_SIGNAL = /\[(?:ACTION SUMMARY|PROACTIVE SUGGESTION|CHECK:|MANDATORY|STEP \d|OPENER)\b|Let'?s write\b|Let me (?:check|refine|write)\b/i;
+    if (THINKING_SIGNAL.test(responseText)) {
+      console.warn('[concierge/chat] thinking chain detected — extracting final paragraph');
+      const REASONING_LINE = /^(?:\[|Let'?s |Wait,|Now,|Check:|Sentence \d|Let me |Note:|Here'?s |Looking |I need |I should |I want |I'?ll |I'?m going|I have |I'?ve |The prompt|The rule|The check|Looking at|Re-read|Re-check|Going back)/i;
+      const paras = responseText
+        .split(/\n{2,}/)
+        .map(p => p.trim())
+        .filter(p => p.length > 15 && !REASONING_LINE.test(p) && !THINKING_SIGNAL.test(p));
+      if (paras.length > 0) {
+        responseText = paras[paras.length - 1];
+      }
+    }
+
+    // Strip any residual bracket-format instruction text (belt-and-suspenders after extraction above).
+    if (/\[(?:MANDATORY|CHECK|ACTION SUMMARY|STEP \d|NOTE:|OPENER|REMINDER)/i.test(responseText)) {
+      console.warn('[concierge/chat] residual bracket leak — stripping');
       responseText = responseText
-        // Remove entire lines that are just a bracket block
-        .replace(/^\s*\[[^\]]{10,}\]\s*$/gm, '')
-        // Remove standalone bracket blocks between sentences
-        .replace(/\s*\[(?:MANDATORY|CHECK|ACTION SUMMARY|STEP \d|NOTE:|OPENER|REMINDER)[^\]]{0,300}\]\s*/gi, ' ')
+        .replace(/^\s*\[[^\n]{10,}\]\s*$/gm, '')
+        .replace(/\[(?:MANDATORY|CHECK|ACTION SUMMARY|STEP \d|NOTE:|OPENER|REMINDER)[^\]]*\]/gi, '')
         .replace(/\n{3,}/g, '\n\n')
         .trim();
     }
