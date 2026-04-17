@@ -1714,8 +1714,11 @@ async function chatHandler(req, res) {
           .replace(/^([A-Z][a-z]+,)\s+and\s+(?=I'?(?:ve|'m)\s)/i, '$1 ')
           // Strip fabricated personal preference details: "I know you'll love your favorite X" / "as always"
           .replace(/[,.]?\s+(?:I\s+know\s+you(?:'ll\s+(?:love|enjoy)\s+(?:having\s+)?your\s+(?:usual|favorite)\s+\w[^.!]*|'d\s+love)|and\s+you(?:'ll\s+love|'ve\s+always\s+loved)\s+\w[^.!]*|as\s+always[^.!]*)[.!]?/gi, '')
-          // Strip venue padding appended after booking: "The [Venue] has been [adj] lately"
-          .replace(/[.!]\s+The\s+[A-Z][^.!\n]+has\s+been\s+(?:wonderful|great|excellent|lovely|fantastic|beautiful|absolutely\s+\w+)\s+lately[^.!]*[.!]/gi, '.')
+          // Strip venue/atmospheric padding appended after booking: "The [Venue] has been [adj] lately/this time of year"
+          .replace(/[.!]\s+The\s+[A-Z][^.!\n]+has\s+been\s+(?:wonderful|great|excellent|lovely|fantastic|beautiful|absolutely\s+\w+)(?:\s+(?:lately|recently|this\s+\w+(?:\s+of\s+year)?))?[^.!]*[.!]/gi, '.')
+          // Strip re-engagement filler: "I'd love to have you back out here / come back soon"
+          .replace(/[,.]?\s+and\s+I'?d\s+(?:love\s+to\s+have\s+you\s+(?:back|out\s+here|in)|look\s+forward\s+to\s+seeing\s+you)[^.!]*/gi, '')
+          .replace(/[.!]\s+I'?d\s+(?:love\s+to\s+have\s+you\s+(?:back|out\s+here)|look\s+forward\s+to\s+seeing\s+you)[^.!]*[.!]/gi, '.')
           .replace(/\s+\.$/, '.')
           .trim();
       }
@@ -1807,6 +1810,11 @@ async function chatHandler(req, res) {
               }).join('\n');
               let gcWarmOpener = responseText.match(/^[^.!\n]+[.!]/)?.[0]?.trim()
                 || `${memberFirstName}! So great to hear from you.`;
+              // If opener is just "Linda!" (≤2 words), grab the next sentence too for real warmth
+              if (gcWarmOpener.trim().split(/\s+/).length <= 2) {
+                const extended = responseText.match(/^[^.!\n]+[.!]\s+[^.!\n]+[.!]/)?.[0]?.trim();
+                gcWarmOpener = extended || `${memberFirstName}! We've missed you at the club.`;
+              }
               // Strip hollow calendar-sharing clause from within the warm opener before using it
               gcWarmOpener = gcWarmOpener.replace(/,\s+and\s+I'?m\s+(?:so\s+)?(?:happy|glad|delighted|thrilled|excited)\s+to\s+(?:share|tell\s+you(?:\s+about)?)\s+(?:what'?s\s+(?:on|happening|coming\s+up)[^.!]*|all\s+about\s+it[^.!]*)/gi, '.').replace(/\.\.+/, '.');
               responseText = `${gcWarmOpener} Here's what's coming up:\n${gcList}`;
