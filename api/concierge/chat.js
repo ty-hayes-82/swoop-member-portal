@@ -1041,6 +1041,9 @@ async function chatHandler(req, res) {
   // Phase 2a: dual-write to universal agent session (fire-and-forget)
   getOrCreateAgentSession(`mbr_${member_id}_concierge`, 'identity', member_id, clubId).catch(() => {});
 
+  // Correlation ID links all events in this turn (user message, tool calls, agent response)
+  const correlationId = `turn_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
+
   // Get club name (fallback for demo)
   let clubName = 'Pinetree Country Club';
   try {
@@ -1160,7 +1163,7 @@ async function chatHandler(req, res) {
     await emitConciergeEvent(member_id, clubId, { type: 'user_message', text: message });
   } catch (_) { /* non-blocking */ }
   // Phase 2a: dual-write to universal session event log (fire-and-forget)
-  emitAgentEvent(`mbr_${member_id}_concierge`, clubId, { type: 'user_message', text: message, source_agent: 'member_concierge' }).catch(() => {});
+  emitAgentEvent(`mbr_${member_id}_concierge`, clubId, { type: 'user.message', text: message, source_agent: 'member_concierge', correlation_id: correlationId }).catch(() => {});
 
   if (SIMULATION_MODE) {
     // Simulation: return a canned response based on the message
@@ -1256,10 +1259,10 @@ async function chatHandler(req, res) {
       }
       if (debug) toolCallLog.push({ tool_name: toolName, arguments: toolInput, result: toolResult, ts: new Date().toISOString() });
       try { await emitConciergeEvent(member_id, clubId, { type: 'tool_call', tool: toolName, args: toolInput, status: toolResult?.status || 'ok', result_summary: JSON.stringify(toolResult).slice(0, 200) }); } catch (_) {}
-      emitAgentEvent(`mbr_${member_id}_concierge`, clubId, { type: 'tool_call', tool: toolName, args: toolInput, status: toolResult?.status || 'ok', result_summary: JSON.stringify(toolResult).slice(0, 200), source_agent: 'member_concierge' }).catch(() => {});
+      emitAgentEvent(`mbr_${member_id}_concierge`, clubId, { type: 'agent.custom_tool_use', tool: toolName, args: toolInput, status: toolResult?.status || 'ok', result_summary: JSON.stringify(toolResult).slice(0, 200), source_agent: 'member_concierge', correlation_id: correlationId }).catch(() => {});
       if (toolResult?.status === 'request_submitted' && toolResult?.request_id) {
         try { await emitConciergeEvent(member_id, clubId, { type: 'request_submitted', request_id: toolResult.request_id, request_type: toolName, routed_to: toolResult.routed_to, details: toolResult.details, expected_response: toolResult.expected_response }); } catch (_) {}
-        emitAgentEvent(`mbr_${member_id}_concierge`, clubId, { type: 'request_submitted', request_id: toolResult.request_id, request_type: toolName, routed_to: toolResult.routed_to, details: toolResult.details, expected_response: toolResult.expected_response, source_agent: 'member_concierge' }).catch(() => {});
+        emitAgentEvent(`mbr_${member_id}_concierge`, clubId, { type: 'agent.custom_tool_result', request_id: toolResult.request_id, request_type: toolName, routed_to: toolResult.routed_to, details: toolResult.details, expected_response: toolResult.expected_response, source_agent: 'member_concierge', correlation_id: correlationId }).catch(() => {});
         appendSessionSummary(clubId, member_id, `REQUEST:${toolResult.request_id}|tool:${toolName}|team:${toolResult.routed_to}|${new Date().toISOString().slice(0,16)}`).catch(() => {});
       }
       if (toolResult?.complaint_id && toolResult?.status === 'filed') {
@@ -2131,7 +2134,7 @@ async function chatHandler(req, res) {
       await emitConciergeEvent(member_id, clubId, { type: 'agent_response', text: responseText });
     } catch (_) { /* non-blocking */ }
     // Phase 2a: dual-write agent_response to universal session event log (fire-and-forget)
-    emitAgentEvent(`mbr_${member_id}_concierge`, clubId, { type: 'agent_response', text: responseText, source_agent: 'member_concierge' }).catch(() => {});
+    emitAgentEvent(`mbr_${member_id}_concierge`, clubId, { type: 'agent.message', text: responseText, source_agent: 'member_concierge', correlation_id: correlationId }).catch(() => {});
 
     // Update conversation summary (fallback for clusters that lack event log)
     try {

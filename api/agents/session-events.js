@@ -28,7 +28,7 @@ async function sessionEventsHandler(req, res) {
   const isDemoRequest = !req.auth && req.query.club_id;
   const clubId = isDemoRequest ? req.query.club_id : getReadClubId(req);
 
-  const { since, session_id, limit = '20' } = req.query;
+  const { since, session_id, include_bus, limit = '20' } = req.query;
   const maxLimit = Math.min(parseInt(limit, 10) || 20, 100);
 
   try {
@@ -105,6 +105,31 @@ async function sessionEventsHandler(req, res) {
       priority: row.payload?.priority || null,
     }));
 
+    // Optionally include event_bus rows (cross-agent routing events)
+    if (include_bus) {
+      try {
+        const busQuery = since
+          ? await sql`SELECT event_id, club_id, event_type, source_agent, member_id, payload, thread_id, created_at FROM event_bus WHERE club_id = ${clubId} AND created_at > ${since} ORDER BY created_at ASC LIMIT ${maxLimit}`
+          : await sql`SELECT event_id, club_id, event_type, source_agent, member_id, payload, thread_id, created_at FROM event_bus WHERE club_id = ${clubId} ORDER BY created_at DESC LIMIT ${maxLimit}`;
+        const busEvents = busQuery.rows.map(row => ({
+          id: `bus_${row.event_id}`,
+          sessionId: row.thread_id || `bus_${clubId}`,
+          sessionType: 'event_bus',
+          ownerId: row.member_id || row.source_agent,
+          eventType: row.event_type,
+          sourceAgent: row.source_agent,
+          correlationId: null,
+          createdAt: row.created_at,
+          payload: row.payload || {},
+          label: labelForEvent(row.event_type, row.payload),
+          sessionLabel: row.source_agent || 'Event Bus',
+          priority: row.payload?.priority || null,
+        }));
+        events.push(...busEvents);
+        events.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      } catch (_) { /* event_bus table may not exist yet */ }
+    }
+
     return res.status(200).json({
       events,
       count: events.length,
@@ -127,17 +152,25 @@ async function sessionEventsHandler(req, res) {
 
 function labelForEvent(eventType, payload = {}) {
   switch (eventType) {
-    case 'user_message':        return `Message: ${(payload.text || '').slice(0, 60)}`;
-    case 'agent_response':      return `Agent replied`;
-    case 'tool_call':           return `Tool: ${payload.tool || 'unknown'}`;
-    case 'request_submitted':   return `Request submitted — ${payload.request_type || 'unknown'}`;
-    case 'staff_notified':      return `Staff notified`;
-    case 'staff_confirmed':     return `Confirmed by staff`;
-    case 'staff_rejected':      return `Rejected by staff`;
-    case 'recommendation_received': return payload.summary || payload.recommendation?.slice(0, 60) || 'Recommendation received';
-    case 'preference_observed': return `Preference: ${payload.field || ''} = ${payload.value || ''}`;
-    case 'outcome_tracked':     return `Outcome: ${payload.outcome || 'tracked'}`;
-    default:                    return eventType.replace(/_/g, ' ');
+    // Canonical names (new)
+    case 'user.message':              return `Message: ${(payload.text || '').slice(0, 60)}`;
+    case 'agent.message':             return `Agent replied`;
+    case 'agent.custom_tool_use':     return `Tool: ${payload.tool || 'unknown'}`;
+    case 'agent.custom_tool_result':  return `Request submitted — ${payload.request_type || 'unknown'}`;
+    case 'user.custom_tool_result':   return `Confirmed by staff`;
+    case 'agent.thread_message_received': return payload.summary?.slice(0, 60) || 'Recommendation received';
+    // Legacy names
+    case 'user_message':              return `Message: ${(payload.text || '').slice(0, 60)}`;
+    case 'agent_response':            return `Agent replied`;
+    case 'tool_call':                 return `Tool: ${payload.tool || 'unknown'}`;
+    case 'request_submitted':         return `Request submitted — ${payload.request_type || 'unknown'}`;
+    case 'staff_notified':            return `Staff notified`;
+    case 'staff_confirmed':           return `Confirmed by staff`;
+    case 'staff_rejected':            return `Rejected by staff`;
+    case 'recommendation_received':   return payload.summary || payload.recommendation?.slice(0, 60) || 'Recommendation received';
+    case 'preference_observed':       return `Preference: ${payload.field || ''} = ${payload.value || ''}`;
+    case 'outcome_tracked':           return `Outcome: ${payload.outcome || 'tracked'}`;
+    default:                          return eventType.replace(/[._]/g, ' ');
   }
 }
 
