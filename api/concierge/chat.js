@@ -1040,7 +1040,7 @@ async function chatHandler(req, res) {
     const client = getAnthropicClient();
     const messages = [{ role: 'user', content: message }];
     let result = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-6',
       max_tokens: 2048,
       temperature: conciergeTemperature,
       system: systemPrompt + conversationContext + pendingRequestsContext + recommendationContext,
@@ -1192,7 +1192,7 @@ async function chatHandler(req, res) {
       messages.push({ role: 'user', content: toolResults });
 
       result = await client.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 2048,
         temperature: conciergeTemperature,
         system: systemPrompt + conversationContext + pendingRequestsContext + recommendationContext,
