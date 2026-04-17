@@ -4,9 +4,10 @@
  *
  * SMS Concierge functionality test + AI scoring pipeline.
  *
- * Sends 42 targeted messages across 5 member personas (30 functional + 6 architecture
- * validation probes for Managed Agents Sprint A-D + 6 GBTC demo day scenarios),
- * captures tool_calls[], takes Playwright screenshots of the UI, then scores with 9 specialist agents:
+ * Sends 48 targeted messages across 5 member personas (30 functional + 6 architecture
+ * validation probes for Managed Agents Sprint A-D + 6 GBTC demo day scenarios +
+ * 6 clarify-vs-act gate probes), captures tool_calls[], takes Playwright screenshots
+ * of the UI, then scores with 9 specialist agents:
  * 5 focused on concierge FUNCTIONALITY, 2 on ARCHITECTURE REALIZATION.
  *
  * Usage:
@@ -117,6 +118,15 @@ const TEST_MATRIX = [
   { personaIdx: 3, message: 'Can you show me a summary of my preferences and what the club knows about me?',                    expectedTool: 'get_member_profile', note: 'Demo Move 3: memory compound — preferences retrieval for Sandra, proves session memory' },
   { personaIdx: 2, message: 'I want to make a reservation but make it really nice — booth by the window if possible',           expectedTool: 'make_dining_reservation', note: 'Demo Move 3: preference recall — Robert has booth preference, concierge should surface it' },
   { personaIdx: 4, message: 'My son wants to start golfing — what programs does the club have for kids?',                       expectedTool: 'get_club_calendar', note: 'Demo Move 5: ghost re-engagement via family angle — Linda ghost member, personal hook needed' },
+
+  // ── Clarify-vs-act gate probes ─────────────────────────────────────────────
+  // These specifically test whether the agent asks for details vs acts immediately
+  { personaIdx: 0, message: 'My lunch was really slow',                                          expectedTool: null,              note: 'complaint gate: vague — must ask for details (location + how long), NOT file_complaint' },
+  { personaIdx: 0, message: 'Make a dinner reservation',                                         expectedTool: null,              note: 'dining gate: no date — must ask for date + party size, NOT make_dining_reservation' },
+  { personaIdx: 0, message: 'The food at the Grill was cold and wrong — we waited 40 minutes',   expectedTool: 'file_complaint',  note: 'complaint gate: specific — location+incident present, must file immediately' },
+  { personaIdx: 2, message: 'Book dinner for my anniversary on Saturday, 7pm for two',            expectedTool: 'make_dining_reservation', note: 'dining gate: full details — must book immediately, not ask' },
+  { personaIdx: 3, message: 'Are there any social events for singles?',                           expectedTool: 'get_club_calendar', note: 'calendar query: must check calendar and return results concisely, not verbose explanation' },
+  { personaIdx: 1, message: 'Yes',                                                                expectedTool: 'make_dining_reservation', note: 'affirmative follow-up: must act on last offer (assumes prior dining offer was made), not re-ask' },
 ];
 
 // ─── Scoring Agent Definitions ────────────────────────────────────────────────
@@ -125,7 +135,7 @@ const SCORING_AGENTS = [
   {
     id: 'tool_accuracy',
     name: 'Tool Selection Accuracy',
-    weight: 0.25,
+    weight: 0.20,
     dimensions: ['correct_tool_fired', 'tool_not_called_when_needed', 'wrong_tool_called', 'two_phase_booking_gate', 'edge_case_recovery'],
     prompt: `You are a senior QA engineer evaluating an AI concierge for a private country club. Be precise and evidence-based. Do NOT hallucinate evidence. Only cite things actually present in the conversations. Never use em-dashes (—) in your output text: use commas, colons, or periods instead.
 
@@ -133,6 +143,7 @@ IMPORTANT CONTEXT:
 - Bookings (tee times, dining, RSVPs, cancellations) correctly return { status: "request_submitted", pending: true, routed_to: "..." } — this is the CORRECT behavior (human-in-the-loop). Do NOT penalize for this.
 - When simulated=true, tool_calls[] will be empty — this is an environment issue, not a code bug. Note it per conversation but do not let it tank scores if simulated mode produces coherent responses.
 - Score based only on what you can directly observe in the conversations provided.
+- For conversations where expectedTool is null, the CORRECT behavior is no tool call — a clarifying question should be the response. Score correct_tool_fired as 10 for these if no tool was fired.
 
 TWO-PHASE TEE TIME BOOKING RULE (critical):
 Tee time booking MUST follow a two-step sequence:
@@ -208,54 +219,58 @@ Return ONLY valid JSON matching this contract exactly:
   },
 
   {
-    id: 'response_naturalness',
-    name: 'Response Naturalness',
-    weight: 0.17,
-    dimensions: ['confirmation_clarity', 'error_messaging', 'tone_warmth', 'action_summary', 'follow_up_proactivity'],
-    prompt: `You are a hospitality expert and conversation designer evaluating an AI concierge for a private country club. Be precise and evidence-based. Quote actual response text when citing evidence. Never use em-dashes (—) in your output text: use commas, colons, or periods instead.
+    id: 'conversational_naturalness',
+    name: 'Conversational Naturalness',
+    weight: 0.30,
+    dimensions: ['response_fit', 'followup_intelligence', 'brevity_fit', 'tone_naturalness', 'clarify_vs_act'],
+    prompt: `You are a conversation quality reviewer evaluating an AI concierge for a private country club. Your job is to assess whether each response feels like a natural, well-calibrated text from a smart friend who works at the club — not a chatbot running a script.
 
-IMPORTANT CONTEXT:
-- Bookings return { status: "request_submitted", pending: true, routed_to: "Pro Shop" } — the concierge SHOULD say something like "Sent your request to the pro shop, they'll confirm within the hour." Penalize if it says "confirmed" without routing language.
-- Banned openers (penalize hard if used): "Perfect", "Great", "I'm sorry", "Certainly", "Absolutely", "Of course", "Done —", "Filed —", "I've escalated", "I understand how frustrating"
-- Banned phrases anywhere in response (penalize hard): "you deserved so much better", "I understand how you feel", "that must have been", "I hear how", "I can only imagine"
-- Attribution preambles are banned: NEVER "Since I know from your history that...", "I can see from your profile that...", "Based on what I know about you..." — just act on the preference silently or skip it
-- Em-dashes (—) in any response are a style violation: penalize under tone_warmth
-- Approved openers: first name, "On it!", "You got it!", "All set!", "Nice!", "Sending that now!", "On the way!"
-- Responses must be 2-4 sentences max. Longer is always wrong. When in doubt, shorter wins.
-- No markdown, no bullet points, no asterisks in the response text.
+The PRIMARY question for every response: does this feel right? Does the length, tone, and content match what a member actually needed in that moment?
 
-COMPLAINT FORMAT (3-sentence structure — penalize deviations):
-1. Specific punchy opener: "[Name], [specific detail as punchy observation or question]." — NOT generic empathy
-2. Action taken: "Filed with [NAMED manager], ref [id], [timeline]."
-3. Recovery offer: one short clause.
-RIGHT: "James, 47 minutes at the Grill with nobody checking? Filed with F&B Director Sarah Collins, ref FB-MO2F1FKV — she'll follow up within 24 hours. Want me to book your usual table this weekend?"
-WRONG: "James, you deserved so much better than that. Waiting 47 minutes is completely unacceptable. I just filed this directly with our F&B Director..."
+KEY RULES being enforced (penalize violations):
+1. RESPONSE FIT: The response should address exactly what was asked. No more, no less. A calendar query gets events. A vague complaint gets a clarifying question. A booking with missing date gets a date question. Not: a complaint filed with invented details the member never gave.
 
-CALENDAR BREVITY: Lead with event name. Under 15 words. No preamble.
-RIGHT: "Club Championship Qualifier is tomorrow morning on the South Course — want me to add it?"
-WRONG: "The only upcoming event on the calendar right now is the Club Championship Qualifier tomorrow morning..."
+2. FOLLOW-UP INTELLIGENCE (two-phase gates):
+   - Vague complaint (no named location + no specific incident): acknowledge + ask ONE question. DO NOT file.
+   - Dining reservation with no date: ask for date + party size. DO NOT book.
+   - Tee time request: check availability first, present options, THEN book. DO NOT book directly.
+   - Affirmative response ("Yes", "Sure", "The first one"): act on what was last offered. DO NOT re-ask.
+   - Short slot pick ("7", "7am", "the second one"): book it. DO NOT re-ask.
 
-SCORE EACH DIMENSION 1-10 based only on observed responses:
-- confirmation_clarity: Does the response clearly state what was sent with specifics (date, time, named routing destination)? (10=always specific, 1=vague "done")
-- brevity_discipline: Are responses 2-4 sentences max? No padding, no patronizing empathy preambles, no attribution preambles? (10=always concise and direct, 1=verbose with padded empathy or "since I know from your history" type bloat)
-- tone_warmth: Warm, texting-natural, club-appropriate — no em-dashes, no banned openers, no banned phrases, uses first name? (10=natural and clean, 1=robotic or uses banned phrases)
-- action_summary: After a tool call, does the response summarize action, named destination, expected next step? (10=always specific, 1=just "done" or "filed")
-- follow_up_proactivity: After completing a request, does the concierge suggest one related action without preamble? (10=always offers follow-up, 1=never)
+3. BREVITY: 2 sentences is the target. 3 is the max. Penalize verbose patterns:
+   - "I checked our calendar and I'm not seeing any specific events..."
+   - "Let me check with the events team to see if they have anything planned and have them get back to you"
+   - "In the meantime, would you like me to check..."
+   - Responses that explain the process instead of stating the result
 
-Return ONLY valid JSON matching this contract exactly:
+4. TONE: Natural, direct, warm. Penalize:
+   - Banned openers: "Perfect", "Great", "Certainly", "Absolutely", "Of course"
+   - Banned phrases: "I hear you", "you deserved so much better", "Since I know from your history", "Once you pick I'll send", reasoning preambles, hollow closers
+   - Em-dashes (—) anywhere
+
+5. FABRICATION: NEVER invent details. "My lunch was slow" — you know: lunch was slow. Filing a complaint with invented wait times or outlet names is a hard failure.
+
+SCORING (1-10 per dimension):
+- response_fit: Does the response content match what was actually asked? (10=perfectly calibrated, 1=completely misses the ask)
+- followup_intelligence: Correct decision between ask vs act? (10=always right, 5=sometimes right, 1=always files/books without asking or always asks when it should act)
+- brevity_fit: Is the response the right length? (10=always 2 sentences, tight and direct; 1=verbose walls of text with padding)
+- tone_naturalness: Does it sound like a smart friend texting, not a bot? (10=completely natural, 1=robotic/scripted/banned phrases throughout)
+- clarify_vs_act: Correct gate decisions across the full test set? (10=always correct, 1=always invents details or always blocks on clarification when unnecessary)
+
+Return ONLY valid JSON:
 {
-  "agent": "Response Naturalness",
+  "agent": "Conversational Naturalness",
   "scores": {
-    "confirmation_clarity": { "score": <1-10>, "evidence": "<quote actual response text showing confirmation or lack thereof>", "rationale": "<1 sentence>" },
-    "brevity_discipline": { "score": <1-10>, "evidence": "<quote a verbose or correctly concise response as evidence>", "rationale": "<1 sentence>" },
-    "tone_warmth": { "score": <1-10>, "evidence": "<quote a response showing tone quality, flag any banned phrases used>", "rationale": "<1 sentence>" },
-    "action_summary": { "score": <1-10>, "evidence": "<quote response showing action summary or its absence>", "rationale": "<1 sentence>" },
-    "follow_up_proactivity": { "score": <1-10>, "evidence": "<quote a response with or without follow-up suggestion>", "rationale": "<1 sentence>" }
+    "response_fit": { "score": <1-10>, "evidence": "<quote a response showing fit or misfit>", "rationale": "<1 sentence>" },
+    "followup_intelligence": { "score": <1-10>, "evidence": "<cite a case where it asked correctly or failed to ask/acted incorrectly>", "rationale": "<1 sentence>" },
+    "brevity_fit": { "score": <1-10>, "evidence": "<quote a verbose response or correctly concise one>", "rationale": "<1 sentence>" },
+    "tone_naturalness": { "score": <1-10>, "evidence": "<quote a response showing tone quality, flag any banned phrases>", "rationale": "<1 sentence>" },
+    "clarify_vs_act": { "score": <1-10>, "evidence": "<cite the vague complaint case and the dining-no-date case specifically>", "rationale": "<1 sentence>" }
   },
-  "top_strengths": ["<specific observed strength with example>", "<specific observed strength>"],
-  "top_issues": ["<specific issue with quoted evidence>", "<specific issue>"],
+  "top_strengths": ["<specific observed strength>", "<second strength>"],
+  "top_issues": ["<specific issue with quoted evidence>", "<second issue>"],
   "recommendations": [
-    { "priority": "P0|P1|P2", "surface": "<src/config/conciergePrompt.js>", "change": "<specific actionable change to system prompt>", "expected_lift": "<dimension_id>" }
+    { "priority": "P0|P1|P2", "surface": "<src/config/conciergePrompt.js or api/concierge/chat.js>", "change": "<specific actionable change>", "expected_lift": "<dimension_id>" }
   ],
   "confidence": <0.0-1.0>
 }`,
@@ -713,7 +728,7 @@ async function main() {
 
   console.log(ARCH_ONLY
     ? 'Phase 1 — Sending 6 architecture probe messages (msgs 31-36 only)…\n'
-    : 'Phase 1 — Sending 36 test messages (30 functional + 6 architecture probes)…\n');
+    : 'Phase 1 — Sending 48 test messages (30 functional + 6 architecture probes + 6 GBTC + 6 clarify-vs-act gate probes)…\n');
 
   const apiResults = [];
   let simulatedCount = 0;
@@ -723,7 +738,7 @@ async function main() {
     const test = activeMatrix[i];
     const persona = PERSONAS[test.personaIdx];
     const label = `${i + 1}`.padStart(2, '0');
-    const toolSlug = test.expectedTool.replace(/_/g, '-');
+    const toolSlug = test.expectedTool ? test.expectedTool.replace(/_/g, '-') : 'no-tool';
 
     process.stdout.write(`  [${label}/${activeMatrix.length}] ${persona.memberId} — "${test.message.slice(0, 50)}…" `);
 
@@ -753,7 +768,7 @@ async function main() {
     } else if (result.error) {
       console.log(`✗ error: ${result.error.slice(0, 60)}`);
     } else {
-      console.log(`— no tool call (expected: ${test.expectedTool})`);
+      console.log(`— no tool call (expected: ${test.expectedTool ?? 'none — clarify expected'})`);
     }
 
     // Throttle to avoid rate limiting the concierge endpoint
@@ -947,7 +962,7 @@ ${r.error ? `Error: ${r.error}` : ''}`;
     run_timestamp: ts,
     app_url: APP_URL,
     club_id: clubId,
-    total_messages: TEST_MATRIX.length, // 30 functional + 6 architecture probes
+    total_messages: TEST_MATRIX.length, // 30 functional + 6 architecture probes + 6 GBTC + 6 clarify-vs-act gate probes
     simulated_count: simulatedCount,
     tool_call_count: toolCallCount,
     composite,
@@ -1001,7 +1016,7 @@ ${r.error ? `Error: ${r.error}` : ''}`;
 
       for (const c of convos) {
         const convNum = String(c.index || '?').padStart(2, '0');
-        lines.push(`### Conv ${convNum} — \`${c.expectedTool || 'unknown'}\``);
+        lines.push(`### Conv ${convNum} — \`${c.expectedTool ?? 'clarify-expected'}\``);
         if (c.note) lines.push(`> *${c.note}*`);
         lines.push('');
         lines.push(`**Member:** ${c.message}`);
