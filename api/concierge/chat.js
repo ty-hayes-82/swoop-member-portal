@@ -1202,7 +1202,7 @@ async function chatHandler(req, res) {
   // Live mode: call AI (Gemini primary, Claude fallback when GEMINI_API_KEY absent)
   try {
     const lastResponseContext = last_response
-      ? `\n\nYOUR PREVIOUS RESPONSE: "${last_response.slice(0, 400)}"\nThe member's current message is a reply to that. If it is an affirmative ("Yes", "Yes please", "Sure", "Please do", "Go ahead", "sounds good", "that works", "perfect") or a direct slot pick ("7am", "the first one", "Saturday works") — RULE 4 applies: call the appropriate tool NOW and confirm in 1 sentence. Do NOT repeat your previous message. IMPORTANT: If your previous response already listed tee time slots (e.g. "I've got 7:00, 7:12, or 7:24 — which works?"), and the member picks one, call ONLY book_tee_time — do NOT call check_tee_availability again, that was already done in the previous turn.`
+      ? `\n\nYOUR PREVIOUS RESPONSE: "${last_response.slice(0, 400)}"\nThe member's current message is a reply to that. If it is an affirmative ("Yes", "Yes please", "Sure", "Please do", "Go ahead", "sounds good", "that works", "perfect") or a direct slot pick ("7am", "the first one", "Saturday works") — RULE 4 applies: call the appropriate tool NOW and confirm in 1 sentence. Do NOT repeat your previous message. IMPORTANT: If your previous response already listed tee time slots (e.g. "I've got 7:00, 7:12, or 7:24 — which works?"), and the member picks one, call ONLY book_tee_time — do NOT call check_tee_availability again, that was already done in the previous turn.\nOPENER VARIATION (MANDATORY): Read the first sentence of YOUR PREVIOUS RESPONSE above. You MUST NOT start this response with the same opening words or phrase. If the previous response started with "Anne, always love hearing from you!" — choose a DIFFERENT opener from the bank for this response.`
       : '';
     const fullSystemPrompt = systemPrompt + conversationContext + pendingRequestsContext + recommendationContext + lastResponseContext;
 
@@ -1279,6 +1279,8 @@ async function chatHandler(req, res) {
 
       let loopGuard = 0;
       const seenToolCalls = new Set();
+      // Computed once — whether the prior response already listed tee time slots (T2 confirmation context)
+      const lastRespHadSlots = last_response && /\d{1,2}:\d{2}.*\d{1,2}:\d{2}/.test(last_response);
       while (loopGuard++ < 5) {
         const candidate = geminiResp.candidates?.[0];
         const fnCalls = _geminiFunctionCalls(candidate);
@@ -1298,7 +1300,6 @@ async function chatHandler(req, res) {
         // check_tee_availability in this session, intercept and redirect.
         // EXCEPTION: if last_response already contained slot options (T2 confirmation),
         // the availability check was done in the prior turn — allow book_tee_time directly.
-        const lastRespHadSlots = last_response && /\d{1,2}:\d{2}.*\d{1,2}:\d{2}/.test(last_response);
         const intercepted = dedupedCalls.filter(({ functionCall: fc }) => {
           if (fc.name === 'book_tee_time' && !seenToolCalls.has(`check_tee_availability:intercepted`) && !lastRespHadSlots) {
             const alreadyChecked = [...seenToolCalls].some(k => k.startsWith('check_tee_availability:'));
@@ -1354,6 +1355,73 @@ async function chatHandler(req, res) {
       }
 
       responseText = _geminiText(geminiResp.candidates?.[0]);
+
+      // ── POST-LOOP TEE TIME GUARD ─────────────────────────────────────────────
+      // If the member asked to book a tee time (T1 — no prior slots in last_response),
+      // but no check_tee_availability was called and no book_tee_time was called,
+      // the model returned a fake booking without checking. Force check_tee_availability
+      // and re-run so the member gets real slot options.
+      if (!lastRespHadSlots && responseText) {
+        const isTeeBooking = /\bbook\b.{0,30}\btee\s*time\b/i.test(message)
+          || /\btee\s*time\b.{0,40}\b(?:saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tomorrow|\d{1,2}(?:am|pm))/i.test(message);
+        const noCheckFired = ![...seenToolCalls].some(k => k.startsWith('check_tee_availability:'));
+        const noBookFired = ![...seenToolCalls].some(k => k.startsWith('book_tee_time:'));
+        if (isTeeBooking && noCheckFired && noBookFired) {
+          console.warn('[concierge] TEE POST-LOOP GUARD: tee booking with no availability check — forcing check_tee_availability');
+          const tm = message.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
+          let forceTime = '08:00';
+          if (tm) {
+            let h = parseInt(tm[1]);
+            const m = tm[2] ? parseInt(tm[2]) : 0;
+            if (tm[3].toLowerCase() === 'pm' && h < 12) h += 12;
+            if (tm[3].toLowerCase() === 'am' && h === 12) h = 0;
+            forceTime = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+          }
+          const nextSatDate = (() => {
+            const d = new Date();
+            const daysUntilSat = ((6 - d.getDay() + 7) % 7) || 7;
+            d.setDate(d.getDate() + daysUntilSat);
+            return d.toISOString().split('T')[0];
+          })();
+          const forceDate = message.match(/\d{4}-\d{2}-\d{2}/)?.[0] || nextSatDate;
+          const checkResult = await executeAndLogTool('check_tee_availability', { date: forceDate, preferred_time: forceTime });
+          const sanitizedCheck = JSON.parse(JSON.stringify(checkResult).replace(/\u2014/g, ','));
+          const forceContents = [
+            { role: 'user', parts: [{ text: message }] },
+            { role: 'model', parts: [{ functionCall: { name: 'check_tee_availability', args: { date: forceDate, preferred_time: forceTime } } }] },
+            { role: 'user', parts: [{ functionResponse: { name: 'check_tee_availability', response: sanitizedCheck } }] },
+          ];
+          const forceResp = await _geminiGenerate({
+            systemPrompt: fullSystemPrompt,
+            contents: forceContents,
+            tools: availableTools,
+            temperature: conciergeTemperature,
+            maxOutputTokens: 2048,
+          });
+          const forcedText = _geminiText(forceResp.candidates?.[0]);
+          if (forcedText) responseText = forcedText;
+        }
+      }
+
+      // ── POST-LOOP DINING PARTY SIZE GUARD ────────────────────────────────────
+      // If make_dining_reservation fired but no party size was mentioned in the
+      // member's message, the agent invented it. Override with a clarification offer.
+      if (responseText) {
+        const diningFired = [...seenToolCalls].some(k => k.startsWith('make_dining_reservation:'));
+        if (diningFired) {
+          const msgHasPartySize = /\b(?:for\s+\d+|\d+\s+(?:people|persons?|guests?|of\s+us)|me\s+and\s+(?:my\s+)?\S+|party\s+of\s+\d+|table\s+for\s+\d+|just\s+(?:me|us|the\s+two)|two\s+of\s+us|\btwo\b|\bthree\b|\bfour\b|\bfive\b|\bsix\b)\b/i.test(message);
+          const householdRef = (profile.household || []).some(h => {
+            const fn = (h.name || '').split(' ')[0].toLowerCase();
+            return fn.length > 2 && message.toLowerCase().includes(fn);
+          });
+          const prevRespAskedPartySize = last_response && /how many|party size|for how many/i.test(last_response);
+          if (!msgHasPartySize && !householdRef && !prevRespAskedPartySize) {
+            console.warn('[concierge] DINING PARTY SIZE GUARD: party_size not in member message — overriding with clarification');
+            const dateRef = message.match(/\b(saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tomorrow)\b/i)?.[1];
+            responseText = `${memberFirstName}, how about dinner for 2 at 7pm${dateRef ? ` this ${dateRef}` : ''}? Say yes and I'll send it.`;
+          }
+        }
+      }
 
     } else {
       // ── Claude fallback path ─────────────────────────────────────────────────
