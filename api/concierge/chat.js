@@ -1723,8 +1723,8 @@ async function chatHandler(req, res) {
           // Replace "I've requested a table" with done-deal language
           .replace(/I'?ve\s+requested\s+a\s+table/gi, 'Booked a table')
           // Replace "I've [also] sent your [dinner] request for X to the front desk [...]" → "Booked dinner for X"
-          // Catches sentence-starting variants (after ? or . in multi-intent responses)
-          .replace(/I'?ve\s+(?:also\s+)?sent\s+your\s+(?:dinner\s+|dining\s+)?request\s+(for\s+\d+[^.!,]*?)\s+to\s+(?:the\s+|our\s+)?front\s+desk[^.!]*/gi, 'Booked dinner $1')
+          // Catches "I also sent" (no 've') and "I've also sent" variants (multi-intent responses)
+          .replace(/I'?(?:ve\s+)?(?:also\s+)?sent\s+your\s+(?:dinner\s+|dining\s+)?request\s+(for\s+\d+[^.!,]*?)\s+to\s+(?:the\s+|our\s+)?front\s+desk[^.!]*/gi, 'Booked dinner $1')
           // Strip fabricated venue descriptions and re-engagement padding after confirmation
           .replace(/[.!]\s+The\s+[A-Z][^.!\n]+(?:has\s+been|is)\s+(?:wonderful|great|excellent|lovely|fantastic|beautiful)[^.!]*[.!]/gi, '.')
           .replace(/,?\s+and\s+(?:we|I)\s+can'?t\s+wait\s+to\s+have\s+you\s+back[^.!]*/gi, '')
