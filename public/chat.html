@@ -314,6 +314,11 @@
       border-bottom-left-radius: 4px;
       box-shadow: 0 1px 4px var(--shadow);
     }
+    .bubble.bot.ack {
+      color: var(--muted);
+      font-style: italic;
+      box-shadow: none;
+    }
     .bubble-time { font-size: 10px; margin-top: 4px; }
     .bubble.user .bubble-time { color: rgba(255,255,255,0.5); }
     .bubble.bot  .bubble-time { color: var(--label); }
@@ -803,7 +808,8 @@ function renderMessages() {
   messages.forEach(msg => {
     const div = document.createElement('div');
     div.className = `msg-row ${msg.role === 'user' ? 'user' : 'bot'}`;
-    div.innerHTML = `<div class="bubble ${msg.role === 'user' ? 'user' : 'bot'}"><div>${esc(msg.text)}</div><div class="bubble-time">${msg.time}</div></div>`;
+    const ackClass = msg.isAck ? ' ack' : '';
+    div.innerHTML = `<div class="bubble ${msg.role === 'user' ? 'user' : 'bot'}${ackClass}"><div>${esc(msg.text)}</div><div class="bubble-time">${msg.time}</div></div>`;
     container.insertBefore(div, anchor);
   });
 
@@ -832,15 +838,41 @@ function selectMember(id) {
   renderAll();
 }
 
+/* ── Intent detection for quick ack ── */
+function getTeeTimeQuickAck(text) {
+  const t = text.toLowerCase();
+  const isTeeRequest = /\b(book|reserve|tee\s*time|my\s*usual|get\s*me\s*(on|a)|usual\s*slot)\b/i.test(t) ||
+    (/\b(saturday|sunday|monday|tuesday|wednesday|thursday|friday|tomorrow|this\s*week)\b/i.test(t) &&
+     /\b(7\s*(am|:)|8\s*(am|:)|9\s*(am|:)|morning|golf|round|tee)\b/i.test(t));
+  if (!isTeeRequest) return null;
+  const day = /saturday/i.test(t) ? 'Saturday' :
+              /sunday/i.test(t)   ? 'Sunday'   :
+              /tomorrow/i.test(t) ? 'tomorrow' : null;
+  return day ? `On it, checking ${day} availability...` : 'On it, checking availability...';
+}
+
 async function sendMessage(text) {
   if (!text?.trim() || loading) return;
   const trimmed = text.trim();
   loading = true;
+
+  // Add user message
   const current = loadChats(selectedId);
   current.push({ role: 'user', text: trimmed, time: now() });
   saveChats(selectedId, current);
   document.getElementById('chat-input').value = '';
   renderAll();
+
+  // Quick ack: show immediately for tee time booking intent
+  const quickAck = getTeeTimeQuickAck(trimmed);
+  if (quickAck) {
+    const withAck = loadChats(selectedId);
+    withAck.push({ role: 'bot', text: quickAck, time: now(), isAck: true });
+    saveChats(selectedId, withAck);
+    renderAll();
+    // Small pause so the ack reads naturally before the options arrive
+    await new Promise(r => setTimeout(r, 1800));
+  }
 
   try {
     const res = await fetch('/api/concierge/chat', {
