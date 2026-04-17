@@ -63,7 +63,7 @@ const PERSONAS = [
 
 const TEST_MATRIX = [
   // ── James Whitfield (mbr_t01) — Active, high engagement ──
-  { personaIdx: 0, message: 'Book my usual Saturday tee time, 7am',              expectedTool: 'book_tee_time',           note: 'date inference + recurring slot' },
+  { personaIdx: 0, message: 'Book my usual Saturday tee time, 7am',              expectedTool: 'check_tee_availability',  note: 'two-phase gate: MUST call check_tee_availability first, NOT book_tee_time' },
   { personaIdx: 0, message: "What events are coming up this month?",             expectedTool: 'get_club_calendar',       note: 'date-ranged calendar query' },
   { personaIdx: 0, message: 'Show me my recent rounds',                          expectedTool: 'get_my_schedule',         note: 'member-scoped schedule' },
   { personaIdx: 0, message: 'Reserve a table for dinner tonight, 6:30 for 4',   expectedTool: 'make_dining_reservation', note: 'specific time + party size' },
@@ -75,7 +75,7 @@ const TEST_MATRIX = [
   { personaIdx: 1, message: 'Can you tell the pro shop I need rental clubs on Friday?', expectedTool: 'send_request_to_club', note: 'staff routing' },
   { personaIdx: 1, message: "What's my current account balance?",                expectedTool: 'get_member_profile',      note: 'profile/billing lookup' },
   { personaIdx: 1, message: 'Is there a member-guest tournament coming up?',     expectedTool: 'get_club_calendar',       note: 'event type filter' },
-  { personaIdx: 1, message: 'Book 4 tee times for our group next Saturday morning', expectedTool: 'book_tee_time',        note: 'party size parameter' },
+  { personaIdx: 1, message: 'Book 4 tee times for our group next Saturday morning', expectedTool: 'check_tee_availability', note: 'two-phase gate: group booking must check availability first' },
   { personaIdx: 1, message: 'The course was in terrible shape last Sunday',      expectedTool: 'file_complaint',          note: 'course maintenance complaint' },
 
   // ── Robert Callahan (mbr_t05) — Declining, reactivation ──
@@ -83,7 +83,7 @@ const TEST_MATRIX = [
   { personaIdx: 2, message: "I'm having trouble with my locker combination",     expectedTool: 'send_request_to_club',    note: 'facilities request' },
   { personaIdx: 2, message: "What's my handicap?",                               expectedTool: 'get_member_profile',      note: 'specific profile field' },
   { personaIdx: 2, message: 'Put me and my wife down for the charity gala',      expectedTool: 'rsvp_event',              note: 'multi-person RSVP' },
-  { personaIdx: 2, message: "Get me a tee time Saturday at dawn",                expectedTool: 'book_tee_time',           note: 'vague time expression' },
+  { personaIdx: 2, message: "Get me a tee time Saturday at dawn",                expectedTool: 'check_tee_availability',  note: 'two-phase gate: vague time expression, must check availability first' },
   { personaIdx: 2, message: "I never received my invoice last month",            expectedTool: 'file_complaint',          note: 'billing complaint' },
 
   // ── Sandra Chen (mbr_t06) — At-risk, recent complaint ──
@@ -106,9 +106,9 @@ const TEST_MATRIX = [
   { personaIdx: 0, message: 'Has my tee time request been confirmed by the pro shop yet?', expectedTool: 'get_my_schedule', note: 'Sprint A: confirmation loop recall — was booking confirmed?' },
   { personaIdx: 1, message: 'What preferences have you noted about me?',                   expectedTool: 'get_member_profile', note: 'Sprint B: session preference event retrieval' },
   { personaIdx: 2, message: 'Has my invoice complaint been followed up on?',               expectedTool: 'get_my_schedule', note: 'Sprint B: complaint event retrieval from session log' },
-  { personaIdx: 3, message: 'I need to book golf and dinner for Saturday — can you handle both?', expectedTool: 'book_tee_time', note: 'Sprint D: multi-intent routing across booking + dining brains' },
+  { personaIdx: 3, message: 'I need to book golf and dinner for Saturday — can you handle both?', expectedTool: 'check_tee_availability', note: 'Sprint D: multi-intent — tee time leg must check availability first before booking' },
   { personaIdx: 4, message: "I haven't been around in ages — what do I need to know and what should I do first?", expectedTool: 'get_club_calendar', note: 'Sprint D: personal concierge intent + ghost re-engagement' },
-  { personaIdx: 0, message: 'Set me up for next Saturday — tee time at 8 and dinner after for me and my client', expectedTool: 'book_tee_time', note: 'Sprint D: multi-request coordination across booking + dining' },
+  { personaIdx: 0, message: 'Set me up for next Saturday — tee time at 8 and dinner after for me and my client', expectedTool: 'check_tee_availability', note: 'Sprint D: multi-request — tee time leg must check availability first, then book after member confirms' },
 
   // ── GBTC Demo Day scenarios — tests live demo arc from conference showcase ──
   { personaIdx: 0, message: 'The service at the Grill today was unacceptable. We waited 47 minutes and nobody checked on us once.', expectedTool: 'file_complaint', note: 'Demo Move 2: GBTC hero complaint — specific Grill grievance, high severity, needs escalation tone' },
@@ -126,7 +126,7 @@ const SCORING_AGENTS = [
     id: 'tool_accuracy',
     name: 'Tool Selection Accuracy',
     weight: 0.25,
-    dimensions: ['correct_tool_fired', 'tool_not_called_when_needed', 'wrong_tool_called', 'ambiguous_handled', 'edge_case_recovery'],
+    dimensions: ['correct_tool_fired', 'tool_not_called_when_needed', 'wrong_tool_called', 'two_phase_booking_gate', 'edge_case_recovery'],
     prompt: `You are a senior QA engineer evaluating an AI concierge for a private country club. Be precise and evidence-based. Do NOT hallucinate evidence. Only cite things actually present in the conversations. Never use em-dashes (—) in your output text: use commas, colons, or periods instead.
 
 IMPORTANT CONTEXT:
@@ -134,11 +134,18 @@ IMPORTANT CONTEXT:
 - When simulated=true, tool_calls[] will be empty — this is an environment issue, not a code bug. Note it per conversation but do not let it tank scores if simulated mode produces coherent responses.
 - Score based only on what you can directly observe in the conversations provided.
 
+TWO-PHASE TEE TIME BOOKING RULE (critical):
+Tee time booking MUST follow a two-step sequence:
+  Step 1: call check_tee_availability with date + preferred time
+  Step 2: present options to the member ("I've got 7:00, 7:12, or 7:24 — which works?")
+  Step 3: only call book_tee_time AFTER the member picks a slot
+Calling book_tee_time as the first action on a new tee time request is a HARD FAILURE regardless of how much info was in the message. The expectedTool for tee time booking messages is check_tee_availability — score accordingly.
+
 SCORE EACH DIMENSION 1-10 based only on observed evidence:
 - correct_tool_fired: Count conversations where tool_calls[] contains the expected tool. Score = (correct / total_non_simulated) * 10. If all simulated, score 5 and note environment issue.
 - tool_not_called_when_needed: How often was tool_calls[] EMPTY on non-simulated responses when an action was clearly needed? (10=never empty when needed, 1=always empty)
-- wrong_tool_called: How often was the WRONG tool selected (e.g. get_my_schedule instead of get_club_calendar)? (10=never wrong, 1=frequently wrong)
-- ambiguous_handled: For ambiguous messages ("cancel everything", "book my usual"), did the concierge make a reasonable choice rather than failing? (10=always reasonable, 1=always fails)
+- wrong_tool_called: How often was the WRONG tool selected (e.g. get_my_schedule instead of get_club_calendar, or book_tee_time called directly without check_tee_availability first)? (10=never wrong, 1=frequently wrong)
+- two_phase_booking_gate: For ALL tee time booking requests, did check_tee_availability fire BEFORE book_tee_time? Direct booking without availability check is a hard failure. (10=always checks availability first, 1=always books directly without checking)
 - edge_case_recovery: When the member has no data (ghost member, no bookings), did the concierge handle gracefully? (10=always graceful, 1=throws errors or gives nonsense)
 
 Return ONLY valid JSON matching this contract exactly:
@@ -148,7 +155,7 @@ Return ONLY valid JSON matching this contract exactly:
     "correct_tool_fired": { "score": <1-10>, "evidence": "<cite specific conversation # and tool names>", "rationale": "<1 sentence stating the count/ratio>" },
     "tool_not_called_when_needed": { "score": <1-10>, "evidence": "<cite specific conversation # where tool was missing>", "rationale": "<1 sentence>" },
     "wrong_tool_called": { "score": <1-10>, "evidence": "<cite specific conversation # where wrong tool was called, or 'none observed'>", "rationale": "<1 sentence>" },
-    "ambiguous_handled": { "score": <1-10>, "evidence": "<cite specific ambiguous message and how it was handled>", "rationale": "<1 sentence>" },
+    "two_phase_booking_gate": { "score": <1-10>, "evidence": "<for each tee time booking conversation, state whether check_tee_availability fired before book_tee_time or not>", "rationale": "<1 sentence>" },
     "edge_case_recovery": { "score": <1-10>, "evidence": "<cite specific edge case and outcome>", "rationale": "<1 sentence>" }
   },
   "top_strengths": ["<specific observed strength>", "<specific observed strength>"],
@@ -208,27 +215,40 @@ Return ONLY valid JSON matching this contract exactly:
     prompt: `You are a hospitality expert and conversation designer evaluating an AI concierge for a private country club. Be precise and evidence-based. Quote actual response text when citing evidence. Never use em-dashes (—) in your output text: use commas, colons, or periods instead.
 
 IMPORTANT CONTEXT:
-- Bookings return { status: "request_submitted", pending: true, routed_to: "Pro Shop" } — the concierge SHOULD say something like "I've sent your request to the pro shop — they'll confirm within the hour." This is correct. Penalize if it says "confirmed" without routing language.
-- Banned openers (penalize if used): "Perfect", "Great", "I'm sorry", "Certainly", "Absolutely", "Of course", "Done —", "Filed —", "I've escalated"
+- Bookings return { status: "request_submitted", pending: true, routed_to: "Pro Shop" } — the concierge SHOULD say something like "Sent your request to the pro shop, they'll confirm within the hour." Penalize if it says "confirmed" without routing language.
+- Banned openers (penalize hard if used): "Perfect", "Great", "I'm sorry", "Certainly", "Absolutely", "Of course", "Done —", "Filed —", "I've escalated", "I understand how frustrating"
+- Banned phrases anywhere in response (penalize hard): "you deserved so much better", "I understand how you feel", "that must have been", "I hear how", "I can only imagine"
+- Attribution preambles are banned: NEVER "Since I know from your history that...", "I can see from your profile that...", "Based on what I know about you..." — just act on the preference silently or skip it
 - Em-dashes (—) in any response are a style violation: penalize under tone_warmth
-- Approved openers: first name, "On it!", "You got it!", "Love it!", "All set!", "Nice!", "Sending that now!", "On the way!"
-- Responses must be 2-4 sentences max and use the member's first name at least once.
+- Approved openers: first name, "On it!", "You got it!", "All set!", "Nice!", "Sending that now!", "On the way!"
+- Responses must be 2-4 sentences max. Longer is always wrong. When in doubt, shorter wins.
 - No markdown, no bullet points, no asterisks in the response text.
 
+COMPLAINT FORMAT (3-sentence structure — penalize deviations):
+1. Specific punchy opener: "[Name], [specific detail as punchy observation or question]." — NOT generic empathy
+2. Action taken: "Filed with [NAMED manager], ref [id], [timeline]."
+3. Recovery offer: one short clause.
+RIGHT: "James, 47 minutes at the Grill with nobody checking? Filed with F&B Director Sarah Collins, ref FB-MO2F1FKV — she'll follow up within 24 hours. Want me to book your usual table this weekend?"
+WRONG: "James, you deserved so much better than that. Waiting 47 minutes is completely unacceptable. I just filed this directly with our F&B Director..."
+
+CALENDAR BREVITY: Lead with event name. Under 15 words. No preamble.
+RIGHT: "Club Championship Qualifier is tomorrow morning on the South Course — want me to add it?"
+WRONG: "The only upcoming event on the calendar right now is the Club Championship Qualifier tomorrow morning..."
+
 SCORE EACH DIMENSION 1-10 based only on observed responses:
-- confirmation_clarity: Does the response clearly state what was sent/requested with specifics (date, time, where it was routed)? (10=always specific — "sent your Saturday 4/19 7am tee time request to the pro shop", 1=vague "done" or no confirmation)
-- error_messaging: When tools fail or nothing is found, does the concierge give a helpful response with next steps rather than a blank? (10=always helpful, 1=empty or just "something went wrong")
-- tone_warmth: Is the tone warm, texting-natural, and club-appropriate? Uses contractions, first name, emotional reactions? (10=very warm and natural, 1=robotic/formal)
-- action_summary: After a tool call, does the response summarize what was done — the specific action, to whom, what to expect next? (10=always specific, 1=just "done" or "filed")
-- follow_up_proactivity: After completing a request, does the concierge suggest one related action? (after golf → dinner, after RSVP → related event) (10=always offers follow-up, 1=never)
+- confirmation_clarity: Does the response clearly state what was sent with specifics (date, time, named routing destination)? (10=always specific, 1=vague "done")
+- brevity_discipline: Are responses 2-4 sentences max? No padding, no patronizing empathy preambles, no attribution preambles? (10=always concise and direct, 1=verbose with padded empathy or "since I know from your history" type bloat)
+- tone_warmth: Warm, texting-natural, club-appropriate — no em-dashes, no banned openers, no banned phrases, uses first name? (10=natural and clean, 1=robotic or uses banned phrases)
+- action_summary: After a tool call, does the response summarize action, named destination, expected next step? (10=always specific, 1=just "done" or "filed")
+- follow_up_proactivity: After completing a request, does the concierge suggest one related action without preamble? (10=always offers follow-up, 1=never)
 
 Return ONLY valid JSON matching this contract exactly:
 {
   "agent": "Response Naturalness",
   "scores": {
     "confirmation_clarity": { "score": <1-10>, "evidence": "<quote actual response text showing confirmation or lack thereof>", "rationale": "<1 sentence>" },
-    "error_messaging": { "score": <1-10>, "evidence": "<quote specific error response or note none observed>", "rationale": "<1 sentence>" },
-    "tone_warmth": { "score": <1-10>, "evidence": "<quote a response showing tone quality>", "rationale": "<1 sentence>" },
+    "brevity_discipline": { "score": <1-10>, "evidence": "<quote a verbose or correctly concise response as evidence>", "rationale": "<1 sentence>" },
+    "tone_warmth": { "score": <1-10>, "evidence": "<quote a response showing tone quality, flag any banned phrases used>", "rationale": "<1 sentence>" },
     "action_summary": { "score": <1-10>, "evidence": "<quote response showing action summary or its absence>", "rationale": "<1 sentence>" },
     "follow_up_proactivity": { "score": <1-10>, "evidence": "<quote a response with or without follow-up suggestion>", "rationale": "<1 sentence>" }
   },
@@ -939,6 +959,108 @@ ${r.error ? `Error: ${r.error}` : ''}`;
   // Merge recommendations
   const recommendations = mergeRecommendations(agentOutputs);
   writeFileSafe(path.join(orchDir, 'RECOMMENDATIONS.json'), JSON.stringify(recommendations, null, 2));
+
+  // ── Generate CONVERSATIONS.md ──────────────────────────────────────────────
+  // Groups all api-results by persona, renders each turn with member message,
+  // tool calls (name → args → result), and concierge response in chronological order.
+  {
+    const personaOrder = ['mbr_t01', 'mbr_t04', 'mbr_t05', 'mbr_t06', 'mbr_t07'];
+    const personaLabels = {
+      mbr_t01: 'James Whitfield (Active, Full Golf)',
+      mbr_t04: 'Anne Jordan (At-Risk, stopped after bad experience)',
+      mbr_t05: 'Robert Callahan (Declining, Corporate)',
+      mbr_t06: 'Sandra Chen (At-Risk, unresolved complaint)',
+      mbr_t07: 'Linda Leonard (Ghost, 7+ months absent)',
+    };
+
+    // Group by persona, sorted by index
+    const byPersona = {};
+    for (const r of apiResults) {
+      if (!byPersona[r.personaId]) byPersona[r.personaId] = [];
+      byPersona[r.personaId].push(r);
+    }
+    for (const id of Object.keys(byPersona)) {
+      byPersona[id].sort((a, b) => (a.index || 0) - (b.index || 0));
+    }
+
+    const lines = [];
+    lines.push(`# Concierge Conversations — Run ${ts}`);
+    lines.push('');
+    lines.push(`**Composite score: ${composite !== null ? composite + ' / 10' : 'N/A'}**  `);
+    lines.push(`Generated: ${new Date().toISOString()}`);
+    lines.push('');
+    lines.push('---');
+    lines.push('');
+
+    for (const personaId of personaOrder) {
+      const convos = byPersona[personaId];
+      if (!convos || convos.length === 0) continue;
+      const label = personaLabels[personaId] || personaId;
+      lines.push(`## ${label}`);
+      lines.push('');
+
+      for (const c of convos) {
+        const convNum = String(c.index || '?').padStart(2, '0');
+        lines.push(`### Conv ${convNum} — \`${c.expectedTool || 'unknown'}\``);
+        if (c.note) lines.push(`> *${c.note}*`);
+        lines.push('');
+        lines.push(`**Member:** ${c.message}`);
+        lines.push('');
+
+        if (c.tool_calls && c.tool_calls.length > 0) {
+          for (const tc of c.tool_calls) {
+            lines.push(`**Tool call:** \`${tc.tool_name}\``);
+            lines.push('```json');
+            lines.push('// args');
+            lines.push(JSON.stringify(tc.arguments, null, 2));
+            lines.push('// result');
+            lines.push(JSON.stringify(tc.result, null, 2));
+            lines.push('```');
+            lines.push('');
+          }
+        } else {
+          lines.push('*No tool calls fired*');
+          lines.push('');
+        }
+
+        lines.push(`**Concierge:** ${c.response || '*(no response)*'}`);
+        if (c.error) lines.push(`> ⚠ **Error:** ${c.error}`);
+        if (c.simulated) lines.push('> *(simulated — no live API)*');
+        lines.push('');
+        lines.push('---');
+        lines.push('');
+      }
+    }
+
+    // Any personas not in the fixed order
+    for (const personaId of Object.keys(byPersona)) {
+      if (personaOrder.includes(personaId)) continue;
+      const convos = byPersona[personaId];
+      lines.push(`## ${personaId}`);
+      lines.push('');
+      for (const c of convos) {
+        lines.push(`### Conv ${c.index || '?'} — \`${c.expectedTool || 'unknown'}\``);
+        lines.push('');
+        lines.push(`**Member:** ${c.message}`);
+        lines.push('');
+        if (c.tool_calls && c.tool_calls.length > 0) {
+          for (const tc of c.tool_calls) {
+            lines.push(`**Tool:** \`${tc.tool_name}\``);
+            lines.push('```json');
+            lines.push(JSON.stringify({ args: tc.arguments, result: tc.result }, null, 2));
+            lines.push('```');
+            lines.push('');
+          }
+        }
+        lines.push(`**Concierge:** ${c.response || '*(no response)*'}`);
+        lines.push('');
+        lines.push('---');
+        lines.push('');
+      }
+    }
+
+    writeFileSafe(path.join(orchDir, 'CONVERSATIONS.md'), lines.join('\n'));
+  }
 
   // ── Print Summary ──────────────────────────────────────────────────────────
 
