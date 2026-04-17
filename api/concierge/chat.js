@@ -1280,6 +1280,7 @@ async function chatHandler(req, res) {
       let loopGuard = 0;
       const seenToolCalls = new Set();
       let diningNeedsPartySizeOffer = false;
+      let rsvpBlockedNeedsTeeTime = false;
       // Computed once — whether the prior response already listed tee time slots (T2 confirmation context)
       const lastRespHadSlots = last_response && /\d{1,2}:\d{2}.*\d{1,2}:\d{2}/.test(last_response);
       while (loopGuard++ < 5) {
@@ -1345,6 +1346,20 @@ async function chatHandler(req, res) {
               return false; // block tool before execution
             }
           }
+          // ── RSVP EVENT GATE ───────────────────────────────────────────────────
+          // Block rsvp_event when context is a golf round, not a club event.
+          // "Put me down for it" after tee/course/round mention = tee time, not RSVP.
+          if (fc.name === 'rsvp_event') {
+            const prevRespMentionedRound = last_response && /\b(?:round|tee\s*time|south\s+course|north\s+course|course)\b/i.test(last_response);
+            const msgIsGolfRound = /\b(?:round|tee\s*time|south\s+course|north\s+course)\b/i.test(message);
+            const hasEventName = /\b(?:tournament|championship|qualifier|social|gala|competition|wine\s+dinner|ladies'\s+day|member\s+guest)\b/i.test(message)
+              || (last_response && /\b(?:tournament|championship|qualifier|social|gala|competition)\b/i.test(last_response));
+            if ((prevRespMentionedRound || msgIsGolfRound) && !hasEventName) {
+              console.warn('[concierge] RSVP EVENT GATE: rsvp_event blocked — context is golf round, not club event');
+              rsvpBlockedNeedsTeeTime = true;
+              return false;
+            }
+          }
           return true;
         });
 
@@ -1383,7 +1398,10 @@ async function chatHandler(req, res) {
       // and re-run so the member gets real slot options.
       if (!lastRespHadSlots && responseText) {
         const isTeeBooking = /\bbook\b.{0,30}\btee\s*time\b/i.test(message)
-          || /\btee\s*time\b.{0,40}\b(?:saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tomorrow|\d{1,2}(?:am|pm))/i.test(message);
+          || /\btee\s*time\b.{0,40}\b(?:saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tomorrow|\d{1,2}(?:am|pm))/i.test(message)
+          || /(?:any\s+)?tee\s+times?\s+available|available\s+tee\s+times?/i.test(message)
+          || /(?:any\s+)?(?:tee|golf)\s+availability/i.test(message)
+          || /(?:start\s+playing|play\s+again|get\s+back\s+out).{0,30}(?:tee|golf|course)/i.test(message);
         const noCheckFired = ![...seenToolCalls].some(k => k.startsWith('check_tee_availability:'));
         const noBookFired = ![...seenToolCalls].some(k => k.startsWith('book_tee_time:'));
         if (isTeeBooking && noCheckFired && noBookFired) {
@@ -1461,6 +1479,74 @@ async function chatHandler(req, res) {
               responseText = `${memberFirstName}, when would you like the reservation, and for how many guests?`;
             }
           }
+        }
+      }
+
+      // ── POST-LOOP DINING INTENT GUARD ────────────────────────────────────────
+      // Catches when the model bypasses the tool entirely and generates a fake dining
+      // confirmation (no tool fired, but response claims booking was sent).
+      if (responseText && !diningNeedsPartySizeOffer) {
+        const isDiningMsg = /\b(?:dinner|lunch|dining|reservation|book\s+a\s+table|dine)\b/i.test(message);
+        const noDiningToolFired = ![...seenToolCalls].some(k => k.startsWith('make_dining_reservation:'));
+        if (isDiningMsg && noDiningToolFired) {
+          const msgHasPartySz2 = /\b(?:for\s+\d+|\d+\s+(?:people|persons?|guests?|of\s+us)|me\s+and\s+(?:my\s+)?\S+|party\s+of\s+\d+|table\s+for\s+\d+|just\s+(?:me|us|the\s+two)|two\s+of\s+us|\btwo\b|\bthree\b|\bfour\b|\bfive\b|\bsix\b)\b/i.test(message);
+          const hhRef2 = (profile.household || []).some(h => {
+            const fn = (h.name || '').split(' ')[0].toLowerCase();
+            return fn.length > 2 && message.toLowerCase().includes(fn);
+          });
+          const prevDiningCtx2 = last_response && /say\s+yes\s+and\s+i.?ll\s+(?:send|book)|how\s+about\s+dinner\s+for|how\s+many|for\s+how\s+many|party\s+size/i.test(last_response);
+          const responseClaimedAction = /\b(?:sent|submitted|booked|f&b\s+team|confirm\s+within|table\s+for)\b/i.test(responseText);
+          if (!msgHasPartySz2 && !hhRef2 && !prevDiningCtx2 && responseClaimedAction) {
+            console.warn('[concierge] DINING INTENT GUARD: dining action claimed without tool — overriding with clarification');
+            const hasDateInMsg2 = /\b(saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tonight|tomorrow)\b/i.test(message);
+            const dateRef2 = message.match(/\b(saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tomorrow)\b/i)?.[1];
+            responseText = hasDateInMsg2
+              ? `${memberFirstName}, how about dinner for 2 at 7pm this ${dateRef2}? Say yes and I'll book it.`
+              : `${memberFirstName}, when would you like the reservation, and for how many guests?`;
+          }
+        }
+      }
+
+      // ── POST-LOOP RSVP → TEE TIME REDIRECT ───────────────────────────────────
+      // When rsvp_event was blocked because context was golf round, provide tee time ask.
+      if (rsvpBlockedNeedsTeeTime) {
+        const courseMention = message.match(/\b(south|north|east|west)\s+course\b/i)?.[0]
+          || (last_response && last_response.match(/\b(south|north|east|west)\s+course\b/i)?.[0])
+          || 'the course';
+        responseText = `${memberFirstName}, I'd love to get you out on ${courseMention}! What date and time works for you?`;
+      }
+
+      // ── POST-LOOP COMPLAINT GUARD ─────────────────────────────────────────────
+      // If message is a complaint and the response claims to have filed it
+      // (with reference numbers or "filed with F&B") but file_complaint wasn't called,
+      // force the tool call so the reference number is real.
+      if (responseText) {
+        const isComplaintMsg = /\b(?:cold|wrong|slow|wait(?:ed|ing)?|rude|broken|terrible|disappointed|unhappy|issue|problem|complaint)\b/i.test(message);
+        const complaintFired = [...seenToolCalls].some(k => k.startsWith('file_complaint:'));
+        const responseClaimedFiling = /\b(?:filed|reference|ref\s+\w{4,}|fb-\w+|reported|f&b\s+director)\b/i.test(responseText);
+        if (isComplaintMsg && !complaintFired && responseClaimedFiling) {
+          console.warn('[concierge] COMPLAINT GUARD: complaint claimed filed without tool — forcing file_complaint');
+          const category = /\b(?:food|grill|dining|meal|drink|cold|order)\b/i.test(message) ? 'food_and_beverage'
+            : /\b(?:golf|course|tee|green|cart)\b/i.test(message) ? 'golf_operations'
+            : /\b(?:facility|locker|pool|gym|spa)\b/i.test(message) ? 'facilities'
+            : /\b(?:staff|service|rude|employee)\b/i.test(message) ? 'staff'
+            : 'other';
+          const complaintResult = await executeAndLogTool('file_complaint', { category, description: message });
+          const sanitizedComplaint = JSON.parse(JSON.stringify(complaintResult).replace(/\u2014/g, ','));
+          const complaintContents = [
+            { role: 'user', parts: [{ text: message }] },
+            { role: 'model', parts: [{ functionCall: { name: 'file_complaint', args: { category, description: message } } }] },
+            { role: 'user', parts: [{ functionResponse: { name: 'file_complaint', response: sanitizedComplaint } }] },
+          ];
+          const complaintResp = await _geminiGenerate({
+            systemPrompt: fullSystemPrompt,
+            contents: complaintContents,
+            tools: availableTools,
+            temperature: conciergeTemperature,
+            maxOutputTokens: 2048,
+          });
+          const complaintText = _geminiText(complaintResp.candidates?.[0]);
+          if (complaintText) responseText = complaintText;
         }
       }
 
