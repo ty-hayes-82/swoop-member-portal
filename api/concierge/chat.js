@@ -1469,18 +1469,6 @@ async function chatHandler(req, res) {
         }
       }
 
-      // ── POST-LOOP AT-RISK TEE RE-ENGAGEMENT NUDGE ────────────────────────────
-      // When an at-risk member just asked about tee times and the response lists slots,
-      // append a brief re-engagement nudge if not already present.
-      if (isAtRiskMember && responseText && [...seenToolCalls].some(k => k.startsWith('check_tee_availability:'))) {
-        const hasSlots = /\b\d{1,2}:\d{2}\b/.test(responseText);
-        const hasNudge = /\b(?:back\s+out\s+there|love\s+to\s+see\s+you|miss\s+you|see\s+you\s+out|see\s+you\s+on\s+the\s+course|great\s+to\s+have\s+you\s+back)\b/i.test(responseText);
-        if (hasSlots && !hasNudge) {
-          // Append nudge after the last punctuation
-          responseText = responseText.replace(/([.!?])\s*$/, '$1') + ' Would love to see you back out there.';
-        }
-      }
-
       // ── POST-LOOP DECLINING MEMBER DINING SPECIFICS GUARD ────────────────────
       // When a declining member sends a dining request without party size AND time,
       // override the response with an explicit ask regardless of what the model did.
@@ -1656,7 +1644,7 @@ async function chatHandler(req, res) {
                 : isRepeatComplaint
                   ? `I'm so sorry this happened again`
                   : `I'm so sorry about this`;
-              responseText = `${memberFirstName}, ${ackPhrase}. Filed with ${manager}, ref ${ref}. They'll follow up within 24 hours.`;
+              responseText = `${memberFirstName}, ${ackPhrase}, filed with ${manager}, ref ${ref}. They'll follow up within 24 hours.`;
             } else {
               responseText = `${memberFirstName}, filed with ${manager}, ref ${ref}. They'll follow up within 24 hours.`;
             }
@@ -1701,11 +1689,13 @@ async function chatHandler(req, res) {
           .replace(/,\s+and\s+the\s+front\s+desk\s+will\s+confirm[^.!]*/gi, '')
           .replace(/[,;]\s+(?:the\s+front\s+desk|they'?ll)\s+(?:will\s+)?confirm\s+(?:within|in)\s+[^.!]*/gi, '')
           .replace(/[.!]\s+[Tt]hey'?ll\s+confirm\s+(?:within|in)\s+[^.!]*[.!]/gi, '.')
-          // Strip hollow T2 warmth when confirming a booking after prior offer
+          // Strip "our front desk team will confirm/follow up/reach out" variants
+          .replace(/,\s+and\s+(?:the\s+|our\s+)?front\s+desk(?:\s+team)?\s+will\s+(?:confirm|follow\s+up|reach\s+out)[^.!]*/gi, '')
+          .replace(/[.!]\s+(?:The\s+|Our\s+)?[Ff]ront\s+desk(?:\s+team)?\s+will\s+(?:confirm|follow\s+up|reach\s+out)[^.!]*[.!]/gi, '.')
+          // Strip hollow T2 standalone warm sentence before confirmation (e.g. "Anne! You made my day reaching out.")
+          .replace(/^([A-Z][a-z]+!)\s+(?:you\s+made\s+my\s+day[^.!]*|so\s+glad\s+you\s+(?:reached\s+out|did)[^.!]*|so\s+good\s+to\s+hear\s+from\s+you[^.!]*)[.!]\s*/i, '$1 ')
+          // Strip hollow T2 warmth clause when confirming a booking after prior offer
           .replace(/^[^,!]+[,!]\s+(?:so\s+glad\s+you\s+reached\s+out|always\s+love\s+hearing\s+from\s+you|great\s+to\s+hear\s+from\s+you|so\s+good\s+to\s+hear\s+from\s+you|you\s+made\s+my\s+day)[,!]\s*/i, `${memberFirstName}, `)
-          // Strip "our front desk team will follow up" process language
-          .replace(/,\s+and\s+our\s+front\s+desk\s+team\s+will\s+follow\s+up[^.!]*/gi, '')
-          .replace(/[.!]\s+Our\s+front\s+desk\s+team\s+will\s+(?:follow\s+up|reach\s+out)[^.!]*[.!]/gi, '.')
           .replace(/\s+\.$/, '.')
           .trim();
       }
@@ -1750,6 +1740,17 @@ async function chatHandler(req, res) {
         } catch (calErr) {
           console.warn('[concierge] CALENDAR GUARD error (suppressed):', calErr.message);
         }
+      }
+
+      // ── POST-LOOP CALENDAR TRAILING OFFER SCRUB ──────────────────────────────
+      // Strip invented trailing invitations/offers appended after calendar event listings.
+      // The model sometimes fabricates "would you prefer to join me for dinner?" etc.
+      if (responseText && [...seenToolCalls].some(k => k.startsWith('get_club_calendar:'))) {
+        responseText = responseText
+          .replace(/[,.]?\s+[Oo]r\s+would\s+you\s+(?:prefer\s+to\s+)?(?:like\s+to\s+)?join\s+(?:me|us)\s+for[^.!?]*/gi, '')
+          .replace(/[.!]\s+[Ww]ould\s+you\s+(?:prefer\s+to\s+)?(?:like\s+to\s+)?join\s+(?:me|us)[^.!?]*[.!?]?/gi, '.')
+          .replace(/\s+\.$/, '.')
+          .trim();
       }
 
       // ── POST-LOOP AFFIRMATIVE RSVP GUARD ─────────────────────────────────────
