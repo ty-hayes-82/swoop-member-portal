@@ -2,6 +2,9 @@
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "functions": {
+    "api/concierge/chat.js": { "maxDuration": 60 }
+  },
   "crons": [
     { "path": "/api/cron/weather-daily", "schedule": "0 3 * * *" },
     { "path": "/api/cron/purge-cross-club-audit", "schedule": "0 4 * * *" },
