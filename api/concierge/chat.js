@@ -980,6 +980,20 @@ async function chatHandler(req, res) {
             source_agent: 'member_concierge',
           }).catch(() => {});
         }
+        // Emit complaint_filed event so get_request_status can retrieve it (file_complaint returns status:'filed' not 'request_submitted')
+        if (toolResult?.complaint_id && toolResult?.status === 'filed') {
+          try {
+            await emitConciergeEvent(member_id, clubId, {
+              type: 'complaint_filed',
+              complaint_id: toolResult.complaint_id,
+              category: toolUse.input.category,
+              description: toolUse.input.description,
+              routed_to: toolResult.routed_to,
+              assigned_manager: toolResult.assigned_manager,
+              expected_response: toolResult.expected_response,
+            });
+          } catch (_) { /* non-blocking */ }
+        }
         // Sanitize em-dashes from tool result text before returning to model (prevents echoing in responses)
         const toolResultStr = JSON.stringify(toolResult).replace(/\u2014/g, ',');
         return { type: 'tool_result', tool_use_id: toolUse.id, content: toolResultStr };

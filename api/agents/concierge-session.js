@@ -160,7 +160,7 @@ export async function getPendingRequestDetails(memberId, { maxAgeDays = 7 } = {}
       SELECT id, event_type, payload, emitted_at
       FROM member_concierge_events
       WHERE session_id = ${sessionId}
-        AND event_type IN ('request_submitted', 'staff_confirmed')
+        AND event_type IN ('request_submitted', 'staff_confirmed', 'complaint_filed')
         AND emitted_at >= ${since}
       ORDER BY emitted_at DESC
       LIMIT 15
@@ -186,6 +186,18 @@ export async function getPendingRequestDetails(memberId, { maxAgeDays = 7 } = {}
           submitted_at: ts?.toISOString(),
           time_label: timeLabel,
           summary: `${p.request_type || 'Request'} sent to ${p.routed_to} ${timeLabel} — still pending.`,
+        });
+      } else if (row.event_type === 'complaint_filed') {
+        pending.push({
+          request_id: p.complaint_id,
+          request_type: 'complaint',
+          routed_to: p.routed_to,
+          assigned_manager: p.assigned_manager,
+          details: p.description,
+          expected_response: p.expected_response,
+          submitted_at: ts?.toISOString(),
+          time_label: timeLabel,
+          summary: `Complaint (${p.category || 'general'}) filed with ${p.assigned_manager || p.routed_to} ${timeLabel} — ${p.expected_response || 'pending response'}.`,
         });
       } else if (row.event_type === 'staff_confirmed') {
         confirmed.push({
