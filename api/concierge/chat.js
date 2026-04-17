@@ -1279,6 +1279,7 @@ async function chatHandler(req, res) {
 
       let loopGuard = 0;
       const seenToolCalls = new Set();
+      let diningNeedsPartySizeOffer = false;
       // Computed once — whether the prior response already listed tee time slots (T2 confirmation context)
       const lastRespHadSlots = last_response && /\d{1,2}:\d{2}.*\d{1,2}:\d{2}/.test(last_response);
       while (loopGuard++ < 5) {
@@ -1327,8 +1328,27 @@ async function chatHandler(req, res) {
               course: fc.args.course || 'North Course',
             };
           }
+          // ── DINING PARTY SIZE IN-LOOP GATE ────────────────────────────────────
+          // Block make_dining_reservation before it fires when party size is unknown
+          // and no prior dining context (offer or question) was in the last response.
+          // This prevents tool/response mismatch (tool fires but agent should ask first).
+          if (fc.name === 'make_dining_reservation') {
+            const msgHasPartySz = /\b(?:for\s+\d+|\d+\s+(?:people|persons?|guests?|of\s+us)|me\s+and\s+(?:my\s+)?\S+|party\s+of\s+\d+|table\s+for\s+\d+|just\s+(?:me|us|the\s+two)|two\s+of\s+us|\btwo\b|\bthree\b|\bfour\b|\bfive\b|\bsix\b)\b/i.test(message);
+            const hhRef = (profile.household || []).some(h => {
+              const fn = (h.name || '').split(' ')[0].toLowerCase();
+              return fn.length > 2 && message.toLowerCase().includes(fn);
+            });
+            const priorDiningCtx = last_response && /say\s+yes\s+and\s+i.?ll\s+(?:send|book)|how\s+about\s+dinner\s+for|how\s+many|for\s+how\s+many|party\s+size/i.test(last_response);
+            if (!msgHasPartySz && !hhRef && !priorDiningCtx) {
+              console.warn('[concierge] DINING IN-LOOP GATE: make_dining_reservation blocked — party size unknown, no prior dining context');
+              diningNeedsPartySizeOffer = true;
+              return false; // block tool before execution
+            }
+          }
           return true;
         });
+
+        if (!intercepted.length) break;
 
         const responseParts = await Promise.all(intercepted.map(async ({ functionCall: fc }) => {
           const toolResult = await executeAndLogTool(fc.name, fc.args);
@@ -1403,10 +1423,24 @@ async function chatHandler(req, res) {
         }
       }
 
-      // ── POST-LOOP DINING PARTY SIZE GUARD ────────────────────────────────────
-      // If make_dining_reservation fired but no party size was mentioned in the
-      // member's message, the agent invented it. Override with a clarification offer.
-      if (responseText) {
+      // ── POST-LOOP DINING PARTY SIZE CLARIFICATION ────────────────────────────
+      // When the in-loop gate blocked make_dining_reservation, provide a date-aware
+      // clarification response: propose a default if date is known, ask directly if not.
+      if (diningNeedsPartySizeOffer) {
+        const hasDateInMsg = /\b(saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tonight|tomorrow)\b/i.test(message);
+        const dateRef = message.match(/\b(saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tomorrow)\b/i)?.[1];
+        if (hasDateInMsg) {
+          responseText = `${memberFirstName}, how about dinner for 2 at 7pm this ${dateRef}? Say yes and I'll book it.`;
+        } else {
+          responseText = `${memberFirstName}, when would you like the reservation, and for how many guests?`;
+        }
+      }
+
+      // ── POST-LOOP DINING PARTY SIZE GUARD (fallback) ─────────────────────────
+      // Catches the rare case where make_dining_reservation slips through the in-loop
+      // gate (e.g. model retries after a blocked iteration) but the response text
+      // still lacks confirmation. Only fires when prior response had no dining context.
+      if (responseText && !diningNeedsPartySizeOffer) {
         const diningFired = [...seenToolCalls].some(k => k.startsWith('make_dining_reservation:'));
         if (diningFired) {
           const msgHasPartySize = /\b(?:for\s+\d+|\d+\s+(?:people|persons?|guests?|of\s+us)|me\s+and\s+(?:my\s+)?\S+|party\s+of\s+\d+|table\s+for\s+\d+|just\s+(?:me|us|the\s+two)|two\s+of\s+us|\btwo\b|\bthree\b|\bfour\b|\bfive\b|\bsix\b)\b/i.test(message);
@@ -1414,11 +1448,18 @@ async function chatHandler(req, res) {
             const fn = (h.name || '').split(' ')[0].toLowerCase();
             return fn.length > 2 && message.toLowerCase().includes(fn);
           });
-          const prevRespAskedPartySize = last_response && /how many|party size|for how many/i.test(last_response);
-          if (!msgHasPartySize && !householdRef && !prevRespAskedPartySize) {
-            console.warn('[concierge] DINING PARTY SIZE GUARD: party_size not in member message — overriding with clarification');
+          const prevRespHadDiningOffer = last_response && /say\s+yes\s+and\s+i.?ll\s+(?:send|book)|how\s+about\s+dinner\s+for/i.test(last_response);
+          const prevRespAskedPartySize = last_response && /how\s+many|party\s+size|for\s+how\s+many/i.test(last_response);
+          const prevRespHadDiningContext = prevRespHadDiningOffer || prevRespAskedPartySize;
+          if (!msgHasPartySize && !householdRef && !prevRespHadDiningContext) {
+            console.warn('[concierge] DINING PARTY SIZE GUARD (fallback): party_size not confirmed — overriding with clarification');
+            const hasDateInMsg = /\b(saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tonight|tomorrow)\b/i.test(message);
             const dateRef = message.match(/\b(saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tomorrow)\b/i)?.[1];
-            responseText = `${memberFirstName}, how about dinner for 2 at 7pm${dateRef ? ` this ${dateRef}` : ''}? Say yes and I'll send it.`;
+            if (hasDateInMsg) {
+              responseText = `${memberFirstName}, how about dinner for 2 at 7pm this ${dateRef}? Say yes and I'll book it.`;
+            } else {
+              responseText = `${memberFirstName}, when would you like the reservation, and for how many guests?`;
+            }
           }
         }
       }
