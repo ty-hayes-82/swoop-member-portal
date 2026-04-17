@@ -36,8 +36,24 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
+// Load .env.local if ANTHROPIC_API_KEY not set or malformed (contains quotes/newlines)
+function loadApiKey() {
+  let key = process.env.ANTHROPIC_API_KEY || '';
+  // Strip surrounding quotes and take only first line (handles duplicate entries)
+  key = key.split('\n')[0].replace(/^["']|["']$/g, '').trim();
+  if (key.startsWith('sk-ant-')) return key;
+  // Fall back to parsing .env.local directly
+  try {
+    const envPath = path.resolve(__dirname, '../.env.local');
+    const envText = fs.readFileSync(envPath, 'utf8');
+    const m = envText.match(/^ANTHROPIC_API_KEY=["']?([^"'\n]+)["']?/m);
+    if (m) return m[1].trim();
+  } catch {}
+  return '';
+}
+
 const APP_URL      = (process.env.APP_URL || 'http://localhost:3000').replace(/\/$/, '');
-const API_KEY      = process.env.ANTHROPIC_API_KEY;
+const API_KEY      = loadApiKey();
 const AGENT_MODEL  = 'claude-opus-4-6';
 const OUTPUT_BASE  = path.resolve(__dirname, '../../critiques');
 const CREDS_FILE   = path.join(OUTPUT_BASE, 'pinetree-creds.json');
