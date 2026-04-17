@@ -695,6 +695,51 @@ async function executeConciergeTool(toolName, input, profile, clubId) {
           } catch (actErr) {
             console.warn('[concierge] get_request_status activity_log fallback failed:', actErr.message);
           }
+
+          // Query feedback table for complaint status
+          // (complaints are written to 'feedback', not activity_log, so they need a separate lookup)
+          if (!requestTypeFilter || requestTypeFilter === 'all' || requestTypeFilter === 'complaint') {
+            try {
+              const feedbackSince = new Date(Date.now() - 14 * 24 * 3600 * 1000).toISOString();
+              const feedbackResult = await sql`
+                SELECT feedback_id, category, status, submitted_at, description
+                FROM feedback
+                WHERE member_id = ${memberId}
+                  AND club_id = ${clubId}
+                  AND submitted_at >= ${feedbackSince}
+                ORDER BY submitted_at DESC
+                LIMIT 5
+              `;
+              for (const row of feedbackResult.rows) {
+                const ts = row.submitted_at ? new Date(row.submitted_at) : null;
+                const hoursAgo = ts ? Math.round((Date.now() - ts.getTime()) / 3600000) : null;
+                const timeLabel = hoursAgo !== null
+                  ? (hoursAgo < 1 ? 'less than an hour ago' : hoursAgo === 1 ? '1 hour ago' : `${hoursAgo} hours ago`)
+                  : 'recently';
+                const categoryManagers = {
+                  food_and_beverage: 'Sarah Collins, F&B Director',
+                  golf_operations: 'Chris Delaney, Head Golf Professional',
+                  facilities: 'Robert Kim, Facilities Director',
+                  staff: 'Jennifer Hayes, HR Director',
+                  billing: 'Anne Torres, Membership Accounting',
+                  other: 'David Park, General Manager',
+                };
+                const assignedManager = categoryManagers[row.category] || 'Club Management';
+                all.push({
+                  request_id: row.feedback_id,
+                  request_type: 'complaint',
+                  routed_to: assignedManager,
+                  details: `Complaint (${row.category}): ${(row.description || '').slice(0, 100)}`,
+                  submitted_at: ts?.toISOString(),
+                  time_label: timeLabel,
+                  status: row.status === 'resolved' ? 'confirmed' : 'pending',
+                  summary: `Complaint (${row.category}) filed ${timeLabel} with ${assignedManager} — status: ${row.status}.`,
+                });
+              }
+            } catch (fbErr) {
+              console.warn('[concierge] get_request_status feedback query failed:', fbErr.message);
+            }
+          }
         }
 
         if (all.length === 0) {
@@ -1106,12 +1151,18 @@ async function chatHandler(req, res) {
       } else if (isComplaintFirstFlag) {
         const _hasBilling = notesLowerChat.includes('billing') || notesLowerChat.includes('invoice') || notesLowerChat.includes('charge');
         const _hasService = notesLowerChat.includes('slow service') || notesLowerChat.includes('slow at the bar') || notesLowerChat.includes('service at the bar') || notesLowerChat.includes('wait');
-        const _ack = _hasBilling
-          ? `"${memberFirstName}, I know that billing issue still hasn't been resolved, let me make sure we get that fixed."`
-          : _hasService
-          ? `"${memberFirstName}, I know that wait wasn't what you deserved, I want to make this visit better."`
-          : `"${memberFirstName}, I know your last experience wasn't what it should have been, I want to make this one different."`;
-        _openerLine = `${_ack} (VARY on subsequent turns, do not repeat verbatim)`;
+        if (currentMessageIsComplaint) {
+          // Heavy opener only when current message is complaint-related
+          const _ack = _hasBilling
+            ? `"${memberFirstName}, I know that billing issue still hasn't been resolved, let me make sure we get that fixed."`
+            : _hasService
+            ? `"${memberFirstName}, I know that wait wasn't what you deserved, I want to make this visit better."`
+            : `"${memberFirstName}, I know your last experience wasn't what it should have been, I want to make this one different."`;
+          _openerLine = `${_ack} (VARY on subsequent turns, do not repeat verbatim)`;
+        } else {
+          // Light 1-sentence acknowledgment for routine messages
+          _openerLine = `a BRIEF 1-sentence light acknowledgment (e.g. "${memberFirstName}, I know your last experience wasn't what it should have been —") then IMMEDIATELY handle their request in the same or next sentence. ONE SENTENCE MAX for the acknowledgment. Do NOT use heavy apology language.`;
+        }
       } else if (isAtRiskMember) {
         _openerLine = `a warm re-engagement opener (e.g. "${memberFirstName}, always love hearing from you!" or "${memberFirstName}! Great to hear from you, we'd love to see you out here more." or "So good to hear from you, ${memberFirstName}!" — VARY it, never repeat the same phrase)`;
       } else {
