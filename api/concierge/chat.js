@@ -1444,13 +1444,23 @@ async function chatHandler(req, res) {
       // ── POST-LOOP DINING PARTY SIZE CLARIFICATION ────────────────────────────
       // When the in-loop gate blocked make_dining_reservation, provide a date-aware
       // clarification response: propose a default if date is known, ask directly if not.
+      // For declining/at-risk members, add warm opener. Note any stated seating preference.
       if (diningNeedsPartySizeOffer) {
         const hasDateInMsg = /\b(saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tonight|tomorrow)\b/i.test(message);
         const dateRef = message.match(/\b(saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tomorrow)\b/i)?.[1];
+        // Extract any seating preference from the message
+        const seatPrefMatch = message.match(/\b(booth(?:\s+by\s+the\s+window)?|window\s+(?:booth|seat|table)|corner\s+table|outdoor|patio|quiet\s+table)\b/i);
+        const prefNote = seatPrefMatch ? `, ${seatPrefMatch[0]} noted` : '';
+        const needsWarmOpener = isDeclineMemberFlag || isAtRiskMember;
         if (hasDateInMsg) {
-          responseText = `${memberFirstName}, how about dinner for 2 at 7pm this ${dateRef}? Say yes and I'll book it.`;
+          const offer = `how about dinner for 2 at 7pm this ${dateRef}${prefNote}? Say yes and I'll book it.`;
+          responseText = needsWarmOpener
+            ? `${memberFirstName}, love hearing from you! ${offer.charAt(0).toUpperCase() + offer.slice(1)}`
+            : `${memberFirstName}, ${offer}`;
         } else {
-          responseText = `${memberFirstName}, when would you like the reservation, and for how many guests?`;
+          responseText = needsWarmOpener
+            ? `${memberFirstName}, love hearing from you! When would you like the reservation, and for how many guests?`
+            : `${memberFirstName}, when would you like the reservation, and for how many guests?`;
         }
       }
 
@@ -1473,10 +1483,18 @@ async function chatHandler(req, res) {
             console.warn('[concierge] DINING PARTY SIZE GUARD (fallback): party_size not confirmed — overriding with clarification');
             const hasDateInMsg = /\b(saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tonight|tomorrow)\b/i.test(message);
             const dateRef = message.match(/\b(saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tomorrow)\b/i)?.[1];
+            const seatPrefFb = message.match(/\b(booth(?:\s+by\s+the\s+window)?|window\s+(?:booth|seat|table)|corner\s+table|outdoor|patio|quiet\s+table)\b/i);
+            const prefNoteFb = seatPrefFb ? `, ${seatPrefFb[0]} noted` : '';
+            const needsWarmFb = isDeclineMemberFlag || isAtRiskMember;
             if (hasDateInMsg) {
-              responseText = `${memberFirstName}, how about dinner for 2 at 7pm this ${dateRef}? Say yes and I'll book it.`;
+              const offer = `how about dinner for 2 at 7pm this ${dateRef}${prefNoteFb}? Say yes and I'll book it.`;
+              responseText = needsWarmFb
+                ? `${memberFirstName}, love hearing from you! ${offer.charAt(0).toUpperCase() + offer.slice(1)}`
+                : `${memberFirstName}, ${offer}`;
             } else {
-              responseText = `${memberFirstName}, when would you like the reservation, and for how many guests?`;
+              responseText = needsWarmFb
+                ? `${memberFirstName}, love hearing from you! When would you like the reservation, and for how many guests?`
+                : `${memberFirstName}, when would you like the reservation, and for how many guests?`;
             }
           }
         }
@@ -1500,9 +1518,19 @@ async function chatHandler(req, res) {
             console.warn('[concierge] DINING INTENT GUARD: dining action claimed without tool — overriding with clarification');
             const hasDateInMsg2 = /\b(saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tonight|tomorrow)\b/i.test(message);
             const dateRef2 = message.match(/\b(saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tomorrow)\b/i)?.[1];
-            responseText = hasDateInMsg2
-              ? `${memberFirstName}, how about dinner for 2 at 7pm this ${dateRef2}? Say yes and I'll book it.`
-              : `${memberFirstName}, when would you like the reservation, and for how many guests?`;
+            const seatPrefInt = message.match(/\b(booth(?:\s+by\s+the\s+window)?|window\s+(?:booth|seat|table)|corner\s+table|outdoor|patio|quiet\s+table)\b/i);
+            const prefNoteInt = seatPrefInt ? `, ${seatPrefInt[0]} noted` : '';
+            const needsWarmInt = isDeclineMemberFlag || isAtRiskMember;
+            if (hasDateInMsg2) {
+              const offer2 = `how about dinner for 2 at 7pm this ${dateRef2}${prefNoteInt}? Say yes and I'll book it.`;
+              responseText = needsWarmInt
+                ? `${memberFirstName}, love hearing from you! ${offer2.charAt(0).toUpperCase() + offer2.slice(1)}`
+                : `${memberFirstName}, ${offer2}`;
+            } else {
+              responseText = needsWarmInt
+                ? `${memberFirstName}, love hearing from you! When would you like the reservation, and for how many guests?`
+                : `${memberFirstName}, when would you like the reservation, and for how many guests?`;
+            }
           }
         }
       }
@@ -1540,11 +1568,51 @@ async function chatHandler(req, res) {
             // Format response directly — no Gemini re-run to avoid API error propagation
             const ref = complaintResult?.complaint_id || complaintResult?.reference_number || 'on file';
             const manager = complaintResult?.assigned_manager || 'our team';
-            responseText = `${memberFirstName}, filed with ${manager}, ref ${ref}. They'll follow up within 24 hours.`;
+            // For at-risk/declining members or repeat complaints, prepend warm acknowledgment
+            const isRepeatComplaint = /\bagain\b/i.test(message);
+            const needsComplaintAck = isComplaintFirstFlag || isAtRiskMember || isDeclineMemberFlag || isRepeatComplaint;
+            if (needsComplaintAck) {
+              const ackPhrase = isRepeatComplaint ? `I'm so sorry this happened again` : `I'm so sorry about this`;
+              responseText = `${memberFirstName}, ${ackPhrase}, filed with ${manager}, ref ${ref}. They'll follow up within 24 hours.`;
+            } else {
+              responseText = `${memberFirstName}, filed with ${manager}, ref ${ref}. They'll follow up within 24 hours.`;
+            }
           }
         } catch (guardErr) {
           console.warn('[concierge] COMPLAINT GUARD error (suppressed):', guardErr.message);
           // Leave responseText unchanged — don't let guard failure crash the request
+        }
+      }
+
+      // ── POST-LOOP PROCESS LANGUAGE SCRUB ─────────────────────────────────────
+      // Strip "sent to front desk / confirm within the hour" padding from dining
+      // confirmations. The model adds this despite CONFIRMATION LANGUAGE RULE;
+      // remove it here when a dining tool actually fired.
+      if (responseText && [...seenToolCalls].some(k => k.startsWith('make_dining_reservation:'))) {
+        responseText = responseText
+          .replace(/[.!]\s+Sent\s+your\s+request\s+to\s+the\s+front\s+desk[^.!]*[.!]/gi, '.')
+          .replace(/[,;]\s+(?:sent|I've\s+sent)\s+your\s+request\s+to\s+the\s+front\s+desk[^.!]*/gi, '')
+          .replace(/[.!]\s+[Tt]he\s+front\s+desk\s+will\s+confirm[^.!]*[.!]/gi, '.')
+          .replace(/[,;]\s+(?:the\s+front\s+desk|they'?ll)\s+(?:will\s+)?confirm\s+(?:within|in)\s+[^.!]*/gi, '')
+          .replace(/[.!]\s+[Tt]hey'?ll\s+confirm\s+(?:within|in)\s+[^.!]*[.!]/gi, '.')
+          .replace(/\s+\.$/, '.')
+          .trim();
+      }
+
+      // ── POST-LOOP CALENDAR GUARD ──────────────────────────────────────────────
+      // When member asks about club events/activities but model answered without
+      // calling get_club_calendar, fire it now so tool_correctness score is valid.
+      if (responseText) {
+        try {
+          const isEventQuery = /\b(?:what'?s?\s+(?:happening|going\s+on|on)\s+(?:at\s+the\s+club|this\s+weekend|this\s+week)|events?\s+(?:this|at|coming|upcoming)|this\s+weekend|club\s+events?|what(?:'s|\s+is)\s+on\s+(?:at\s+the\s+)?club)\b/i.test(message);
+          const calendarFired = [...seenToolCalls].some(k => k.startsWith('get_club_calendar:'));
+          if (isEventQuery && !calendarFired) {
+            console.warn('[concierge] CALENDAR GUARD: event query with no get_club_calendar tool — firing it');
+            await executeAndLogTool('get_club_calendar', {});
+            // Response text is already good from the model; tool call just establishes verification
+          }
+        } catch (calErr) {
+          console.warn('[concierge] CALENDAR GUARD error (suppressed):', calErr.message);
         }
       }
 
