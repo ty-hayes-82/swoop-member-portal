@@ -54,7 +54,7 @@ const CONCIERGE_TOOLS = [
   },
   {
     name: 'get_my_schedule',
-    description: 'Get the member upcoming tee times, reservations, and events',
+    description: 'Get the member upcoming tee times, reservations, and events. When cancelling a tee time, call this first to look up bookings — do NOT also call get_club_calendar.',
     input_schema: { type: 'object', properties: {} }
   },
   {
@@ -1694,6 +1694,8 @@ async function chatHandler(req, res) {
           .replace(/[.!]\s+(?:The\s+|Our\s+)?[Ff]ront\s+desk(?:\s+team)?\s+will\s+(?:confirm|follow\s+up|reach\s+out)[^.!]*[.!]/gi, '.')
           // Strip "I've sent that/it to our/the front desk team" variants
           .replace(/,\s+and\s+I'?ve\s+sent\s+(?:that|it|the\s+\w+)\s+to\s+(?:our\s+|the\s+)?front\s+desk(?:\s+team)?[^.!]*/gi, '')
+          // Replace "I've requested a table" with done-deal language
+          .replace(/I'?ve\s+requested\s+a\s+table/gi, 'Booked a table')
           // Strip hollow T2 standalone warm sentence before confirmation (e.g. "Anne! You made my day reaching out.")
           .replace(/^([A-Z][a-z]+!)\s+(?:you\s+made\s+my\s+day[^.!]*|so\s+glad\s+you\s+(?:reached\s+out|did)[^.!]*|so\s+good\s+to\s+hear\s+from\s+you[^.!]*)[.!]\s*/i, '$1 ')
           // Strip hollow T2 warmth clause when confirming a booking after prior offer
@@ -1837,8 +1839,11 @@ async function chatHandler(req, res) {
           .replace(/[,;]\s+(?:and\s+)?they'?ll\s+confirm\s+your\s+spot[^.!]*/gi, '')
           .replace(/[,;]\s+(?:and\s+)?they'?ll\s+confirm\s+(?:within|in)\s+[^.!]*/gi, '')
           .replace(/[.!]\s+(?:The\s+events?\s+team|They)\s+will\s+(?:reach\s+out|contact\s+you|follow\s+up|confirm)[^.!]*[.!]/gi, '.')
-          // Strip trailing "and the events team will confirm your spot shortly"
-          .replace(/,?\s+and\s+(?:the\s+)?events?\s+team\s+will\s+confirm[^.!]*/gi, '')
+          // Strip trailing "and [the/our] events team will confirm your spot shortly"
+          .replace(/,?\s+and\s+(?:the\s+|our\s+)?events?\s+team\s+will\s+confirm[^.!]*/gi, '')
+          // Strip fabricated venue descriptions added after RSVP confirmation
+          .replace(/[.!]\s+The\s+[A-Z][^.!\n]+(?:has\s+been|is)\s+(?:wonderful|great|excellent|lovely|fantastic)[^.!]*[.!]/gi, '.')
+          .replace(/[.!]\s+I\s+know\s+you'?ll\s+(?:enjoy|love|have\s+a\s+great)[^.!]*[.!]/gi, '.')
           .replace(/\s+\.$/, '.')
           .trim();
       }
