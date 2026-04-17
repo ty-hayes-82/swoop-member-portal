@@ -39,12 +39,17 @@ export function textResult(text: string): ContentBlock[] {
  * Send a message and consume the response stream in one call.
  * Opens the stream BEFORE sending the message so no events are missed.
  */
+export interface StreamResult {
+  text: string;
+  toolCalls: { name: string; input: Record<string, unknown>; result: unknown }[];
+}
+
 export async function sendAndConsumeStream(
   sessionId: string,
   text: string,
   handlers: ToolHandlers,
   onText?: (chunk: string) => void,
-): Promise<string> {
+): Promise<StreamResult> {
   // Open stream first, then send — events are emitted to the open stream
   const stream = await streamEvents(sessionId);
   // Fire-and-forget the send after stream is open
@@ -56,7 +61,7 @@ export async function consumeStream(
   sessionId: string,
   handlers: ToolHandlers,
   onText?: (chunk: string) => void,
-): Promise<string> {
+): Promise<StreamResult> {
   const stream = await streamEvents(sessionId);
   return _consumeStream(sessionId, stream, handlers, onText);
 }
@@ -66,8 +71,9 @@ async function _consumeStream(
   stream: AsyncIterable<unknown>,
   handlers: ToolHandlers,
   onText?: (chunk: string) => void,
-): Promise<string> {
+): Promise<StreamResult> {
   const textParts: string[] = [];
+  const toolCalls: StreamResult['toolCalls'] = [];
 
   for await (const event of stream) {
     const e = event as unknown as Record<string, unknown>;
@@ -95,6 +101,7 @@ async function _consumeStream(
           content: textResult(JSON.stringify({ error: `Unknown tool: ${toolName}` })),
           is_error: true,
         });
+        toolCalls.push({ name: toolName, input, result: { error: `Unknown tool: ${toolName}` } });
         continue;
       }
 
@@ -105,13 +112,16 @@ async function _consumeStream(
           custom_tool_use_id: toolUseId,
           content: textResult(JSON.stringify(result)),
         });
+        toolCalls.push({ name: toolName, input, result });
       } catch (err) {
+        const errMsg = err instanceof Error ? err.message : String(err);
         await emitEvent(sessionId, {
           type: 'user.custom_tool_result',
           custom_tool_use_id: toolUseId,
-          content: textResult(JSON.stringify({ error: err instanceof Error ? err.message : String(err) })),
+          content: textResult(JSON.stringify({ error: errMsg })),
           is_error: true,
         });
+        toolCalls.push({ name: toolName, input, result: { error: errMsg } });
       }
     }
 
@@ -126,5 +136,5 @@ async function _consumeStream(
     }
   }
 
-  return textParts.join('');
+  return { text: textParts.join(''), toolCalls };
 }

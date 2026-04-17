@@ -411,6 +411,16 @@ async function seedComplaints(client, members) {
         pick(categories), randInt(2, 7),
         pick(descriptions), isResolved ? 'resolved' : 'open',
         isResolved ? isoDatetime(daysAgo(randInt(0, daysBack))) : null]);
+
+    // Also insert into complaints (gates.js checks this table)
+    const complaintId = `${CLUB_ID}_CMP${String(i + 1).padStart(3, '0')}`;
+    await client.query(`
+      INSERT INTO complaints (complaint_id, club_id, member_id, category, description, status, reported_at, resolved_at)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+      ON CONFLICT (complaint_id) DO NOTHING
+    `, [complaintId, CLUB_ID, member.memberId, pick(categories), pick(descriptions),
+        isResolved ? 'resolved' : 'open', isoDatetime(daysAgo(daysBack)),
+        isResolved ? isoDatetime(daysAgo(randInt(0, daysBack))) : null]);
     count++;
   }
   console.log(`  ${count} member complaints/feedback seeded`);

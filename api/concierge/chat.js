@@ -42,12 +42,13 @@ async function chatHandler(req, res) {
     const capNote = formatCapabilitiesNote(ctx);
     const fullMessage = capNote ? `${capNote}\n\n${message}` : message;
 
-    const responseText = await sendAndConsumeStream(managedSessionId, fullMessage, buildHandlers(clubId));
+    const { text: responseText, toolCalls } = await sendAndConsumeStream(managedSessionId, fullMessage, buildHandlers(clubId));
 
     return res.status(200).json({
       session_id: managedSessionId,
       member_id,
       response: responseText || fallbackResponse(),
+      tool_calls: toolCalls,
       simulated: false,
     });
   } catch (err) {
