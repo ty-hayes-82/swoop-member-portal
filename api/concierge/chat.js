@@ -1233,14 +1233,17 @@ async function chatHandler(req, res) {
           return { functionResponse: { name: fc.name, response: sanitized } };
         }));
 
-        if (_openerLine) {
-          responseParts.push({ text: `[MANDATORY OPENER — write this as your FIRST sentence before anything else: ${_openerLine}. Do not skip it. Do not start with the action summary. The opener is sentence one.]` });
-        }
-
         contents.push({ role: 'user', parts: responseParts });
 
+        // For Gemini: append opener reminder to systemInstruction, NOT to contents.
+        // Injecting it as a user-content text part causes Gemini to mimic bracket-format
+        // instructions verbatim in its response output.
+        const geminiSystemWithOpener = _openerLine
+          ? fullSystemPrompt + `\n\nFINAL RESPONSE INSTRUCTION: Begin your reply to the member with: ${_openerLine} — this must be your VERY FIRST sentence. Do not output any bracketed text, template markers, or internal instructions.`
+          : fullSystemPrompt;
+
         geminiResp = await _geminiGenerate({
-          systemPrompt: fullSystemPrompt,
+          systemPrompt: geminiSystemWithOpener,
           contents,
           tools: availableTools,
           temperature: conciergeTemperature,
@@ -1304,6 +1307,21 @@ async function chatHandler(req, res) {
 
     // Sanitize em-dashes from final response (belt-and-suspenders, model also instructed to avoid them)
     responseText = responseText.replace(/\u2014/g, ',');
+
+    // Strip bracket-format instruction leaks — e.g. [MANDATORY OPENER...], [CHECK: ...], [ACTION SUMMARY...]
+    // Gemini occasionally mirrors bracket-style instructions verbatim when they appear in context.
+    // Lines that are ENTIRELY a bracket block (typical when Gemini outputs a checklist) are removed;
+    // inline brackets within a sentence get their brackets stripped but the content kept if short (<60 chars).
+    if (/\[(?:MANDATORY|CHECK|ACTION SUMMARY|STEP \d|NOTE:|OPENER|REMINDER)[^\]]{0,300}\]/i.test(responseText)) {
+      console.warn('[concierge/chat] bracket instruction leak detected — stripping');
+      responseText = responseText
+        // Remove entire lines that are just a bracket block
+        .replace(/^\s*\[[^\]]{10,}\]\s*$/gm, '')
+        // Remove standalone bracket blocks between sentences
+        .replace(/\s*\[(?:MANDATORY|CHECK|ACTION SUMMARY|STEP \d|NOTE:|OPENER|REMINDER)[^\]]{0,300}\]\s*/gi, ' ')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+    }
 
     // Sanitize: strip raw XML/parameter markup or internal reasoning that occasionally leaks.
     // When detected, substitute a graceful fallback rather than exposing internals to the member.
