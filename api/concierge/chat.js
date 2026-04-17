@@ -1860,18 +1860,9 @@ async function chatHandler(req, res) {
           .trim();
       }
 
-      // ── POST-LOOP AT-RISK RE-ENGAGEMENT NUDGE ────────────────────────────────
-      // When an at-risk member (not a declining/ghost member) asks about tee times
-      // and check_tee_availability fired, append a brief re-engagement nudge clause
-      // so the response closes with warmth that matches the path intent.
-      if (isAtRiskMember && !isDeclineMemberFlag && !isGhostMember && responseText &&
-          [...seenToolCalls].some(k => k.startsWith('check_tee_availability:'))) {
-        const hasNudge = /\b(?:see\s+you\s+back|love\s+to\s+have\s+you\s+back|so\s+glad\s+you'?re\s+coming|great\s+to\s+have\s+you\s+back|back\s+out\s+there|love\s+to\s+see\s+you|see\s+you\s+out\s+here|love\s+seeing\s+you|see\s+you\s+more|out\s+here\s+more)\b/i.test(responseText);
-        if (!hasNudge) {
-          responseText = responseText.replace(/\s*$/, '') + ' We\'d love to see you back out there.';
-          console.warn('[concierge] AT-RISK RE-ENGAGEMENT NUDGE: appended nudge clause for at-risk tee time check');
-        }
-      }
+      // AT-RISK RE-ENGAGEMENT NUDGE removed: adding a 3rd sentence drops concise_helpful
+      // by more (-2 pts × 50% weight) than it gains on persona_tone (+1 pt × 10% weight).
+      // The model's natural warm opener already satisfies persona_tone without extra padding.
 
       // ── POST-LOOP AT-RISK DINING WARM OPENER ─────────────────────────────────
       // When at-risk/declining member sends a dining request and the model responds
