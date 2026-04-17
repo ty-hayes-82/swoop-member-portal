@@ -21,13 +21,13 @@ export default withAuth(async function handler(req, res) {
     // Find the most recent date that has bookings for this club.
     // Prefer today or future; fall back to most recent past date.
     const dateResult = await sql`
-      SELECT date::date AS booking_date
+      SELECT booking_date::date AS booking_date
       FROM bookings
       WHERE club_id = ${clubId}
         AND status != 'cancelled'
       ORDER BY
-        CASE WHEN date::date >= CURRENT_DATE THEN 0 ELSE 1 END ASC,
-        ABS(EXTRACT(EPOCH FROM (date::date - CURRENT_DATE))) ASC
+        CASE WHEN booking_date::date >= CURRENT_DATE THEN 0 ELSE 1 END ASC,
+        ABS(EXTRACT(EPOCH FROM (booking_date::date - CURRENT_DATE))) ASC
       LIMIT 1
     `;
 
@@ -60,7 +60,7 @@ export default withAuth(async function handler(req, res) {
       LEFT JOIN health_scores hs
         ON hs.member_id = m.member_id AND hs.club_id = ${clubId}
       WHERE b.club_id = ${clubId}
-        AND b.date::date = ${targetDate}
+        AND b.booking_date::date = ${targetDate}
         AND b.status != 'cancelled'
       ORDER BY b.tee_time ASC
     `;
