@@ -602,16 +602,67 @@ async function executeConciergeTool(toolName, input, profile, clubId) {
     case 'get_request_status': {
       try {
         const { pending, confirmed } = await getPendingRequestDetails(memberId, { maxAgeDays: 14 });
-        const all = [
+        let all = [
           ...pending.map(r => ({ ...r, status: 'pending' })),
           ...confirmed.map(r => ({ ...r, status: 'confirmed' })),
         ];
+
+        // Fallback: if event log returned nothing, query activity_log directly
+        // (activity_log is written by all booking tools and definitely exists)
+        if (all.length === 0) {
+          try {
+            const since = new Date(Date.now() - 14 * 24 * 3600 * 1000).toISOString();
+            const activityRows = await sql`
+              SELECT action_subtype, reference_id, description, status, meta, created_at
+              FROM activity_log
+              WHERE member_id = ${memberId}
+                AND action_type = 'concierge_request'
+                AND created_at >= ${since}
+              ORDER BY created_at DESC
+              LIMIT 10
+            `;
+            for (const row of activityRows.rows) {
+              const meta = row.meta || {};
+              const ts = row.created_at ? new Date(row.created_at) : null;
+              const hoursAgo = ts ? Math.round((Date.now() - ts.getTime()) / 3600000) : null;
+              const timeLabel = hoursAgo !== null
+                ? (hoursAgo < 1 ? 'less than an hour ago' : hoursAgo === 1 ? '1 hour ago' : `${hoursAgo} hours ago`)
+                : 'recently';
+              const requestType = row.action_subtype === 'tee_time' ? 'tee_time_request'
+                : row.action_subtype === 'dining_reservation' ? 'dining_request'
+                : row.action_subtype === 'event_rsvp' ? 'event_rsvp'
+                : row.action_subtype === 'tee_time_cancel' ? 'tee_time_cancellation'
+                : row.action_subtype === 'dining_cancel' ? 'dining_cancellation'
+                : row.action_subtype;
+              const routedTo = meta.routed_to
+                || (row.action_subtype === 'tee_time' || row.action_subtype === 'tee_time_cancel' ? 'Pro Shop'
+                : row.action_subtype === 'dining_reservation' || row.action_subtype === 'dining_cancel' ? 'Front Desk'
+                : row.action_subtype === 'event_rsvp' ? 'Events Team'
+                : 'Club Staff');
+              all.push({
+                request_id: row.reference_id,
+                request_type: requestType,
+                routed_to: routedTo,
+                details: row.description,
+                submitted_at: ts?.toISOString(),
+                time_label: timeLabel,
+                status: row.status === 'pending_staff_confirmation' ? 'pending' : (row.status || 'pending'),
+                summary: `${requestType} sent to ${routedTo} ${timeLabel} — ${row.status === 'pending_staff_confirmation' ? 'awaiting confirmation' : row.status}.`,
+              });
+            }
+          } catch (actErr) {
+            console.warn('[concierge] get_request_status activity_log fallback failed:', actErr.message);
+          }
+        }
+
         if (all.length === 0) {
           return { requests: [], summary: 'No recent requests found in the last 14 days.' };
         }
+        const pendingCount = all.filter(r => r.status === 'pending').length;
+        const confirmedCount = all.filter(r => r.status === 'confirmed').length;
         return {
           requests: all,
-          summary: `Found ${pending.length} pending and ${confirmed.length} confirmed request(s).`,
+          summary: `Found ${pendingCount} pending and ${confirmedCount} confirmed request(s).`,
         };
       } catch (e) {
         return { requests: [], summary: 'Could not retrieve request status.', error: e.message };
@@ -1219,16 +1270,9 @@ function generateSimulatedResponse(profile, message) {
   // Events — show upcoming events (filter to weekend if asked)
   if (lower.includes('event') || lower.includes('rsvp') || lower.includes('tournament') || lower.includes('happening') || lower.includes('weekend') || lower.includes('wine')) {
     if (lower.includes('weekend')) {
-      return `Great timing, ${name}! Here's what's happening this weekend:\n\n` +
-        `• Saturday Shotgun — Member-Guest (Apr 12, 8 AM — only 8 spots left)\n` +
-        `• Junior Golf Clinic (Apr 13, 10 AM — open enrollment)\n\n` +
-        `Want me to RSVP you for either of these?`;
+      return `${name}! This weekend there's a Saturday Shotgun Member-Guest on Apr 12 at 8 AM with only 8 spots left, and a Junior Golf Clinic on Apr 13 at 10 AM. Want me to RSVP you for either?`;
     }
-    return `Great timing, ${name}! Here's what's coming up:\n\n` +
-      `• Saturday Shotgun — Member-Guest (Apr 12, 8 AM — only 8 spots left)\n` +
-      `• Junior Golf Clinic (Apr 13, 10 AM — open enrollment)\n` +
-      `• Trivia Night (Apr 15, 5:30 PM, Grill Room — 6 teams open)\n\n` +
-      `Want me to RSVP you for any of these?`;
+    return `${name}! Coming up we have the Saturday Shotgun Member-Guest on Apr 12 at 8 AM (only 8 spots left), Junior Golf Clinic on Apr 13 at 10 AM, and Trivia Night on Apr 15 at 5:30 PM in the Grill Room with 6 teams open. Want me to RSVP you for any of these?`;
   }
 
   // Privacy guard — MUST check before schedule (so "my health score" doesn't trigger schedule)
@@ -1238,10 +1282,7 @@ function generateSimulatedResponse(profile, message) {
 
   // Schedule — show personalized upcoming items
   if (lower.includes('schedule') || lower.includes('upcoming') || (lower.includes('my') && (lower.includes('booking') || lower.includes('reservation') || lower.includes('tee') || lower.includes('event')))) {
-    return `Here's what I have for you, ${name}:\n\n` +
-      `• Tee Time: Apr 12, 7:00 AM — North Course (foursome)\n` +
-      `• Wine Dinner: Apr 10, 7:30 PM — Main Dining Room (party of 2)\n\n` +
-      `Everything look good, or would you like to make any changes?`;
+    return `${name}! You've got a tee time on Apr 12 at 7:00 AM on the North Course with your foursome, and the Wine Dinner on Apr 10 at 7:30 PM in the Main Dining Room for 2. Everything look good, or want to make any changes?`;
   }
 
   // Household — general family reference
