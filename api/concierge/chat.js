@@ -1015,7 +1015,7 @@ async function chatHandler(req, res) {
   }
 
   const clubId = getReadClubId(req);
-  const { member_id, message, debug } = req.body;
+  const { member_id, message, debug, last_response } = req.body;
 
   if (!member_id) {
     return res.status(400).json({ error: 'member_id is required' });
@@ -1201,7 +1201,10 @@ async function chatHandler(req, res) {
 
   // Live mode: call AI (Gemini primary, Claude fallback when GEMINI_API_KEY absent)
   try {
-    const fullSystemPrompt = systemPrompt + conversationContext + pendingRequestsContext + recommendationContext;
+    const lastResponseContext = last_response
+      ? `\n\nYOUR PREVIOUS RESPONSE TO THIS MEMBER: "${last_response.slice(0, 400)}"\nIf the member's current message is a short affirmative ("Yes", "Yeah", "Sure", "Please", "Do it", "Go ahead", "sounds good", "perfect") or a short pick, it is a direct reply to your previous response above. Execute the offered action immediately — do NOT ask the same question again.`
+      : '';
+    const fullSystemPrompt = systemPrompt + conversationContext + pendingRequestsContext + recommendationContext + lastResponseContext;
 
     // Collect tool call trace for debug mode; also track successful submissions for fallback use
     const toolCallLog = [];
