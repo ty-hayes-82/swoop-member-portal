@@ -1346,6 +1346,15 @@ async function chatHandler(req, res) {
               return false; // block tool before execution
             }
           }
+          // ── CANCEL GATE: block get_club_calendar for cancellation requests ──────
+          // Cancellation needs get_my_schedule only — calendar is irrelevant.
+          if (fc.name === 'get_club_calendar') {
+            const isCancelMsg = /\bcancel\b/i.test(message) && /\b(?:tee\s+time|booking|reservation|round)\b/i.test(message);
+            if (isCancelMsg) {
+              console.warn('[concierge] CANCEL GATE: blocking get_club_calendar for cancellation request');
+              return false;
+            }
+          }
           // ── RSVP EVENT GATE ───────────────────────────────────────────────────
           // Block rsvp_event when context is a golf round booking, not a club event.
           // "Put me down for it" after tee/course/round mention = tee time, not RSVP.
@@ -1457,6 +1466,46 @@ async function chatHandler(req, res) {
             }
             // If teeCheckResult is null (executeAndLogTool threw too), leave responseText as model's output
           }
+        }
+      }
+
+      // ── POST-LOOP AT-RISK TEE RE-ENGAGEMENT NUDGE ────────────────────────────
+      // When an at-risk member just asked about tee times and the response lists slots,
+      // append a brief re-engagement nudge if not already present.
+      if (isAtRiskMember && responseText && [...seenToolCalls].some(k => k.startsWith('check_tee_availability:'))) {
+        const hasSlots = /\b\d{1,2}:\d{2}\b/.test(responseText);
+        const hasNudge = /\b(?:back\s+out\s+there|love\s+to\s+see\s+you|miss\s+you|see\s+you\s+out|see\s+you\s+on\s+the\s+course|great\s+to\s+have\s+you\s+back)\b/i.test(responseText);
+        if (hasSlots && !hasNudge) {
+          // Append nudge after the last punctuation
+          responseText = responseText.replace(/([.!?])\s*$/, '$1') + ' Would love to see you back out there.';
+        }
+      }
+
+      // ── POST-LOOP DECLINING MEMBER DINING SPECIFICS GUARD ────────────────────
+      // When a declining member sends a dining request without party size AND time,
+      // override the response with an explicit ask regardless of what the model did.
+      // Declining members get "ask" style (not propose defaults) to avoid fabrication.
+      if (isDeclineMemberFlag && responseText) {
+        try {
+          const isDiningMsg2 = /\b(?:dinner|lunch|dining|reservation|book\s+(?:a\s+)?(?:table|dinner|lunch)|dine)\b/i.test(message);
+          const msgHasTime = /\b(\d{1,2})(?::(\d{2}))?\s*(?:am|pm)\b/i.test(message) || /\b(?:noon|midnight|morning|evening|afternoon)\b/i.test(message);
+          const msgHasPartyDcl = /\b(?:for\s+\d+|\d+\s+(?:people|persons?|guests?|of\s+us)|party\s+of\s+\d+|table\s+for\s+\d+|just\s+(?:me|us|the\s+two)|two\s+of\s+us|\btwo\b|\bthree\b|\bfour\b|\bfive\b|\bsix\b)\b/i.test(message);
+          const prevDiningCtxDcl = last_response && /say\s+yes\s+and\s+i.?ll\s+(?:send|book)|how\s+about\s+dinner\s+for|how\s+many|for\s+how\s+many|party\s+size/i.test(last_response);
+          const diningToolFiredDcl = [...seenToolCalls].some(k => k.startsWith('make_dining_reservation:'));
+          if (isDiningMsg2 && !msgHasTime && !msgHasPartyDcl && !prevDiningCtxDcl && !diningToolFiredDcl) {
+            const hasDateDcl = /\b(saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tonight|tomorrow)\b/i.test(message);
+            const dateDcl = message.match(/\b(saturday|sunday|monday|tuesday|wednesday|thursday|friday|today|tonight|tomorrow)\b/i)?.[1];
+            const seatPrefDcl = message.match(/\b(booth(?:\s+by\s+the\s+window)?|window\s+(?:booth|seat|table)|corner\s+table|outdoor|patio|quiet\s+table)\b/i)?.[0];
+            const prefNoteDcl = seatPrefDcl ? ` (${seatPrefDcl} noted)` : '';
+            if (hasDateDcl) {
+              responseText = `${memberFirstName}, love hearing from you! What time and party size work for ${dateDcl}${prefNoteDcl}?`;
+            } else {
+              responseText = `${memberFirstName}, love hearing from you! What date, time, and party size work for you?`;
+            }
+            console.warn('[concierge] DECLINING DINING GUARD: overriding with explicit ask');
+          }
+        } catch (dclErr) {
+          console.warn('[concierge] DECLINING DINING GUARD error (suppressed):', dclErr.message);
         }
       }
 
@@ -1612,6 +1661,28 @@ async function chatHandler(req, res) {
         }
       }
 
+      // ── POST-LOOP PROFILE HANDICAP GUARD ─────────────────────────────────────
+      // When member asks about their handicap and get_member_profile fired, check
+      // the profile object directly for handicap/GHIN data. Model often says
+      // "not showing up" even when the data exists, or asks permission to check.
+      if (responseText && [...seenToolCalls].some(k => k.startsWith('get_member_profile:'))) {
+        const isHandicapQ = /\b(?:handicap|ghin|index)\b/i.test(message);
+        if (isHandicapQ) {
+          const handicapVal = profile.handicap ?? profile.handicap_index ?? profile.ghin_index ?? profile.ghin ?? null;
+          if (handicapVal !== null && handicapVal !== undefined) {
+            responseText = `${memberFirstName}, your current handicap index is ${handicapVal}.`;
+            console.warn('[concierge] PROFILE HANDICAP GUARD: returning handicap from profile object');
+          } else {
+            // Rewrite any "want me to send?" permission-ask into a direct action statement
+            const asksPermission = /\bwant\s+me\s+to\b|\bshall\s+I\b|\bshould\s+I\b/i.test(responseText);
+            if (asksPermission) {
+              responseText = `${memberFirstName}, your handicap isn't in your profile right now — I'll check with the pro shop and follow up shortly.`;
+              console.warn('[concierge] PROFILE HANDICAP GUARD: removing permission-ask, stating direct action');
+            }
+          }
+        }
+      }
+
       // ── POST-LOOP PROCESS LANGUAGE SCRUB ─────────────────────────────────────
       // Strip "sent to front desk / confirm within the hour" padding from dining
       // confirmations. The model adds this despite CONFIRMATION LANGUAGE RULE;
@@ -1621,8 +1692,11 @@ async function chatHandler(req, res) {
           .replace(/[.!]\s+Sent\s+your\s+request\s+to\s+the\s+front\s+desk[^.!]*[.!]/gi, '.')
           .replace(/[,;]\s+(?:sent|I've\s+sent)\s+your\s+request\s+to\s+the\s+front\s+desk[^.!]*/gi, '')
           .replace(/[.!]\s+[Tt]he\s+front\s+desk\s+will\s+confirm[^.!]*[.!]/gi, '.')
+          .replace(/,\s+and\s+the\s+front\s+desk\s+will\s+confirm[^.!]*/gi, '')
           .replace(/[,;]\s+(?:the\s+front\s+desk|they'?ll)\s+(?:will\s+)?confirm\s+(?:within|in)\s+[^.!]*/gi, '')
           .replace(/[.!]\s+[Tt]hey'?ll\s+confirm\s+(?:within|in)\s+[^.!]*[.!]/gi, '.')
+          // Strip hollow T2 warmth when confirming a booking after prior offer
+          .replace(/^[^,!]+[,!]\s+(?:so\s+glad\s+you\s+reached\s+out|always\s+love\s+hearing\s+from\s+you|great\s+to\s+hear\s+from\s+you)[,!]\s*/i, `${memberFirstName}, `)
           .replace(/\s+\.$/, '.')
           .trim();
       }
@@ -1644,7 +1718,9 @@ async function chatHandler(req, res) {
             if (modelDeferred && events.length > 0) {
               console.warn('[concierge] CALENDAR GUARD: replacing events-team-deferral with real event data');
               const eventList = events.slice(0, 3).map(e => {
-                const parts = [e.name];
+                const parts = [];
+                const evTitle = e.title || e.name || e.event_name;
+                if (evTitle) parts.push(evTitle);
                 if (e.date) parts.push(e.date);
                 if (e.time) parts.push(`at ${e.time}`);
                 if (e.location) parts.push(`in ${e.location}`);
@@ -1655,7 +1731,7 @@ async function chatHandler(req, res) {
                 const warmOpener = responseText.match(/^[^.!]+[.!]/)?.[0]?.trim() || '';
                 responseText = warmOpener ? `${warmOpener} Here's what's coming up:\n${eventList}` : `${memberFirstName}! Here's what's on this weekend:\n${eventList}`;
               } else if (isDeclineMemberFlag) {
-                responseText = `${memberFirstName}, great to hear from you! Here's what's coming up:\n${eventList}`;
+                responseText = `${memberFirstName}, we've missed you! Here's what's coming up:\n${eventList}`;
               } else {
                 responseText = `${memberFirstName}, here's what's on this weekend:\n${eventList}`;
               }
@@ -1690,6 +1766,23 @@ async function chatHandler(req, res) {
         } catch (rsvpErr) {
           console.warn('[concierge] RSVP GUARD error (suppressed):', rsvpErr.message);
         }
+      }
+
+      // ── POST-LOOP RSVP SCRUB ──────────────────────────────────────────────────
+      // When rsvp_event fired (by model OR by guard), strip hollow warmth phrases
+      // and process-language from the confirmation response.
+      if (responseText && [...seenToolCalls].some(k => k.startsWith('rsvp_event:'))) {
+        responseText = responseText
+          // Strip hollow T2 opener like "Robert! So glad you reached out, ..."
+          .replace(/^([^,!]+[,!])\s+(?:so\s+glad\s+you\s+reached\s+out|always\s+love\s+hearing\s+from\s+you|great\s+to\s+hear\s+from\s+you)[,!]\s*/i, '$1 ')
+          // Strip "with the events team" / "with our team"
+          .replace(/\s+with\s+(?:the\s+)?(?:events?\s+team|our\s+team)[,.]?/gi, '')
+          // Strip process-language sentences about follow-up confirmation
+          .replace(/[.!]\s+They'?ll\s+follow\s+up\s+with\s+(?:a\s+)?confirmation[^.!]*[.!]/gi, '.')
+          .replace(/[,;]\s+they'?ll\s+follow\s+up\s+with\s+(?:a\s+)?confirmation[^.!]*/gi, '')
+          .replace(/[.!]\s+(?:The\s+events?\s+team|They)\s+will\s+(?:reach\s+out|contact\s+you|follow\s+up)[^.!]*[.!]/gi, '.')
+          .replace(/\s+\.$/, '.')
+          .trim();
       }
 
       // ── POST-LOOP DINING FABRICATION GUARD ───────────────────────────────────
