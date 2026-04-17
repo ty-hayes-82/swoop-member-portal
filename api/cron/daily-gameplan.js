@@ -1,3 +1,4 @@
+// SUPERSEDED: gm_concierge session + morning-briefing endpoint now handles this. Remove after 7-day parallel-run validation.
 /**
  * Daily Game Plan Cron
  * Schedule: 5 AM UTC daily (0 5 * * *)

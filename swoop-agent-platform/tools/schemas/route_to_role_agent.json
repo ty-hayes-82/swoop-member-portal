@@ -1,0 +1,21 @@
+{
+  "type": "custom",
+  "name": "route_to_role_agent",
+  "description": "Invoke a staff role agent by calling it as a callable_agent. Use when the member concierge or GM concierge needs a specialist to handle a request. Pass full member context — the target agent will not re-query. The target agent runs in its own session thread and returns a result asynchronously.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "target_role": {
+        "type": "string",
+        "enum": ["tee_time", "fb", "dining", "events", "membership", "pro_shop", "controller", "head_pro"]
+      },
+      "member_context": { "type": "object" },
+      "request_summary": { "type": "string" },
+      "priority": {
+        "type": "string",
+        "enum": ["urgent", "normal", "whenever"]
+      }
+    },
+    "required": ["target_role", "request_summary"]
+  }
+}

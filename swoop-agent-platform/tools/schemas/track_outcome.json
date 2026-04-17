@@ -1,0 +1,15 @@
+{
+  "type": "custom",
+  "name": "track_outcome",
+  "description": "Write the result of a past recommendation back to the originating analyst's session. This closes the learning loop — analyst agents adjust future recommendations based on what worked.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "recommendation_id": { "type": "string" },
+      "outcome": { "type": "string" },
+      "metric": { "type": "object" },
+      "measured_at": { "type": "string", "description": "ISO 8601 timestamp" }
+    },
+    "required": ["recommendation_id", "outcome"]
+  }
+}

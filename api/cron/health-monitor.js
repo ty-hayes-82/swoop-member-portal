@@ -1,3 +1,4 @@
+// SUPERSEDED: cron-member-pulse now handles this via member_pulse_analyst session. Remove after 7-day parallel-run validation.
 /**
  * Health Monitor Cron Job
  * Schedule: daily (runs alongside playbook-timers)

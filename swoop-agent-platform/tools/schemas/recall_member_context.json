@@ -1,0 +1,21 @@
+{
+  "type": "custom",
+  "name": "recall_member_context",
+  "description": "Fetch relevant slices of a member's session event log to build context for the current interaction. Always scope the query — fetching full history is wasteful and defeats the point of external sessions.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "member_id": { "type": "string" },
+      "event_types": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "time_window": {
+        "type": "string",
+        "description": "ISO 8601 duration, e.g. 'P30D' for last 30 days"
+      },
+      "max_events": { "type": "integer", "default": 20 }
+    },
+    "required": ["member_id"]
+  }
+}

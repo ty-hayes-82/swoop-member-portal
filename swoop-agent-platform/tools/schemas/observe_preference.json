@@ -1,0 +1,19 @@
+{
+  "type": "custom",
+  "name": "observe_preference",
+  "description": "Write an inferred member preference to the member's session as a preference.observed event. Use when an agent learns something about a member from their behavior — favorite tee time, drink preference, playing partners, family members, dietary restrictions. Do not re-observe preferences that are already in the session.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "member_id": { "type": "string" },
+      "preference_type": { "type": "string" },
+      "value": {},
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+      "source": {
+        "type": "string",
+        "description": "How the preference was inferred — booking pattern, explicit statement, complaint detail, etc."
+      }
+    },
+    "required": ["member_id", "preference_type", "value", "source"]
+  }
+}

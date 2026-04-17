@@ -1,0 +1,23 @@
+{
+  "type": "custom",
+  "name": "surface_recommendation",
+  "description": "Domain-analyst agents use this to push a recommended action into an identity agent's queue. The target agent will decide whether to surface to the human, auto-approve within threshold, or hold for review.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "target_role": { "type": "string" },
+      "recommendation_type": { "type": "string" },
+      "signal_bundle": {
+        "type": "object",
+        "description": "Evidence supporting the recommendation"
+      },
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+      "urgency": {
+        "type": "string",
+        "enum": ["now", "today", "this_week"]
+      },
+      "suggested_action": { "type": "string" }
+    },
+    "required": ["target_role", "recommendation_type", "signal_bundle", "suggested_action"]
+  }
+}

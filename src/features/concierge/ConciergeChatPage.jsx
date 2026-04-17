@@ -66,22 +66,58 @@ export default function ConciergeChatPage() {
     setInput('');
     setLoading(true);
 
+    // Get club/member context from auth
+    let clubId = 'club_001';
+    let memberId = MEMBER_ID;
     try {
-      const res = await fetch('/api/concierge/chat', {
+      const user = JSON.parse(localStorage.getItem('swoop_auth_user') || 'null');
+      if (user?.clubId) clubId = user.clubId;
+      if (user?.memberId) memberId = user.memberId;
+    } catch {}
+
+    try {
+      const res = await fetch('/api/agents/member-concierge-session', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeaders(),
-        },
-        body: JSON.stringify({ member_id: MEMBER_ID, message: text.trim() }),
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        body: JSON.stringify({ clubId, memberId, message: text.trim() }),
       });
-      const data = await res.json();
-      const botMsg = {
-        role: 'assistant',
-        text: data.response || data.error || 'No response',
-        time: timestamp(),
-      };
-      setMessages(prev => [...prev, botMsg]);
+
+      if (!res.ok || !res.body) {
+        const err = await res.json().catch(() => ({ error: 'Request failed' }));
+        setMessages(prev => [...prev, { role: 'assistant', text: err.error || 'No response', time: timestamp() }]);
+        return;
+      }
+
+      // Stream SSE chunks and accumulate text
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulated = '';
+      const botId = Date.now();
+
+      setMessages(prev => [...prev, { role: 'assistant', text: '', time: timestamp(), id: botId, streaming: true }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        for (const line of chunk.split('\n')) {
+          if (!line.startsWith('data: ')) continue;
+          try {
+            const event = JSON.parse(line.slice(6));
+            if (event.type === 'text' && event.text) {
+              accumulated += event.text;
+              setMessages(prev => prev.map(m =>
+                m.id === botId ? { ...m, text: accumulated } : m
+              ));
+            }
+            if (event.type === 'done') break;
+          } catch {}
+        }
+      }
+
+      setMessages(prev => prev.map(m =>
+        m.id === botId ? { ...m, streaming: false } : m
+      ));
     } catch (err) {
       setMessages(prev => [...prev, { role: 'assistant', text: `Error: ${err.message}`, time: timestamp() }]);
     } finally {

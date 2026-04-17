@@ -1,0 +1,15 @@
+{
+  "type": "custom",
+  "name": "escalate_to_role",
+  "description": "When a first-choice role agent cannot complete or is unavailable, escalate to a different role. Use sparingly — most routing should go directly to the right role the first time.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "from_role": { "type": "string" },
+      "to_role": { "type": "string" },
+      "reason": { "type": "string" },
+      "original_request": { "type": "object" }
+    },
+    "required": ["from_role", "to_role", "reason"]
+  }
+}
