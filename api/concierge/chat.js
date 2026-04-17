@@ -1667,12 +1667,9 @@ async function chatHandler(req, res) {
             responseText = `${memberFirstName}, your current handicap index is ${handicapVal}.`;
             console.warn('[concierge] PROFILE HANDICAP GUARD: returning handicap from profile object');
           } else {
-            // Rewrite any "want me to send?" permission-ask into a direct action statement
-            const asksPermission = /\bwant\s+me\s+to\b|\bshall\s+I\b|\bshould\s+I\b/i.test(responseText);
-            if (asksPermission) {
-              responseText = `${memberFirstName}, your handicap isn't in your profile right now — I'll check with the pro shop and follow up shortly.`;
-              console.warn('[concierge] PROFILE HANDICAP GUARD: removing permission-ask, stating direct action');
-            }
+            // Handicap not in profile — always write a clear, direct statement
+            responseText = `${memberFirstName}, your handicap isn't on file — I'll have the pro shop reach out with your current index.`;
+            console.warn('[concierge] PROFILE HANDICAP GUARD: handicap absent, writing clear direct statement');
           }
         }
       }
@@ -1696,8 +1693,9 @@ async function chatHandler(req, res) {
           .replace(/,\s+and\s+I'?ve\s+sent\s+(?:that|it|the\s+\w+)\s+to\s+(?:our\s+|the\s+)?front\s+desk(?:\s+team)?[^.!]*/gi, '')
           // Replace "I've requested a table" with done-deal language
           .replace(/I'?ve\s+requested\s+a\s+table/gi, 'Booked a table')
-          // Strip hollow T2 standalone warm sentence before confirmation (e.g. "Anne! You made my day reaching out.")
-          .replace(/^([A-Z][a-z]+!)\s+(?:you\s+made\s+my\s+day[^.!]*|so\s+glad\s+you\s+(?:reached\s+out|did)[^.!]*|so\s+good\s+to\s+hear\s+from\s+you[^.!]*)[.!]\s*/i, '$1 ')
+          // Strip hollow T2 standalone warm sentence before confirmation (e.g. "Anne! You made my day.")
+          // Only strip when the hollow phrase IS the full sentence (ends with . or ! directly, no comma-clause after it)
+          .replace(/^([A-Z][a-z]+!)\s+(?:you\s+made\s+my\s+day|so\s+glad\s+you\s+(?:reached\s+out|did)|so\s+good\s+to\s+hear\s+from\s+you)(?:\s+\w+){0,3}[.!]\s*/i, '$1 ')
           // Strip hollow T2 warmth clause when confirming a booking after prior offer
           .replace(/^[^,!]+[,!]\s+(?:I'?m\s+)?(?:so\s+glad\s+you\s+reached\s+out|always\s+love\s+hearing\s+from\s+you|great\s+to\s+hear\s+from\s+you|so\s+good\s+to\s+hear\s+from\s+you|you\s+made\s+my\s+day)[^,!.]*[,!.]\s*/i, `${memberFirstName}, `)
           .replace(/\s+\.$/, '.')
@@ -1846,6 +1844,19 @@ async function chatHandler(req, res) {
           .replace(/[.!]\s+I\s+know\s+you'?ll\s+(?:enjoy|love|have\s+a\s+great)[^.!]*[.!]/gi, '.')
           .replace(/\s+\.$/, '.')
           .trim();
+      }
+
+      // ── POST-LOOP AT-RISK RE-ENGAGEMENT NUDGE ────────────────────────────────
+      // When an at-risk member (not a declining/ghost member) asks about tee times
+      // and check_tee_availability fired, append a brief re-engagement nudge clause
+      // so the response closes with warmth that matches the path intent.
+      if (isAtRiskMember && !isDeclineMemberFlag && !isGhostMember && responseText &&
+          [...seenToolCalls].some(k => k.startsWith('check_tee_availability:'))) {
+        const hasNudge = /\b(?:see\s+you\s+back|love\s+to\s+have\s+you\s+back|so\s+glad\s+you'?re\s+coming|great\s+to\s+have\s+you\s+back|back\s+out\s+there)\b/i.test(responseText);
+        if (!hasNudge) {
+          responseText = responseText.replace(/\s*$/, '') + ' We\'d love to see you back out there.';
+          console.warn('[concierge] AT-RISK RE-ENGAGEMENT NUDGE: appended nudge clause for at-risk tee time check');
+        }
       }
 
       // ── POST-LOOP AT-RISK DINING WARM OPENER ─────────────────────────────────
