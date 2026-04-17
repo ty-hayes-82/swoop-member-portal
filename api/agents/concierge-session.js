@@ -58,6 +58,30 @@ export async function updateSessionSummary(clubId, memberId, summary) {
 }
 
 /**
+ * Append a line to the conversation summary (accumulates cross-turn request IDs and status).
+ * Used as a reliable fallback when member_concierge_events table is unavailable.
+ *
+ * @param {string} clubId
+ * @param {string} memberId
+ * @param {string} line
+ */
+export async function appendSessionSummary(clubId, memberId, line) {
+  try {
+    await sql`
+      UPDATE member_concierge_sessions
+      SET conversation_summary = CASE
+        WHEN conversation_summary IS NULL OR conversation_summary = '' THEN ${line}
+        ELSE conversation_summary || ' | ' || ${line}
+      END,
+      last_active = NOW()
+      WHERE club_id = ${clubId} AND member_id = ${memberId}
+    `;
+  } catch (err) {
+    console.warn('[concierge-session] appendSessionSummary failed:', err.message);
+  }
+}
+
+/**
  * Update cached preferences for a session.
  *
  * @param {string} clubId

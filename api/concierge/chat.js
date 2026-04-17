@@ -9,7 +9,7 @@
  */
 import { sql } from '@vercel/postgres';
 import { withAuth, getReadClubId } from '../lib/withAuth.js';
-import { getOrCreateSession, updateSessionSummary, emitConciergeEvent, getConciergeEvents, getPendingRequestDetails } from '../agents/concierge-session.js';
+import { getOrCreateSession, updateSessionSummary, appendSessionSummary, emitConciergeEvent, getConciergeEvents, getPendingRequestDetails } from '../agents/concierge-session.js';
 import { getOrCreateAgentSession, emitAgentEvent } from '../agents/session-core.js';
 import { buildConciergePrompt } from '../../src/config/conciergePrompt.js';
 import { getAnthropicClient, MANAGED_AGENT_ID, MANAGED_ENV_ID } from '../agents/managed-config.js';
@@ -832,9 +832,16 @@ async function chatHandler(req, res) {
     }
   } catch (_) { /* recommendation events not available */ }
 
-  // Fall back to text summary if event log is empty
-  if (!conversationContext && session.conversation_summary) {
-    conversationContext = `\n\nPrevious conversation context: ${session.conversation_summary}`;
+  // Inject session summary as context — always appended when it contains pending request IDs.
+  // This is the reliable cross-turn fallback even when member_concierge_events is unavailable.
+  if (session.conversation_summary) {
+    const summaryHasPending = /COMPLAINT:|REQUEST:/.test(session.conversation_summary);
+    if (!conversationContext) {
+      conversationContext = `\n\nPrevious conversation context: ${session.conversation_summary}`;
+    } else if (summaryHasPending) {
+      // Always inject pending request IDs even when event log has other context
+      conversationContext += `\n\nPENDING REQUESTS FROM PRIOR TURNS (use this to answer status questions): ${session.conversation_summary}`;
+    }
   }
 
   // Emit the incoming user message to the durable event log
@@ -993,6 +1000,16 @@ async function chatHandler(req, res) {
               expected_response: toolResult.expected_response,
             });
           } catch (_) { /* non-blocking */ }
+          // Append to session summary — reliable cross-turn fallback even if event table is missing
+          appendSessionSummary(clubId, member_id,
+            `COMPLAINT:${toolResult.complaint_id}|mgr:${toolResult.assigned_manager}|dept:${toolResult.routed_to}|${new Date().toISOString().slice(0,16)}`
+          ).catch(() => {});
+        }
+        // Append request_submitted to session summary as cross-turn fallback memory
+        if (toolResult?.status === 'request_submitted' && toolResult?.request_id) {
+          appendSessionSummary(clubId, member_id,
+            `REQUEST:${toolResult.request_id}|tool:${toolUse.name}|team:${toolResult.routed_to}|${new Date().toISOString().slice(0,16)}`
+          ).catch(() => {});
         }
         // Sanitize em-dashes from tool result text before returning to model (prevents echoing in responses)
         const toolResultStr = JSON.stringify(toolResult).replace(/\u2014/g, ',');
