@@ -1201,10 +1201,11 @@ async function chatHandler(req, res) {
 
   // Live mode: call AI (Gemini primary, Claude fallback when GEMINI_API_KEY absent)
   try {
+    // Inject previous response context AT THE TOP so Gemini sees it first — affirmative handling depends on this
     const lastResponseContext = last_response
-      ? `\n\nYOUR PREVIOUS RESPONSE TO THIS MEMBER: "${last_response.slice(0, 400)}"\nIf the member's current message is a short affirmative ("Yes", "Yeah", "Sure", "Please", "Do it", "Go ahead", "sounds good", "perfect") or a short pick, it is a direct reply to your previous response above. Execute the offered action immediately — do NOT ask the same question again.`
+      ? `CURRENT TURN CONTEXT: Your previous response to ${member?.name?.split(' ')[0] || 'this member'} was: "${last_response.slice(0, 400)}"\nThe member's current message is a reply to that. If it is an affirmative ("Yes", "Yes please", "Sure", "Please do", "Go ahead", "sounds good", "that works", "perfect") or a direct slot pick ("7am", "the first one", "Saturday works") — you MUST call the appropriate tool NOW and confirm in 1 sentence. Do NOT repeat your previous message. Do NOT say the team will confirm again.\n\n`
       : '';
-    const fullSystemPrompt = systemPrompt + conversationContext + pendingRequestsContext + recommendationContext + lastResponseContext;
+    const fullSystemPrompt = lastResponseContext + systemPrompt + conversationContext + pendingRequestsContext + recommendationContext;
 
     // Collect tool call trace for debug mode; also track successful submissions for fallback use
     const toolCallLog = [];
