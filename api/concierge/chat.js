@@ -49,7 +49,7 @@ const CONCIERGE_TOOLS = [
   },
   {
     name: 'make_dining_reservation',
-    description: 'Make a dining reservation',
+    description: 'Make a dining reservation. ALWAYS call this tool immediately when the member has explicitly provided a date and party size. Never describe a handoff to staff without calling this tool. Required: date and party size must both come from the member — never invent them.',
     input_schema: { type: 'object', properties: { date: { type: 'string' }, time: { type: 'string' }, outlet: { type: 'string' }, party_size: { type: 'integer' }, preferences: { type: 'string' } }, required: ['date', 'outlet'] }
   },
   {
@@ -74,7 +74,7 @@ const CONCIERGE_TOOLS = [
   },
   {
     name: 'file_complaint',
-    description: 'File a complaint or feedback on behalf of the member',
+    description: 'File a complaint or feedback on behalf of the member. ALWAYS call this tool before generating a complaint reference number — never fabricate a reference number (like FB-XXXXXXXX) without calling this tool first. The reference number comes from the tool result.',
     input_schema: { type: 'object', properties: { category: { type: 'string', enum: ['food_and_beverage', 'golf_operations', 'facilities', 'staff', 'billing', 'other'] }, description: { type: 'string', description: 'What happened — the member complaint in their own words' } }, required: ['category', 'description'] }
   },
   {
@@ -1202,7 +1202,7 @@ async function chatHandler(req, res) {
   // Live mode: call AI (Gemini primary, Claude fallback when GEMINI_API_KEY absent)
   try {
     const lastResponseContext = last_response
-      ? `\n\nYOUR PREVIOUS RESPONSE: "${last_response.slice(0, 400)}"\nThe member's current message is a reply to that. If it is an affirmative ("Yes", "Yes please", "Sure", "Please do", "Go ahead", "sounds good", "that works", "perfect") or a direct slot pick ("7am", "the first one", "Saturday works") — RULE 4 applies: call the appropriate tool NOW and confirm in 1 sentence. Do NOT repeat your previous message.`
+      ? `\n\nYOUR PREVIOUS RESPONSE: "${last_response.slice(0, 400)}"\nThe member's current message is a reply to that. If it is an affirmative ("Yes", "Yes please", "Sure", "Please do", "Go ahead", "sounds good", "that works", "perfect") or a direct slot pick ("7am", "the first one", "Saturday works") — RULE 4 applies: call the appropriate tool NOW and confirm in 1 sentence. Do NOT repeat your previous message. IMPORTANT: If your previous response already listed tee time slots (e.g. "I've got 7:00, 7:12, or 7:24 — which works?"), and the member picks one, call ONLY book_tee_time — do NOT call check_tee_availability again, that was already done in the previous turn.`
       : '';
     const fullSystemPrompt = systemPrompt + conversationContext + pendingRequestsContext + recommendationContext + lastResponseContext;
 
@@ -1296,14 +1296,26 @@ async function chatHandler(req, res) {
 
         // Server-side tee time gate: if book_tee_time is called without a prior
         // check_tee_availability in this session, intercept and redirect.
+        // EXCEPTION: if last_response already contained slot options (T2 confirmation),
+        // the availability check was done in the prior turn — allow book_tee_time directly.
+        const lastRespHadSlots = last_response && /\d{1,2}:\d{2}.*\d{1,2}:\d{2}/.test(last_response);
         const intercepted = dedupedCalls.filter(({ functionCall: fc }) => {
-          if (fc.name === 'book_tee_time' && !seenToolCalls.has(`check_tee_availability:intercepted`)) {
+          if (fc.name === 'book_tee_time' && !seenToolCalls.has(`check_tee_availability:intercepted`) && !lastRespHadSlots) {
             const alreadyChecked = [...seenToolCalls].some(k => k.startsWith('check_tee_availability:'));
             if (!alreadyChecked) {
               console.warn('[concierge] TEE GATE: book_tee_time called before check_tee_availability — intercepting');
               seenToolCalls.add('check_tee_availability:intercepted');
               fc.name = 'check_tee_availability'; // redirect to availability check
               fc.args = { date: fc.args.date, preferred_time: fc.args.time };
+            }
+          }
+          // T2 redundant check: if last_response already had slots and model fires check_tee_availability
+          // again alongside book_tee_time, skip the redundant check.
+          if (fc.name === 'check_tee_availability' && lastRespHadSlots) {
+            const bookTeeAlsoFiring = dedupedCalls.some(c => c.functionCall.name === 'book_tee_time');
+            if (bookTeeAlsoFiring) {
+              console.warn('[concierge] TEE GATE T2: skipping redundant check_tee_availability (slots already presented in prior turn)');
+              return false; // skip this call
             }
           }
           return true;
