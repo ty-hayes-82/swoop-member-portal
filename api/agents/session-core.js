@@ -201,15 +201,23 @@ export function formatEventSliceAsContext(events) {
       const ts = ev.created_at ? new Date(ev.created_at).toISOString().slice(0, 16) : '';
       const p = ev.payload || {};
       switch (ev.event_type) {
-        case 'user_message':         return `[${ts}] Member: ${p.text || ''}`;
-        case 'agent_response':       return `[${ts}] Agent: ${(p.text || '').slice(0, 200)}`;
-        case 'tool_call':            return `[${ts}] Tool: ${p.tool}(${JSON.stringify(p.args || {})}) → ${p.status || 'ok'}`;
-        case 'request_submitted':    return `[${ts}] PENDING: ${p.request_id} via ${p.request_type} → ${p.routed_to}`;
-        case 'staff_confirmed':      return `[${ts}] CONFIRMED: ${p.text || ''}`;
-        case 'staff_rejected':       return `[${ts}] REJECTED: ${p.reason || ''}`;
-        case 'recommendation_received': return `[${ts}] RECOMMENDATION: ${p.summary || ''}`;
-        case 'preference_observed':  return `[${ts}] Preference: ${p.field} = ${p.value} (confidence: ${p.confidence || '?'})`;
-        case 'outcome_tracked':      return `[${ts}] Outcome: ${p.description || ''}`;
+        // Canonical names (new)
+        case 'user.message':              return `[${ts}] Member: ${p.text || ''}`;
+        case 'agent.message':             return `[${ts}] Agent: ${(p.text || '').slice(0, 200)}`;
+        case 'agent.custom_tool_use':     return `[${ts}] Tool: ${p.tool}(${JSON.stringify(p.args || {})}) → ${p.status || 'ok'}`;
+        case 'agent.custom_tool_result':  return `[${ts}] PENDING: ${p.request_id} via ${p.request_type} → ${p.routed_to}`;
+        case 'user.custom_tool_result':   return `[${ts}] CONFIRMED: ${p.text || p.details || ''}`;
+        case 'agent.thread_message_received': return `[${ts}] RECOMMENDATION: ${p.summary || ''}`;
+        // Legacy names (kept for existing rows)
+        case 'user_message':              return `[${ts}] Member: ${p.text || ''}`;
+        case 'agent_response':            return `[${ts}] Agent: ${(p.text || '').slice(0, 200)}`;
+        case 'tool_call':                 return `[${ts}] Tool: ${p.tool}(${JSON.stringify(p.args || {})}) → ${p.status || 'ok'}`;
+        case 'request_submitted':         return `[${ts}] PENDING: ${p.request_id} via ${p.request_type} → ${p.routed_to}`;
+        case 'staff_confirmed':           return `[${ts}] CONFIRMED: ${p.text || ''}`;
+        case 'staff_rejected':            return `[${ts}] REJECTED: ${p.reason || ''}`;
+        case 'recommendation_received':   return `[${ts}] RECOMMENDATION: ${p.summary || ''}`;
+        case 'preference_observed':       return `[${ts}] Preference: ${p.field} = ${p.value} (confidence: ${p.confidence || '?'})`;
+        case 'outcome_tracked':           return `[${ts}] Outcome: ${p.description || ''}`;
         default: return `[${ts}] ${ev.event_type}: ${JSON.stringify(p).slice(0, 100)}`;
       }
     });
