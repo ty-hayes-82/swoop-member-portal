@@ -74,7 +74,7 @@ const CONCIERGE_TOOLS = [
   },
   {
     name: 'file_complaint',
-    description: 'File a complaint or feedback on behalf of the member. ALWAYS call this tool before generating a complaint reference number — never fabricate a reference number (like FB-XXXXXXXX) without calling this tool first. The reference number comes from the tool result.',
+    description: 'File a complaint or feedback on behalf of the member. Call this tool IMMEDIATELY when the member provides ANY complaint with a location (Grill, Pro Shop, course, etc.) OR a specific incident (cold food, wrong order, long wait, billing error, etc.). NEVER route the member to the front desk or another department — handle it here by calling this tool. NEVER fabricate a reference number — it comes from this tool result.',
     input_schema: { type: 'object', properties: { category: { type: 'string', enum: ['food_and_beverage', 'golf_operations', 'facilities', 'staff', 'billing', 'other'] }, description: { type: 'string', description: 'What happened — the member complaint in their own words' } }, required: ['category', 'description'] }
   },
   {
@@ -1517,15 +1517,17 @@ async function chatHandler(req, res) {
       }
 
       // ── POST-LOOP COMPLAINT GUARD ─────────────────────────────────────────────
-      // If message is a complaint and the response claims to have filed it
-      // (with reference numbers or "filed with F&B") but file_complaint wasn't called,
-      // force the tool call so the reference number is real.
+      // If message is a specific complaint (location OR incident details present)
+      // but file_complaint was not called, force the tool regardless of response text.
+      // Catches both fake-reference fabrication and front-desk deflection.
       if (responseText) {
-        const isComplaintMsg = /\b(?:cold|wrong|slow|wait(?:ed|ing)?|rude|broken|terrible|disappointed|unhappy|issue|problem|complaint)\b/i.test(message);
+        const hasComplaintLocation = /\b(?:grill|pro\s*shop|dining\s+room|restaurant|bar|kitchen|locker|course|pool|gym|spa|club\s*house|front\s+nine|back\s+nine)\b/i.test(message);
+        const hasSpecificIncident = /\b(?:cold|wrong\s+order|incorrect\s+order|waited?\s+\d+|wait(?:ed|ing)?\s+(?:\d+|too\s+long|forever)|overcharged|missing\s+item|order\s+wrong)\b/i.test(message);
+        const hasComplaintKeyword = /\b(?:complaint|terrible|disappointed|unacceptable|awful|horrible|issue\s+with|problem\s+with)\b/i.test(message);
+        const isSpecificComplaint = (hasComplaintLocation || hasSpecificIncident || hasComplaintKeyword);
         const complaintFired = [...seenToolCalls].some(k => k.startsWith('file_complaint:'));
-        const responseClaimedFiling = /\b(?:filed|reference|ref\s+\w{4,}|fb-\w+|reported|f&b\s+director)\b/i.test(responseText);
-        if (isComplaintMsg && !complaintFired && responseClaimedFiling) {
-          console.warn('[concierge] COMPLAINT GUARD: complaint claimed filed without tool — forcing file_complaint');
+        if (isSpecificComplaint && !complaintFired) {
+          console.warn('[concierge] COMPLAINT GUARD: specific complaint with no file_complaint tool — forcing it');
           const category = /\b(?:food|grill|dining|meal|drink|cold|order)\b/i.test(message) ? 'food_and_beverage'
             : /\b(?:golf|course|tee|green|cart)\b/i.test(message) ? 'golf_operations'
             : /\b(?:facility|locker|pool|gym|spa)\b/i.test(message) ? 'facilities'
