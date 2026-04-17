@@ -792,7 +792,7 @@ async function _geminiGenerate({ systemPrompt, contents, tools, temperature, max
   const body = {
     systemInstruction: { parts: [{ text: systemPrompt }] },
     contents,
-    generationConfig: { temperature: temperature ?? 0.5, maxOutputTokens: maxOutputTokens ?? 2048 },
+    generationConfig: { temperature: temperature ?? 0.5, maxOutputTokens: maxOutputTokens ?? 2048, thinkingConfig: { thinkingBudget: 0 } },
     tools: [{ functionDeclarations: tools.map(t => ({ name: t.name, description: t.description, parameters: _toGeminiSchema(t.input_schema) })) }],
   };
   const res = await fetch(url, {
@@ -808,7 +808,7 @@ async function _geminiGenerate({ systemPrompt, contents, tools, temperature, max
 }
 
 function _geminiText(candidate) {
-  return (candidate?.content?.parts || []).filter(p => p.text).map(p => p.text).join('');
+  return (candidate?.content?.parts || []).filter(p => p.text && !p.thought).map(p => p.text).join('');
 }
 
 function _geminiFunctionCalls(candidate) {

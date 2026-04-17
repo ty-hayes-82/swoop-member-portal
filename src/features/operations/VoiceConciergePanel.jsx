@@ -204,7 +204,7 @@ export default function VoiceConciergePanel() {
                     Press the button below to start a live voice session as <strong>{selectedMember.first}</strong>
                   </p>
                   <p className="text-[11px] text-swoop-text-label mt-2">
-                    Powered by Gemini 2.5 Flash Live
+                    Powered by Gemini 3.1 Flash Live
                   </p>
                 </div>
               </div>
