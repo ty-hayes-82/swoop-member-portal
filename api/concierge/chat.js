@@ -131,6 +131,24 @@ async function executeConciergeTool(toolName, input, profile, clubId) {
               description: ev.description,
             });
           }
+          // If a keyword was passed but none of the events match it, surface a no-match signal
+          // so the model doesn't hallucinate a match from unrelated results
+          const keyword = input.keyword;
+          if (keyword) {
+            const kw = keyword.toLowerCase();
+            const hasMatch = events.some(ev =>
+              (ev.title || '').toLowerCase().includes(kw) ||
+              (ev.description || '').toLowerCase().includes(kw) ||
+              (ev.type || '').toLowerCase().includes(kw)
+            );
+            if (!hasMatch) {
+              return {
+                events,
+                keyword_match: false,
+                keyword_note: `No events matching "${keyword}" found in the calendar. Do not fabricate a match. Tell the member no matching event was found and offer to route to the events team for confirmation.`,
+              };
+            }
+          }
           return { events };
         }
       } catch (e) {
