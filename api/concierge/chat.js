@@ -1698,6 +1698,9 @@ async function chatHandler(req, res) {
           .replace(/,\s+and\s+I'?ve\s+sent\s+(?:that|it|the\s+\w+)\s+to\s+(?:our\s+|the\s+)?front\s+desk(?:\s+team)?[^.!]*/gi, '')
           // Replace "I've requested a table" with done-deal language
           .replace(/I'?ve\s+requested\s+a\s+table/gi, 'Booked a table')
+          // Replace "I've [also] sent your [dinner] request for X to the front desk [...]" → "Booked dinner for X"
+          // Catches sentence-starting variants (after ? or . in multi-intent responses)
+          .replace(/I'?ve\s+(?:also\s+)?sent\s+your\s+(?:dinner\s+|dining\s+)?request\s+(for\s+\d+[^.!,]*?)\s+to\s+(?:the\s+|our\s+)?front\s+desk[^.!]*/gi, 'Booked dinner $1')
           // Strip fabricated venue descriptions and re-engagement padding after confirmation
           .replace(/[.!]\s+The\s+[A-Z][^.!\n]+(?:has\s+been|is)\s+(?:wonderful|great|excellent|lovely|fantastic|beautiful)[^.!]*[.!]/gi, '.')
           .replace(/,?\s+and\s+(?:we|I)\s+can'?t\s+wait\s+to\s+have\s+you\s+back[^.!]*/gi, '')
@@ -1706,7 +1709,7 @@ async function chatHandler(req, res) {
           // Only strip when the hollow phrase IS the full sentence (ends with . or ! directly, no comma-clause after it)
           .replace(/^([A-Z][a-z]+!)\s+(?:you\s+made\s+my\s+day|so\s+glad\s+you\s+(?:reached\s+out|did)|so\s+good\s+to\s+hear\s+from\s+you)(?:\s+\w+){0,3}[.!]\s*/i, '$1 ')
           // Strip hollow T2 warmth clause when confirming a booking after prior offer
-          .replace(/^[^,!]+[,!]\s+(?:I'?m\s+)?(?:so\s+glad\s+you\s+reached\s+out|always\s+love\s+hearing\s+from\s+you|great\s+to\s+hear\s+from\s+you|so\s+good\s+to\s+hear\s+from\s+you|you\s+made\s+my\s+day)[^,!.]*[,!.]\s*/i, `${memberFirstName}, `)
+          .replace(/^[^,!]+[,!]\s+(?:I'?m\s+)?(?:so\s+(?:glad|happy)\s+you\s+reached\s+out|always\s+love\s+hearing\s+from\s+you|great\s+to\s+hear\s+from\s+you|so\s+good\s+to\s+hear\s+from\s+you|you\s+made\s+my\s+day)[^,!.]*[,!.]\s*/i, `${memberFirstName}, `)
           .replace(/\s+\.$/, '.')
           .trim();
       }
@@ -1836,8 +1839,8 @@ async function chatHandler(req, res) {
         responseText = responseText
           // Strip hollow T2 opener like "Robert, I'm so glad you reached out..." or "Robert! So glad..."
           .replace(/^([^,!]+[,!])\s+(?:I'?m\s+)?(?:so\s+glad\s+you\s+reached\s+out|always\s+love\s+hearing\s+from\s+you|great\s+to\s+hear\s+from\s+you)[^,.!]*[,.!]\s*/i, '$1 ')
-          // Strip hollow re-engagement opener like "Robert! It's been too long, we miss having you around."
-          .replace(/^([A-Z][a-z]+!)\s+(?:it'?s\s+been\s+(?:too\s+long|a\s+while)|we\s+(?:really\s+)?miss\s+(?:having\s+you|you))[^.!]*[.!]\s*/i, '$1 ')
+          // Strip hollow re-engagement opener like "Robert! It's been too long..." or "Robert, it's been too long..."
+          .replace(/^([A-Z][a-z]+[,!])\s+(?:it'?s\s+been\s+(?:too\s+long|a\s+while)|we\s+(?:really\s+)?miss\s+(?:having\s+you|you))[^.!]*[.!]\s*/i, '$1 ')
           // Replace "I've sent your RSVP for X to [our/the] events team" with "You're on the list for X"
           .replace(/I'?ve\s+sent\s+your\s+(?:RSVP|registration|details?)\s+for\s+([^.!,]+?)\s+to\s+(?:our\s+|the\s+)?(?:events?\s+(?:team|coordinator)|club\s+team)[^.!]*/gi, "You're on the list for $1")
           // Strip "with/to the events team" / "with/to our events team" process language
