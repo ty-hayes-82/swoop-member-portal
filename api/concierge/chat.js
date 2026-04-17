@@ -1309,14 +1309,22 @@ async function chatHandler(req, res) {
               fc.args = { date: fc.args.date, preferred_time: fc.args.time };
             }
           }
-          // T2 redundant check: if last_response already had slots and model fires check_tee_availability
-          // again alongside book_tee_time, skip the redundant check.
+          // T2 redundant check: if last_response already had slots and model fires check_tee_availability,
+          // either skip it (if book_tee_time also firing) or redirect it to book_tee_time.
           if (fc.name === 'check_tee_availability' && lastRespHadSlots) {
             const bookTeeAlsoFiring = dedupedCalls.some(c => c.functionCall.name === 'book_tee_time');
             if (bookTeeAlsoFiring) {
-              console.warn('[concierge] TEE GATE T2: skipping redundant check_tee_availability (slots already presented in prior turn)');
-              return false; // skip this call
+              console.warn('[concierge] TEE GATE T2: skipping redundant check_tee_availability (book_tee_time also firing)');
+              return false; // skip the redundant check, let book_tee_time handle it
             }
+            // Model ONLY fired check_tee_availability on T2 confirmation — redirect to book
+            console.warn('[concierge] TEE GATE T2: redirecting sole check_tee_availability → book_tee_time');
+            fc.name = 'book_tee_time';
+            fc.args = {
+              date: fc.args.date,
+              time: fc.args.preferred_time || '08:00',
+              course: fc.args.course || 'North Course',
+            };
           }
           return true;
         });
