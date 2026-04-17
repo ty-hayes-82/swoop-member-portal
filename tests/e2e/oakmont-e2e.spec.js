@@ -523,8 +523,15 @@ test.describe('Suite 6 — Capability Toggle', () => {
 
     console.log(`[suite6] concierge response (status ${r.status}): ${r.text?.slice(0, 200)}`);
 
-    if (r.status === 200) {
-      const responseText = (r.json?.text ?? r.json?.message ?? r.text ?? '').toLowerCase();
+    if (r.status !== 200) {
+      addIssue({
+        severity: 'medium', suite: 'Suite 6',
+        description: `Concierge chat returned ${r.status} (expected 200)`,
+        expected: '200 with capability gate message',
+        actual: `HTTP ${r.status}: ${r.text?.slice(0, 200)}`,
+      });
+    } else {
+      const responseText = (r.json?.response ?? r.json?.text ?? r.json?.message ?? r.text ?? '').toLowerCase();
       const mentionsUnavailable = /unavailable|not available|disabled|unable|cannot/i.test(responseText);
       if (!mentionsUnavailable) {
         addIssue({
