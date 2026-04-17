@@ -1378,6 +1378,13 @@ async function chatHandler(req, res) {
               return false;
             }
           }
+          // ── CALENDAR DEDUP GUARD ──────────────────────────────────────────────
+          // Block duplicate get_club_calendar calls in the same turn — model
+          // occasionally fires it twice with slightly different args.
+          if (fc.name === 'get_club_calendar' && [...seenToolCalls].some(k => k.startsWith('get_club_calendar:'))) {
+            console.warn('[concierge] CALENDAR DEDUP: blocking duplicate get_club_calendar call');
+            return false;
+          }
           return true;
         });
 
@@ -1877,6 +1884,28 @@ async function chatHandler(req, res) {
           .replace(/[.!]\s+I\s+know\s+you'?ll\s+(?:enjoy|love|have\s+a\s+great)[^.!]*[.!]/gi, '.')
           .replace(/\s+\.$/, '.')
           .trim();
+
+        // ── RSVP CONFIRMATION GUARD ───────────────────────────────────────────
+        // If rsvp_event fired but the response has no explicit confirmation
+        // (model produced warm filler with no "you're all set"), inject it.
+        const hasRsvpConfirmation = /\b(?:you'?re\s+(?:all\s+set|signed\s+up|registered|on\s+the\s+list)|(?:booked|confirmed|rsvp'?d|signed\s+(?:you\s+)?up)\s+for|all\s+set\s+for|i'?ve\s+(?:rsvp'?d|registered|signed\s+you\s+up))\b/i.test(responseText);
+        if (!hasRsvpConfirmation) {
+          const rsvpKey = [...seenToolCalls].find(k => k.startsWith('rsvp_event:'));
+          let rsvpEventTitle = 'that event';
+          if (rsvpKey) {
+            try {
+              const rsvpArgs = JSON.parse(rsvpKey.slice('rsvp_event:'.length));
+              rsvpEventTitle = rsvpArgs.event_title || rsvpArgs.event_name || 'that event';
+            } catch (e) {}
+          }
+          // Replace bare "Name." opener pattern, or prepend confirmation
+          if (/^[A-Z][a-z]+\.\s+/.test(responseText)) {
+            responseText = responseText.replace(/^([A-Z][a-z]+)\.\s+/, `$1, you're all set for the ${rsvpEventTitle}! `);
+          } else {
+            responseText = `${memberFirstName}, you're all set for the ${rsvpEventTitle}! ` + responseText.replace(/^[A-Z][a-z]+[,!]\s+/, '');
+          }
+          console.warn('[concierge] RSVP CONFIRMATION GUARD: injected missing confirmation for', rsvpEventTitle);
+        }
       }
 
       // AT-RISK RE-ENGAGEMENT NUDGE removed: adding a 3rd sentence drops concise_helpful
