@@ -716,9 +716,64 @@ async function executeConciergeTool(toolName, input, profile, clubId) {
   }
 }
 
+// ─── GEMINI INTEGRATION ─────────────────────────────────────────────────────
+const GEMINI_API_KEY = process.env.VITE_GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
+const GEMINI_MODEL = 'gemini-3.1-pro-preview-customtools';
+
+function _toGeminiType(t) {
+  const m = { string: 'STRING', integer: 'INTEGER', number: 'NUMBER', boolean: 'BOOLEAN', object: 'OBJECT', array: 'ARRAY' };
+  return m[(t || 'string').toLowerCase()] || 'STRING';
+}
+
+function _toGeminiSchema(schema) {
+  if (!schema) return { type: 'OBJECT', properties: {} };
+  const properties = {};
+  for (const [k, v] of Object.entries(schema.properties || {})) {
+    properties[k] = {
+      type: _toGeminiType(v.type),
+      ...(v.description ? { description: v.description } : {}),
+      ...(v.enum ? { enum: v.enum } : {}),
+    };
+  }
+  return {
+    type: 'OBJECT',
+    properties,
+    ...(schema.required?.length ? { required: schema.required } : {}),
+  };
+}
+
+async function _geminiGenerate({ systemPrompt, contents, tools, temperature, maxOutputTokens }) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+  const body = {
+    systemInstruction: { parts: [{ text: systemPrompt }] },
+    contents,
+    generationConfig: { temperature: temperature ?? 0.5, maxOutputTokens: maxOutputTokens ?? 2048 },
+    tools: [{ functionDeclarations: tools.map(t => ({ name: t.name, description: t.description, parameters: _toGeminiSchema(t.input_schema) })) }],
+  };
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const errText = await res.text().catch(() => 'unknown');
+    throw new Error(`Gemini API error (${res.status}): ${errText.slice(0, 500)}`);
+  }
+  return res.json();
+}
+
+function _geminiText(candidate) {
+  return (candidate?.content?.parts || []).filter(p => p.text).map(p => p.text).join('');
+}
+
+function _geminiFunctionCalls(candidate) {
+  return (candidate?.content?.parts || []).filter(p => p.functionCall);
+}
+// ─── END GEMINI ──────────────────────────────────────────────────────────────
+
 // Use Claude API whenever an API key exists — managed sessions are optional
 const HAS_API_KEY = !!process.env.ANTHROPIC_API_KEY;
-const SIMULATION_MODE = !HAS_API_KEY;
+const SIMULATION_MODE = !HAS_API_KEY && !GEMINI_API_KEY;
 
 async function loadMemberProfile(clubId, memberId) {
   const result = await sql`
@@ -1035,183 +1090,178 @@ async function chatHandler(req, res) {
   const needsWarmth = isGhostMember || isAtRiskMember || hasPriorComplaintFlag;
   const conciergeTemperature = needsWarmth ? 0.5 : isComplaintIntent ? 0.3 : isBookingIntent ? 0 : 0.5;
 
-  // Live mode: call Claude API
+  // Live mode: call AI (Gemini primary, Claude fallback when GEMINI_API_KEY absent)
   try {
-    const client = getAnthropicClient();
-    const messages = [{ role: 'user', content: message }];
-    let result = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 2048,
-      temperature: conciergeTemperature,
-      system: systemPrompt + conversationContext + pendingRequestsContext + recommendationContext,
-      messages,
-      tools: availableTools,
-    });
+    const fullSystemPrompt = systemPrompt + conversationContext + pendingRequestsContext + recommendationContext;
 
     // Collect tool call trace for debug mode; also track successful submissions for fallback use
     const toolCallLog = [];
     const successfulSubmissions = [];
 
-    // Tool-use loop: execute ALL tool_use blocks per turn, feed results back, repeat until text
-    let loopGuard = 0;
-    const seenToolCalls = new Set(); // dedup: prevent same tool+args twice in a session
-    while (result.stop_reason === 'tool_use' && loopGuard++ < 5) {
-      const rawToolUses = result.content.filter(c => c.type === 'tool_use');
-      if (rawToolUses.length === 0) break;
+    // Pre-compute persona opener line — same logic used in both LLM paths
+    let _openerLine = null;
+    if (needsWarmth) {
+      if (isGhostMember) {
+        _openerLine = `a varied warm welcome-back (e.g. "${memberFirstName}! We've missed you so much — so glad you reached out." or "${memberFirstName}! You just made my day." — VARY it, never repeat the same phrase)`;
+      } else if (isComplaintFirstFlag) {
+        const _hasBilling = notesLowerChat.includes('billing') || notesLowerChat.includes('invoice') || notesLowerChat.includes('charge');
+        const _hasService = notesLowerChat.includes('slow service') || notesLowerChat.includes('slow at the bar') || notesLowerChat.includes('service at the bar') || notesLowerChat.includes('wait');
+        const _ack = _hasBilling
+          ? `"${memberFirstName}, I know that billing issue still hasn't been resolved, let me make sure we get that fixed."`
+          : _hasService
+          ? `"${memberFirstName}, I know that wait wasn't what you deserved, I want to make this visit better."`
+          : `"${memberFirstName}, I know your last experience wasn't what it should have been, I want to make this one different."`;
+        _openerLine = `${_ack} (VARY on subsequent turns, do not repeat verbatim)`;
+      } else if (isAtRiskMember) {
+        _openerLine = `a warm re-engagement opener (e.g. "${memberFirstName}, always love hearing from you!" or "${memberFirstName}! Great to hear from you, we'd love to see you out here more." or "So good to hear from you, ${memberFirstName}!" — VARY it, never repeat the same phrase)`;
+      } else {
+        _openerLine = `"${memberFirstName}, I know your last experience wasn't what it should have been, I want to make sure this one is different."`;
+      }
+    }
 
-      // Deduplication guard: skip calls with identical tool+args already seen this turn
-      const toolUses = rawToolUses.filter(toolUse => {
-        const key = `${toolUse.name}:${JSON.stringify(toolUse.input)}`;
-        if (seenToolCalls.has(key)) {
-          console.warn(`[concierge] dedup: skipping duplicate ${toolUse.name} call`);
-          return false;
-        }
-        seenToolCalls.add(key);
-        return true;
+    // Shared tool executor — emits all session events regardless of which LLM path runs
+    const executeAndLogTool = async (toolName, toolInput) => {
+      let toolResult;
+      try {
+        toolResult = await executeConciergeTool(toolName, toolInput, profile, clubId);
+      } catch (toolErr) {
+        console.warn(`[concierge] tool ${toolName} threw:`, toolErr.message);
+        toolResult = { error: 'Tool execution failed', message: 'Unable to complete that action. Let me connect you with staff.' };
+      }
+      if (toolResult?.status === 'submitted' || toolResult?.status === 'request_submitted') {
+        successfulSubmissions.push({ tool: toolName, result: toolResult });
+      }
+      if (debug) toolCallLog.push({ tool_name: toolName, arguments: toolInput, result: toolResult, ts: new Date().toISOString() });
+      try { await emitConciergeEvent(member_id, clubId, { type: 'tool_call', tool: toolName, args: toolInput, status: toolResult?.status || 'ok', result_summary: JSON.stringify(toolResult).slice(0, 200) }); } catch (_) {}
+      emitAgentEvent(`mbr_${member_id}_concierge`, clubId, { type: 'tool_call', tool: toolName, args: toolInput, status: toolResult?.status || 'ok', result_summary: JSON.stringify(toolResult).slice(0, 200), source_agent: 'member_concierge' }).catch(() => {});
+      if (toolResult?.status === 'request_submitted' && toolResult?.request_id) {
+        try { await emitConciergeEvent(member_id, clubId, { type: 'request_submitted', request_id: toolResult.request_id, request_type: toolName, routed_to: toolResult.routed_to, details: toolResult.details, expected_response: toolResult.expected_response }); } catch (_) {}
+        emitAgentEvent(`mbr_${member_id}_concierge`, clubId, { type: 'request_submitted', request_id: toolResult.request_id, request_type: toolName, routed_to: toolResult.routed_to, details: toolResult.details, expected_response: toolResult.expected_response, source_agent: 'member_concierge' }).catch(() => {});
+        appendSessionSummary(clubId, member_id, `REQUEST:${toolResult.request_id}|tool:${toolName}|team:${toolResult.routed_to}|${new Date().toISOString().slice(0,16)}`).catch(() => {});
+      }
+      if (toolResult?.complaint_id && toolResult?.status === 'filed') {
+        try { await emitConciergeEvent(member_id, clubId, { type: 'complaint_filed', complaint_id: toolResult.complaint_id, category: toolInput.category, description: toolInput.description, routed_to: toolResult.routed_to, assigned_manager: toolResult.assigned_manager, expected_response: toolResult.expected_response }); } catch (_) {}
+        appendSessionSummary(clubId, member_id, `COMPLAINT:${toolResult.complaint_id}|mgr:${toolResult.assigned_manager}|dept:${toolResult.routed_to}|${new Date().toISOString().slice(0,16)}`).catch(() => {});
+      }
+      return toolResult;
+    };
+
+    let responseText = '';
+
+    if (GEMINI_API_KEY) {
+      // ── Gemini path ──────────────────────────────────────────────────────────
+      const contents = [{ role: 'user', parts: [{ text: message }] }];
+      let geminiResp = await _geminiGenerate({
+        systemPrompt: fullSystemPrompt,
+        contents,
+        tools: availableTools,
+        temperature: conciergeTemperature,
+        maxOutputTokens: 2048,
       });
-      if (toolUses.length === 0) break;
 
-      // Execute all tools in this turn (may be multiple simultaneous calls)
-      const toolResults = await Promise.all(toolUses.map(async (toolUse) => {
-        let toolResult;
-        try {
-          toolResult = await executeConciergeTool(toolUse.name, toolUse.input, profile, clubId);
-        } catch (toolErr) {
-          console.warn(`[concierge] tool ${toolUse.name} threw:`, toolErr.message);
-          toolResult = { error: 'Tool execution failed', message: 'Unable to complete that action. Let me connect you with staff.' };
-        }
-        // Track successful submissions regardless of debug mode (needed for fallback response)
-        if (toolResult?.status === 'submitted' || toolResult?.status === 'request_submitted') {
-          successfulSubmissions.push({ tool: toolUse.name, result: toolResult });
-        }
-        if (debug) {
-          toolCallLog.push({ tool_name: toolUse.name, arguments: toolUse.input, result: toolResult, ts: new Date().toISOString() });
-        }
-        // Emit tool_call event to durable log (Sprint B)
-        try {
-          await emitConciergeEvent(member_id, clubId, {
-            type: 'tool_call',
-            tool: toolUse.name,
-            args: toolUse.input,
-            status: toolResult?.status || 'ok',
-            result_summary: JSON.stringify(toolResult).slice(0, 200),
-          });
-        } catch (_) { /* non-blocking */ }
-        // Phase 2a: dual-write tool_call to universal session event log (fire-and-forget)
-        emitAgentEvent(`mbr_${member_id}_concierge`, clubId, {
-          type: 'tool_call',
-          tool: toolUse.name,
-          args: toolUse.input,
-          status: toolResult?.status || 'ok',
-          result_summary: JSON.stringify(toolResult).slice(0, 200),
-          source_agent: 'member_concierge',
-        }).catch(() => {});
-        // Emit dedicated request_submitted event for follow-up status queries (Sprint B)
-        if (toolResult?.status === 'request_submitted' && toolResult?.request_id) {
-          try {
-            await emitConciergeEvent(member_id, clubId, {
-              type: 'request_submitted',
-              request_id: toolResult.request_id,
-              request_type: toolUse.name,
-              routed_to: toolResult.routed_to,
-              details: toolResult.details,
-              expected_response: toolResult.expected_response,
-            });
-          } catch (_) { /* non-blocking */ }
-          // Phase 2a: dual-write request_submitted to universal session event log (fire-and-forget)
-          emitAgentEvent(`mbr_${member_id}_concierge`, clubId, {
-            type: 'request_submitted',
-            request_id: toolResult.request_id,
-            request_type: toolUse.name,
-            routed_to: toolResult.routed_to,
-            details: toolResult.details,
-            expected_response: toolResult.expected_response,
-            source_agent: 'member_concierge',
-          }).catch(() => {});
-        }
-        // Emit complaint_filed event so get_request_status can retrieve it (file_complaint returns status:'filed' not 'request_submitted')
-        if (toolResult?.complaint_id && toolResult?.status === 'filed') {
-          try {
-            await emitConciergeEvent(member_id, clubId, {
-              type: 'complaint_filed',
-              complaint_id: toolResult.complaint_id,
-              category: toolUse.input.category,
-              description: toolUse.input.description,
-              routed_to: toolResult.routed_to,
-              assigned_manager: toolResult.assigned_manager,
-              expected_response: toolResult.expected_response,
-            });
-          } catch (_) { /* non-blocking */ }
-          // Append to session summary — reliable cross-turn fallback even if event table is missing
-          appendSessionSummary(clubId, member_id,
-            `COMPLAINT:${toolResult.complaint_id}|mgr:${toolResult.assigned_manager}|dept:${toolResult.routed_to}|${new Date().toISOString().slice(0,16)}`
-          ).catch(() => {});
-        }
-        // Append request_submitted to session summary as cross-turn fallback memory
-        if (toolResult?.status === 'request_submitted' && toolResult?.request_id) {
-          appendSessionSummary(clubId, member_id,
-            `REQUEST:${toolResult.request_id}|tool:${toolUse.name}|team:${toolResult.routed_to}|${new Date().toISOString().slice(0,16)}`
-          ).catch(() => {});
-        }
-        // Sanitize em-dashes from tool result text before returning to model (prevents echoing in responses)
-        const toolResultStr = JSON.stringify(toolResult).replace(/\u2014/g, ',');
-        return { type: 'tool_result', tool_use_id: toolUse.id, content: toolResultStr };
-      }));
+      let loopGuard = 0;
+      const seenToolCalls = new Set();
+      while (loopGuard++ < 5) {
+        const candidate = geminiResp.candidates?.[0];
+        const fnCalls = _geminiFunctionCalls(candidate);
+        if (!fnCalls.length) break;
 
-      messages.push({ role: 'assistant', content: result.content });
+        contents.push({ role: 'model', parts: candidate.content.parts });
 
-      // Inject persona opener reminder as final content block in the tool-results user message.
-      // This is read by the model immediately before generating text, ensuring STEP 1 compliance
-      // even after tool calls have run (where the model otherwise jumps to action summary).
-      if (needsWarmth) {
-        let openerLine;
-        if (isGhostMember) {
-          openerLine = `a varied warm welcome-back (e.g. "${memberFirstName}! We've missed you so much — so glad you reached out." or "${memberFirstName}! You just made my day." — VARY it, never repeat the same phrase)`;
-        } else if (isComplaintFirstFlag) {
-          // Complaint is the PRIMARY persona driver (e.g. Sandra Chen) — complaint opener first
-          const hasBillingIssue = notesLowerChat.includes('billing') || notesLowerChat.includes('invoice') || notesLowerChat.includes('charge');
-          const hasServiceIssue = notesLowerChat.includes('slow service') || notesLowerChat.includes('slow at the bar') || notesLowerChat.includes('service at the bar') || notesLowerChat.includes('wait');
-          const specificAck = hasBillingIssue
-            ? `"${memberFirstName}, I know that billing issue still hasn't been resolved, let me make sure we get that fixed."`
-            : hasServiceIssue
-            ? `"${memberFirstName}, I know that wait wasn't what you deserved, I want to make this visit better."`
-            : `"${memberFirstName}, I know your last experience wasn't what it should have been, I want to make this one different."`;
-          openerLine = `${specificAck} (VARY on subsequent turns, do not repeat verbatim)`;
-        } else if (isAtRiskMember) {
-          // Declining/reactivation member (e.g. Robert Callahan, Anne Jordan) — warm re-engagement first
-          openerLine = `a warm re-engagement opener (e.g. "${memberFirstName}, always love hearing from you!" or "${memberFirstName}! Great to hear from you, we'd love to see you out here more." or "So good to hear from you, ${memberFirstName}!" — VARY it, never repeat the same phrase)`;
-        } else {
-          openerLine = `"${memberFirstName}, I know your last experience wasn't what it should have been, I want to make sure this one is different."`;
+        const dedupedCalls = fnCalls.filter(({ functionCall: fc }) => {
+          const key = `${fc.name}:${JSON.stringify(fc.args)}`;
+          if (seenToolCalls.has(key)) { console.warn(`[concierge] dedup: skipping duplicate ${fc.name}`); return false; }
+          seenToolCalls.add(key);
+          return true;
+        });
+        if (!dedupedCalls.length) break;
+
+        const responseParts = await Promise.all(dedupedCalls.map(async ({ functionCall: fc }) => {
+          const toolResult = await executeAndLogTool(fc.name, fc.args);
+          const sanitized = JSON.parse(JSON.stringify(toolResult).replace(/\u2014/g, ','));
+          return { functionResponse: { name: fc.name, response: sanitized } };
+        }));
+
+        if (_openerLine) {
+          responseParts.push({ text: `[MANDATORY OPENER — write this as your FIRST sentence before anything else: ${_openerLine}. Do not skip it. Do not start with the action summary. The opener is sentence one.]` });
         }
-        toolResults.push({
-          type: 'text',
-          text: `[MANDATORY OPENER — write this as your FIRST sentence before anything else: ${openerLine}. Do not skip it. Do not start with the action summary. The opener is sentence one.]`,
+
+        contents.push({ role: 'user', parts: responseParts });
+
+        geminiResp = await _geminiGenerate({
+          systemPrompt: fullSystemPrompt,
+          contents,
+          tools: availableTools,
+          temperature: conciergeTemperature,
+          maxOutputTokens: 2048,
         });
       }
 
-      messages.push({ role: 'user', content: toolResults });
+      responseText = _geminiText(geminiResp.candidates?.[0]);
 
-      result = await client.messages.create({
+    } else {
+      // ── Claude fallback path ─────────────────────────────────────────────────
+      const client = getAnthropicClient();
+      const messages = [{ role: 'user', content: message }];
+      let result = await client.messages.create({
         model: 'claude-sonnet-4-6',
         max_tokens: 2048,
         temperature: conciergeTemperature,
-        system: systemPrompt + conversationContext + pendingRequestsContext + recommendationContext,
+        system: fullSystemPrompt,
         messages,
         tools: availableTools,
       });
-    }
 
-    let responseText = result.content?.find(c => c.type === 'text')?.text ?? '';
+      let loopGuard = 0;
+      const seenToolCalls = new Set();
+      while (result.stop_reason === 'tool_use' && loopGuard++ < 5) {
+        const rawToolUses = result.content.filter(c => c.type === 'tool_use');
+        if (rawToolUses.length === 0) break;
+        const toolUses = rawToolUses.filter(toolUse => {
+          const key = `${toolUse.name}:${JSON.stringify(toolUse.input)}`;
+          if (seenToolCalls.has(key)) { console.warn(`[concierge] dedup: skipping duplicate ${toolUse.name} call`); return false; }
+          seenToolCalls.add(key);
+          return true;
+        });
+        if (toolUses.length === 0) break;
+
+        const toolResults = await Promise.all(toolUses.map(async (toolUse) => {
+          const toolResult = await executeAndLogTool(toolUse.name, toolUse.input);
+          const toolResultStr = JSON.stringify(toolResult).replace(/\u2014/g, ',');
+          return { type: 'tool_result', tool_use_id: toolUse.id, content: toolResultStr };
+        }));
+
+        messages.push({ role: 'assistant', content: result.content });
+
+        if (_openerLine) {
+          toolResults.push({ type: 'text', text: `[MANDATORY OPENER — write this as your FIRST sentence before anything else: ${_openerLine}. Do not skip it. Do not start with the action summary. The opener is sentence one.]` });
+        }
+        messages.push({ role: 'user', content: toolResults });
+
+        result = await client.messages.create({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 2048,
+          temperature: conciergeTemperature,
+          system: fullSystemPrompt,
+          messages,
+          tools: availableTools,
+        });
+      }
+
+      responseText = result.content?.find(c => c.type === 'text')?.text ?? '';
+    }
 
     // Sanitize em-dashes from final response (belt-and-suspenders, model also instructed to avoid them)
     responseText = responseText.replace(/\u2014/g, ',');
 
-    // Sanitize: strip raw XML/parameter markup that occasionally leaks from model thinking.
-    // When this pattern is detected, substitute a graceful fallback rather than exposing internals.
-    if (/<parameter\s+name=|<invoke>|<parameter>/.test(responseText)) {
-      console.warn('[concierge/chat] XML parameter leak detected — using fallback response');
+    // Sanitize: strip raw XML/parameter markup or internal reasoning that occasionally leaks.
+    // When detected, substitute a graceful fallback rather than exposing internals to the member.
+    const hasXmlLeak = /<parameter\s+name=|<invoke>|<parameter>/.test(responseText);
+    const hasReasoningLeak = /attempt to override|override my guidelines|appears to be an attempt|that instruction|my system instructions|my guidelines prevent|prompt injection|system instruction/i.test(responseText);
+    if (hasXmlLeak || hasReasoningLeak) {
+      console.warn('[concierge/chat] response leak detected (xml:', hasXmlLeak, 'reasoning:', hasReasoningLeak, ') — using fallback');
       const firstName = profile.first_name || profile.name?.split(' ')[0] || 'there';
-      responseText = `Hey ${firstName}, I ran into a hiccup processing that — let me flag it for the team. In the meantime, call the front desk and they'll take care of you right away.`;
+      responseText = `Hey ${firstName}, I ran into a hiccup on my end — let me flag it for the team. In the meantime, call the front desk and they'll take care of you right away.`;
     }
 
     // Fallback for empty response (model returned no text block).
