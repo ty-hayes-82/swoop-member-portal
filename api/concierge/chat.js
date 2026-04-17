@@ -80,6 +80,11 @@ const CONCIERGE_TOOLS = [
     description: 'Send a special request or message to the club staff on behalf of the member',
     input_schema: { type: 'object', properties: { department: { type: 'string', enum: ['golf_ops', 'dining', 'events', 'membership', 'facilities', 'general', 'gm', 'front_desk', 'cart_staff', 'fb_pickup'] }, message: { type: 'string', description: 'The request or message to send' }, urgency: { type: 'string', enum: ['normal', 'high'], default: 'normal' } }, required: ['department', 'message'] }
   },
+  {
+    name: 'get_request_status',
+    description: 'Check the status of previously submitted requests (tee time, dining, RSVP, complaints). Use this when the member asks if a request has been confirmed, followed up on, or what the status is. Returns pending and confirmed requests from the session log.',
+    input_schema: { type: 'object', properties: { request_type: { type: 'string', description: 'Optional filter: tee_time, dining, event, complaint, or all', default: 'all' } } }
+  },
 ];
 
 /**
@@ -542,6 +547,26 @@ async function executeConciergeTool(toolName, input, profile, clubId) {
         message: `Your request has been sent to the ${input.department.replace('_', ' ')} team. They'll follow up shortly.`,
         member_name: profile.name,
       };
+    }
+
+    // ── GET REQUEST STATUS ─────────────────────────────────────────────
+    case 'get_request_status': {
+      try {
+        const { pending, confirmed } = await getPendingRequestDetails(memberId, { maxAgeDays: 14 });
+        const all = [
+          ...pending.map(r => ({ ...r, status: 'pending' })),
+          ...confirmed.map(r => ({ ...r, status: 'confirmed' })),
+        ];
+        if (all.length === 0) {
+          return { requests: [], summary: 'No recent requests found in the last 14 days.' };
+        }
+        return {
+          requests: all,
+          summary: `Found ${pending.length} pending and ${confirmed.length} confirmed request(s).`,
+        };
+      } catch (e) {
+        return { requests: [], summary: 'Could not retrieve request status.', error: e.message };
+      }
     }
 
     default:
