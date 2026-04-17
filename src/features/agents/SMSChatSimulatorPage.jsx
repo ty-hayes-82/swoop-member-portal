@@ -129,6 +129,7 @@ function PersonaRail({ selected, onSelect, members }) {
         return (
           <button
             key={m.id}
+            data-testid="persona-btn"
             onClick={() => onSelect(m.id)}
             className={`flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2.5 rounded-xl border-2 transition-all cursor-pointer text-left min-w-[96px]
               ${active
