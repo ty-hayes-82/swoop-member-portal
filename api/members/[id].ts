@@ -9,7 +9,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     sql`
       SELECT member_id, first_name, last_name, email, phone, health_score, annual_dues,
              health_tier AS engagement_tier, archetype, join_date,
-             EXTRACT(YEAR FROM AGE(date_of_birth))::int AS age,
+             EXTRACT(YEAR FROM AGE(date_of_birth::date))::int AS age,
              ghin_number AS handicap_index, membership_type
       FROM members
       WHERE member_id = ${memberId} AND club_id = ${clubId}
