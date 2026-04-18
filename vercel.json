@@ -2,49 +2,11 @@
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "functions": {
-    "api/concierge/chat.js": { "maxDuration": 60 }
-  },
-  "crons": [
-    { "path": "/api/cron/weather-daily", "schedule": "0 3 * * *" },
-    { "path": "/api/cron/purge-cross-club-audit", "schedule": "0 4 * * *" },
-    { "path": "/api/cron/playbook-timers", "schedule": "0 8 * * *" },
-    { "path": "/api/cron/compute-health-scores", "schedule": "0 9 * * *" },
-    { "path": "/api/cron/health-monitor", "schedule": "0 10 * * *" },
-    { "path": "/api/cron/track-outcomes", "schedule": "0 11 * * *" },
-    { "path": "/api/cron/daily-gameplan", "schedule": "0 5 * * *" },
-    { "path": "/api/cron/staffing-monitor", "schedule": "0 6 * * *" },
-    { "path": "/api/cron/concierge-proactive", "schedule": "0 7 * * *" },
-    { "path": "/api/cron/member-onboarding", "schedule": "0 9 * * *" },
-    { "path": "/api/cron/pre-arrival-brief", "schedule": "0 17 * * *" },
-    { "path": "/api/cron/post-visit-followup", "schedule": "0 20 * * *" },
-    { "path": "/api/cron/staff-briefings", "schedule": "0 6 * * *" },
-    { "path": "/api/cron/concierge-engagement", "schedule": "0 7 * * *" },
-    { "path": "/api/cron/renewal-intelligence", "schedule": "0 8 1 * *" },
-    { "path": "/api/cron/arrival-scan", "schedule": "*/15 * * * *" },
-    { "path": "/api/agents/cron-member-pulse",     "schedule": "0 * * * *"    },
-    { "path": "/api/agents/cron-service-recovery", "schedule": "*/30 * * * *" },
-    { "path": "/api/agents/cron-revenue",          "schedule": "0 6 * * *"    },
-    { "path": "/api/agents/cron-labor",            "schedule": "0 5 * * *"    },
-    { "path": "/api/agents/cron-engagement",       "schedule": "0 7 * * *"    },
-    { "path": "/api/agents/cron-board-report",     "schedule": "0 8 1 * *"    },
-    { "path": "/api/agents/cron-dormancy-sweep",   "schedule": "0 2 * * *"    }
-  ],
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "https://swoop-member-portal.vercel.app" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, PUT, DELETE, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Authorization, Content-Type" },
-        { "key": "Access-Control-Max-Age", "value": "86400" }
-      ]
-    }
-  ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/landing.html", "destination": "/landing.html" },
-    { "source": "/chat", "destination": "/chat.html" },
-    { "source": "/((?!assets/|@vite/|@react-refresh|@id/|@fs/|src/|node_modules/|__vite_ping).*)", "destination": "/index.html" }
-  ]
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
+  "functions": {
+    "api/board/compile.ts": { "maxDuration": 120 }
+  }
 }
