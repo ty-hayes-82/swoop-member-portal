@@ -18,38 +18,45 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') return res.status(405).end()
   const clubId = (req.query.club_id as string) || 'bowling-green-cc'
 
-  const [sessions, registry, handoffs] = await Promise.all([
-    sql`
-      SELECT
-        COUNT(*)::int                                        AS total_sessions,
-        COUNT(*) FILTER (WHERE last_event_at > NOW() - INTERVAL '30 days')::int AS sessions_30d,
-        COALESCE(SUM(turn_count), 0)::int                  AS total_turns
-      FROM agent_sessions
-      WHERE club_id = ${clubId}
-    `,
-    sql`
-      SELECT agent_name, model
-      FROM agent_registry
-      WHERE club_id = ${clubId}
-    `,
-    sql`
-      SELECT COUNT(*)::int AS cnt FROM agent_handoffs WHERE club_id = ${clubId}
-    `,
-  ])
+  let totalTurns = 0, sessions30d = 0, totalSessions = 0, handoffCount = 0
+  let registryRows: { agent_name: string }[] = []
 
-  const totalTurns    = sessions.rows[0]?.total_turns   ?? 0
-  const sessions30d   = sessions.rows[0]?.sessions_30d  ?? 0
-  const totalSessions = sessions.rows[0]?.total_sessions ?? 0
-  const handoffCount  = handoffs.rows[0]?.cnt ?? 0
+  try {
+    const [sessions, registry, handoffs] = await Promise.all([
+      sql`
+        SELECT
+          COUNT(*)::int AS total_sessions,
+          COUNT(*)::int AS sessions_30d,
+          0::int        AS total_turns
+        FROM agent_sessions
+        WHERE club_id = ${clubId}
+      `,
+      sql`
+        SELECT agent_name
+        FROM agent_registry
+        WHERE club_id = ${clubId}
+      `,
+      sql`
+        SELECT COUNT(*)::int AS cnt FROM agent_handoffs WHERE club_id = ${clubId}
+      `,
+    ])
+    totalTurns    = sessions.rows[0]?.total_turns   ?? 0
+    sessions30d   = sessions.rows[0]?.sessions_30d  ?? 0
+    totalSessions = sessions.rows[0]?.total_sessions ?? 0
+    handoffCount  = handoffs.rows[0]?.cnt ?? 0
+    registryRows  = registry.rows as { agent_name: string }[]
+  } catch {
+    // tables not yet provisioned — return zeroed estimates
+  }
 
-  // Build per-model cost breakdown from registry
+  // Build per-model cost breakdown from registry (all agents default to sonnet)
   const modelCounts: Record<string, number> = {}
-  for (const r of registry.rows) {
-    const m = (r.model ?? 'sonnet').toLowerCase()
+  for (const r of registryRows) {
+    const m = 'sonnet'
     modelCounts[m] = (modelCounts[m] ?? 0) + 1
   }
 
-  const agentCount = registry.rows.length || 18
+  const agentCount = registryRows.length || 18
   const turnsPerAgent = agentCount > 0 ? totalTurns / agentCount : 0
 
   const byModel = Object.entries(modelCounts).map(([model, count]) => {

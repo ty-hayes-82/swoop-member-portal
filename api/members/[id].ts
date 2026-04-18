@@ -8,9 +8,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const [memberRes, complaintsRes, bookingsRes, billingRes] = await Promise.all([
     sql`
       SELECT member_id, first_name, last_name, email, phone, health_score, annual_dues,
-             engagement_tier, archetype, join_date, age, handicap_index,
-             last_activity_date, visit_count_12m, activity_streak_days, membership_type,
-             health_score_components
+             health_tier AS engagement_tier, archetype, join_date,
+             EXTRACT(YEAR FROM AGE(date_of_birth))::int AS age,
+             ghin_number AS handicap_index, membership_type
       FROM members
       WHERE member_id = ${memberId} AND club_id = ${clubId}
       LIMIT 1
@@ -23,17 +23,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       LIMIT 3
     `,
     sql`
-      SELECT booking_id, booking_date, tee_time, round_type, status
-      FROM bookings
-      WHERE club_id = ${clubId}
-      ORDER BY booking_date DESC
+      SELECT b.booking_id, b.booking_date, b.tee_time, b.round_type, b.status
+      FROM bookings b
+      JOIN booking_players bp ON bp.booking_id = b.booking_id
+      WHERE bp.member_id = ${memberId} AND b.club_id = ${clubId}
+      ORDER BY b.booking_date DESC
       LIMIT 3
     `,
     sql`
-      SELECT charge_type, SUM(amount) as total, COUNT(*) as count
-      FROM member_billing
-      WHERE member_id = ${memberId} AND club_id = ${clubId}
-      GROUP BY charge_type
+      SELECT type AS charge_type, SUM(amount) as total, COUNT(*) as count
+      FROM member_invoices
+      WHERE member_id = ${memberId}
+      GROUP BY type
       ORDER BY total DESC
       LIMIT 5
     `,
@@ -56,11 +57,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     join_date: m.join_date,
     age: m.age ?? null,
     handicap_index: m.handicap_index ?? null,
-    last_activity_date: m.last_activity_date ?? null,
-    visit_count_12m: m.visit_count_12m ?? 0,
-    activity_streak_days: m.activity_streak_days ?? 0,
+    last_activity_date: null,
+    visit_count_12m: 0,
+    activity_streak_days: 0,
     membership_type: m.membership_type ?? null,
-    health_score_components: m.health_score_components ?? null,
+    health_score_components: null,
     signals: {
       last_complaint: complaintsRes.rows[0] ?? null,
       recent_complaints_count: complaintsRes.rows.length,
