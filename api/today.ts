@@ -15,7 +15,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       FROM weather_daily
       WHERE club_id = ${clubId} AND date = ${today}
       LIMIT 1
-    `,
+    `.catch(() => ({ rows: [] })),
     sql`
       SELECT member_id, first_name, last_name, health_score, annual_dues, engagement_tier
       FROM members
@@ -24,7 +24,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         AND engagement_tier IN ('At-Risk', 'Watch', 'Inactive')
       ORDER BY health_score ASC
       LIMIT 8
-    `,
+    `.catch(() => ({ rows: [] })),
     sql`
       SELECT id, from_agent, to_agent, recommendation_type, urgency,
              suggested_action, payload, created_at
@@ -34,7 +34,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         CASE urgency WHEN 'critical' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END,
         created_at DESC
       LIMIT 10
-    `,
+    `.catch(() => ({ rows: [] })),
   ]);
 
   const w = weatherRes.rows[0] ?? null;
