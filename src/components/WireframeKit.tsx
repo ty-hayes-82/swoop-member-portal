@@ -37,7 +37,7 @@ export function PageHeader({ title }: { title: string }) {
 }
 
 // ─── SectionTitle — card-level heading with optional badge + link ────────────
-export function SectionTitle({ children, badge, link }: { children: string; badge?: string; link?: string }) {
+export function SectionTitle({ children, badge, link, onLinkClick }: { children: string; badge?: string; link?: string; onLinkClick?: () => void }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.75 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -51,7 +51,7 @@ export function SectionTitle({ children, badge, link }: { children: string; badg
         )}
       </Box>
       {link && (
-        <Typography sx={{ fontSize: '0.75rem', color: BRASS, cursor: 'pointer' }}>{link}</Typography>
+        <Typography onClick={onLinkClick} sx={{ fontSize: '0.75rem', color: BRASS, cursor: onLinkClick ? 'pointer' : 'default' }}>{link}</Typography>
       )}
     </Box>
   )
@@ -72,9 +72,9 @@ export function StatCard({ label, accent = false, tint }: { label: string; accen
 }
 
 // ─── RailCard — right-rail card with optional dark variant ───────────────────
-export function RailCard({ title, dark = false, children }: { title: string; dark?: boolean; children: ReactNode }) {
+export function RailCard({ title, dark = false, onClick, children }: { title: string; dark?: boolean; onClick?: () => void; children: ReactNode }) {
   return (
-    <Card sx={{ bgcolor: dark ? FOREST : '#ffffff', border: dark ? 'none' : undefined }}>
+    <Card onClick={onClick} sx={{ bgcolor: dark ? FOREST : '#ffffff', border: dark ? 'none' : undefined, cursor: onClick ? 'pointer' : 'default' }}>
       <CardContent sx={{ p: '14px 16px !important' }}>
         <Typography sx={{ fontFamily: SERIF, fontWeight: 500, fontSize: '0.875rem', letterSpacing: '0.02em', color: dark ? 'rgba(255,255,255,0.5)' : INK_QUIET, mb: 1.25 }}>
           {title}
