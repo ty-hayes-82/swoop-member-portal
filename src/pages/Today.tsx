@@ -25,6 +25,7 @@ interface TodayData {
   at_risk_members: Array<{ id: string; name: string; health_score: number; annual_dues: number; tier: string }>
   pending_handoffs: Array<{ id: string; from_agent: string; to_agent: string; recommendation_type: string; urgency: string; suggested_action: string; created_at: string }>
   inbox_counts: Record<string, number>
+  demo_mode?: boolean
 }
 
 const URGENCY_COLOR: Record<string, string> = {
@@ -75,23 +76,29 @@ export default function Today() {
   }
 
   const visibleHandoffs = (data?.pending_handoffs ?? []).filter(h => !dismissed.has(h.id))
-  const atRiskCount = data?.at_risk_members.length ?? 0
-  const agentRecCount = data ? Object.values(data.inbox_counts).reduce((a, b) => a + b, 0) : null
-  const pendingVoiceCount = visibleHandoffs.filter(h => h.urgency === 'critical' || h.urgency === 'high').length || null
+  const atRiskCount = data ? data.at_risk_members.length : null
+  const liveInboxCounts: Record<string, number> = visibleHandoffs.reduce((acc, h) => {
+    acc[h.from_agent] = (acc[h.from_agent] ?? 0) + 1
+    return acc
+  }, {} as Record<string, number>)
+  const agentRecCount = data ? visibleHandoffs.length : null
 
   const allAgents = ['labor_optimizer', 'member_pulse_analyst', 'revenue_analyst', 'service_recovery_analyst', 'engagement_autopilot']
+  const AGENT_ROUTE: Record<string, string> = {
+    service_recovery_analyst: '/service',
+    revenue_analyst: '/revenue',
+  }
 
   return (
     <Box>
-      {/* Demo banner */}
-      <Box sx={{ mb: 2, px: 1.5, py: 0.75, bgcolor: 'rgba(163,132,88,0.1)', border: '1px solid rgba(163,132,88,0.25)', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Typography sx={{ fontSize: '0.65rem', fontWeight: 600, color: BRASS, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-          Pre-pilot
-        </Typography>
-        <Typography sx={{ fontSize: '0.65rem', color: INK_FAINT }}>
-          Fixture data · Tier 4 · Bowling Green CC
-        </Typography>
-      </Box>
+      {data?.demo_mode && (
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+          <Box sx={{ px: 1, py: 0.25, bgcolor: 'rgba(163,132,88,0.08)', border: '1px solid rgba(163,132,88,0.2)', borderRadius: '4px', display: 'inline-flex', gap: 0.75, alignItems: 'center' }}>
+            <Typography sx={{ fontSize: '0.6rem', fontWeight: 600, color: BRASS, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Pre-pilot</Typography>
+            <Typography sx={{ fontSize: '0.6rem', color: INK_FAINT }}>Tier 4 · Bowling Green CC</Typography>
+          </Box>
+        </Box>
+      )}
 
       {/* Opener */}
       <Box sx={{ mb: 2.5 }}>
@@ -115,8 +122,10 @@ export default function Today() {
               <Typography sx={{ color: INK_FAINT, fontSize: '0.8rem' }}>·</Typography>
               <Typography sx={{ fontSize: '0.8rem', color: INK_FAINT }}>Golf demand {Math.round(data.weather.golf_demand_modifier * 100)}%</Typography>
             </>
-          ) : (
+          ) : !data ? (
             <><Bar w={120} h={9} /><Typography sx={{ color: INK_FAINT, fontSize: '0.8rem', lineHeight: 1 }}>·</Typography><Bar w={140} h={9} /><Typography sx={{ color: INK_FAINT, fontSize: '0.8rem', lineHeight: 1 }}>·</Typography><Bar w={160} h={9} /></>
+          ) : (
+            <Typography sx={{ fontSize: '0.8rem', color: INK_FAINT }}>Weather unavailable</Typography>
           )}
         </Box>
       </Box>
@@ -126,12 +135,12 @@ export default function Today() {
         <CardContent sx={{ p: '0 !important' }}>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' } }}>
             {[
-              { label: 'Rounds today',     value: data?.tee_sheet.projected_rounds ?? null, accent: false },
-              { label: 'Agent recs',       value: agentRecCount,                            accent: false },
-              { label: 'Needs your voice', value: pendingVoiceCount,                        accent: true  },
-              { label: 'At risk',          value: atRiskCount || null,                      accent: true  },
-            ].map(({ label, value, accent }, i) => (
-              <Box key={label} sx={{ px: 2.5, py: 1.75, borderLeft: { xs: i % 2 === 0 ? 'none' : '1px solid rgba(26,31,27,0.08)', md: i > 0 ? '1px solid rgba(26,31,27,0.08)' : 'none' }, borderTop: { xs: i >= 2 ? '1px solid rgba(26,31,27,0.08)' : 'none', md: 'none' } }}>
+              { label: 'Rounds today',     value: data?.tee_sheet.projected_rounds ?? null, accent: false, route: null },
+              { label: 'Agent recs',       value: agentRecCount,                            accent: false, route: null },
+              { label: 'Needs your voice', value: agentRecCount,                            accent: true,  route: '/members?filter=at-risk' },
+              { label: 'At risk',          value: atRiskCount,                              accent: true,  route: '/members?filter=at-risk' },
+            ].map(({ label, value, accent, route }, i) => (
+              <Box key={label} onClick={route ? () => navigate(route) : undefined} sx={{ px: 2.5, py: 1.75, cursor: route ? 'pointer' : 'default', borderLeft: { xs: i % 2 === 0 ? 'none' : '1px solid rgba(26,31,27,0.08)', md: i > 0 ? '1px solid rgba(26,31,27,0.08)' : 'none' }, borderTop: { xs: i >= 2 ? '1px solid rgba(26,31,27,0.08)' : 'none', md: 'none' }, '&:hover': route ? { bgcolor: 'rgba(26,31,27,0.02)' } : {} }}>
                 <Typography sx={{ fontSize: '0.625rem', fontWeight: 600, letterSpacing: '0.07em', textTransform: 'uppercase', color: INK_FAINT, mb: 0.75 }}>{label}</Typography>
                 {value !== null ? (
                   <Typography sx={{ fontSize: '1.5rem', fontWeight: 600, color: accent ? '#3d6a4b' : INK, lineHeight: 1 }}>{value}</Typography>
@@ -148,7 +157,7 @@ export default function Today() {
       <Box sx={{ display: { xs: 'block', md: 'none' } }}>
         <Card sx={{ mb: 2 }}>
           <CardContent sx={{ p: '16px !important' }}>
-            <SectionTitle badge={pendingVoiceCount ? `${pendingVoiceCount} pending` : undefined}>Needs your voice</SectionTitle>
+            <SectionTitle badge={data ? `${visibleHandoffs.length} pending` : undefined}>Needs your voice</SectionTitle>
             {visibleHandoffs.slice(0, 1).map(h => (
               <Box key={h.id}>
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
@@ -183,7 +192,7 @@ export default function Today() {
           </CardContent>
         </Card>
 
-        <RailCard title="Live at the club">
+        <RailCard title="At-risk members">
           {(data?.at_risk_members ?? []).slice(0, 3).map((m, i) => (
             <Box key={m.id} onClick={() => navigate(`/members/${m.id}`)} sx={{ cursor: 'pointer' }}>
               {i > 0 && <Divider sx={{ my: 0.625 }} />}
@@ -214,7 +223,7 @@ export default function Today() {
           {/* Priority actions */}
           <Card sx={{ mb: 2 }}>
             <CardContent sx={{ p: '20px !important' }}>
-              <SectionTitle badge={pendingVoiceCount !== null ? `${pendingVoiceCount} pending` : '— pending'} link="View all">Needs your voice</SectionTitle>
+              <SectionTitle badge={data ? `${visibleHandoffs.length} pending` : undefined} link="View all" onLinkClick={() => navigate('/members?filter=at-risk')}>Needs your voice</SectionTitle>
               {(visibleHandoffs.length > 0 ? visibleHandoffs : Array.from({ length: 4 })).slice(0, 4).map((h, i) => {
                 const handoff = h as TodayData['pending_handoffs'][0] | undefined
                 return (
@@ -268,30 +277,34 @@ export default function Today() {
           {/* Inbox by agent */}
           <Card>
             <CardContent sx={{ p: '20px !important' }}>
-              <SectionTitle badge={agentRecCount !== null ? `${agentRecCount} pending` : '— pending'} link="View all">Inbox by agent</SectionTitle>
-              <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 1 }}>
-                {allAgents.map((agent) => {
-                  const count = data?.inbox_counts[agent] ?? null
-                  return (
-                    <Box key={agent} sx={{ border: '1px solid rgba(26,31,27,0.08)', borderRadius: '4px', p: '10px 12px' }}>
-                      {count !== null ? (
-                        <Typography sx={{ fontSize: '1.25rem', fontWeight: 700, color: count > 0 ? BRASS : INK_FAINT, lineHeight: 1, mb: 1 }}>{count}</Typography>
-                      ) : (
-                        <Box sx={{ height: 24, width: 20, bgcolor: PH_DARK, borderRadius: '3px', mb: 1 }} />
-                      )}
-                      <Typography sx={{ fontSize: '0.65rem', fontWeight: 600, color: INK, letterSpacing: '0.03em' }}>{AGENT_LABELS[agent] ?? agent}</Typography>
-                      <Typography sx={{ fontSize: '0.6rem', color: INK_FAINT, mt: '3px' }}>{count !== null ? (count === 1 ? '1 rec' : `${count} recs`) : '—'}</Typography>
-                    </Box>
-                  )
-                })}
-              </Box>
+              <SectionTitle badge={data ? `${agentRecCount} pending` : undefined} link="View all" onLinkClick={() => navigate('/members')}>Inbox by agent</SectionTitle>
+              {data && agentRecCount === 0 ? (
+                <Typography sx={{ fontSize: '0.8rem', color: INK_FAINT, py: 1 }}>All agents are clear — no pending recommendations.</Typography>
+              ) : (
+                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 1 }}>
+                  {allAgents.map((agent) => {
+                    const count = data ? (liveInboxCounts[agent] ?? 0) : null
+                    return (
+                      <Box key={agent} onClick={() => navigate(AGENT_ROUTE[agent] ?? '/members')} sx={{ border: '1px solid rgba(26,31,27,0.08)', borderRadius: '4px', p: '10px 12px', cursor: 'pointer', '&:hover': { bgcolor: 'rgba(26,31,27,0.03)', borderColor: 'rgba(26,31,27,0.16)' } }}>
+                        {count !== null ? (
+                          <Typography sx={{ fontSize: '1.25rem', fontWeight: 700, color: count > 0 ? BRASS : INK_FAINT, lineHeight: 1, mb: 1 }}>{count}</Typography>
+                        ) : (
+                          <Box sx={{ height: 24, width: 20, bgcolor: PH_DARK, borderRadius: '3px', mb: 1 }} />
+                        )}
+                        <Typography sx={{ fontSize: '0.65rem', fontWeight: 600, color: INK, letterSpacing: '0.03em' }}>{AGENT_LABELS[agent] ?? agent}</Typography>
+                        <Typography sx={{ fontSize: '0.6rem', color: INK_FAINT, mt: '3px' }}>{count !== null ? (count === 1 ? '1 rec' : `${count} recs`) : ''}</Typography>
+                      </Box>
+                    )
+                  })}
+                </Box>
+              )}
             </CardContent>
           </Card>
         </Box>
 
         {/* Right rail */}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <RailCard title="Live at the club">
+          <RailCard title="At-risk members">
             {(data?.at_risk_members ?? []).slice(0, 3).map((m, i) => (
               <Box key={m.id} onClick={() => navigate(`/members/${m.id}`)} sx={{ cursor: 'pointer' }}>
                 {i > 0 && <Divider sx={{ my: 0.625 }} />}
@@ -315,7 +328,7 @@ export default function Today() {
             ))}
           </RailCard>
 
-          <RailCard title="Course & tee sheet">
+          <RailCard title="Course & tee sheet" onClick={() => navigate('/service')}>
             <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 16px', mb: 1.25 }}>
               {data ? (
                 [
@@ -346,23 +359,28 @@ export default function Today() {
             ) : <Bar w="85%" h={8} />}
           </RailCard>
 
-          <RailCard title={`Overnight · ${(data?.pending_handoffs.length ?? 0)} events`} dark>
-            {(data?.pending_handoffs ?? []).slice(0, 4).map((h) => (
-              <Box key={h.id} sx={{ display: 'flex', gap: 1.25, py: 0.5 }}>
-                <Typography sx={{ width: 28, fontSize: '0.6rem', color: 'rgba(255,255,255,0.5)', flexShrink: 0, mt: '4px' }}>
-                  {AGENT_LABELS[h.from_agent]?.substring(0, 3).toUpperCase() ?? h.from_agent.substring(0, 3).toUpperCase()}
-                </Typography>
-                <Typography sx={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.75)', lineHeight: 1.4 }}>
-                  {h.suggested_action?.substring(0, 48)}{(h.suggested_action?.length ?? 0) > 48 ? '…' : ''}
-                </Typography>
+          <RailCard title={`Overnight · ${(data?.pending_handoffs.length ?? 0)} events`}>
+            {data ? (
+              Object.entries(
+                data.pending_handoffs.reduce((acc, h) => {
+                  acc[h.from_agent] = (acc[h.from_agent] ?? 0) + 1
+                  return acc
+                }, {} as Record<string, number>)
+              ).map(([agent, count]) => (
+                <Box key={agent} onClick={() => navigate(AGENT_ROUTE[agent] ?? '/members')} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5, cursor: 'pointer', '&:hover': { opacity: 0.7 } }}>
+                  <Typography sx={{ fontSize: '0.7rem', color: INK_FAINT }}>{AGENT_LABELS[agent] ?? agent}</Typography>
+                  <Typography sx={{ fontSize: '0.7rem', fontWeight: 600, color: INK }}>{count}</Typography>
+                </Box>
+              ))
+            ) : Array.from({ length: 3 }).map((_, idx) => (
+              <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', py: 0.5 }}>
+                <Bar w="50%" h={8} />
+                <Bar w={16} h={8} />
               </Box>
             ))}
-            {!data && Array.from({ length: 4 }).map((_, idx) => (
-              <Box key={idx} sx={{ display: 'flex', gap: 1.25, py: 0.5 }}>
-                <Box sx={{ width: 28, height: 8, bgcolor: 'rgba(255,255,255,0.22)', borderRadius: '2px', flexShrink: 0, mt: '4px' }} />
-                <Bar w={idx % 2 === 0 ? '80%' : '65%'} h={8} />
-              </Box>
-            ))}
+            {data && data.pending_handoffs.length === 0 && (
+              <Typography sx={{ fontSize: '0.8rem', color: INK_FAINT }}>Nothing overnight</Typography>
+            )}
           </RailCard>
         </Box>
       </Box>

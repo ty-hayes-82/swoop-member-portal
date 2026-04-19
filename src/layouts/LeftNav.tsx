@@ -12,18 +12,19 @@ import TuneIcon from '@mui/icons-material/Tune'
 import HubIcon from '@mui/icons-material/Hub'
 import BarChartIcon from '@mui/icons-material/BarChart'
 import SettingsIcon from '@mui/icons-material/Settings'
+import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
 
 const NAV_ITEMS = [
-  { label: 'Today',        path: '/',               icon: <AutoAwesomeIcon fontSize="small" />, indent: false },
-  { label: 'Service',      path: '/service',        icon: <TimelapseIcon fontSize="small" />,   indent: false },
-  { label: 'Members',      path: '/members',        icon: <PeopleIcon fontSize="small" />,      indent: false },
-  { label: 'Engagement',   path: '/members/email',  icon: <BarChartIcon fontSize="small" />,    indent: true  },
-  { label: 'Revenue',      path: '/revenue',        icon: <AttachMoneyIcon fontSize="small" />, indent: false },
-  { label: 'Board',        path: '/board',          icon: <DashboardIcon fontSize="small" />,   indent: false },
-  { label: 'Admin',        path: '/admin',          icon: <TuneIcon fontSize="small" />,        indent: false },
-  { label: 'Integrations', path: '/integrations',   icon: <HubIcon fontSize="small" />,         indent: false },
-  { label: 'Settings',     path: '/settings',       icon: <SettingsIcon fontSize="small" />,    indent: false },
-  { label: 'Onboarding',  path: '/onboarding',     icon: <HubIcon fontSize="small" />,         indent: false },
+  { label: 'Today',        path: '/',               icon: <AutoAwesomeIcon fontSize="small" />,     indent: false },
+  { label: 'Service',      path: '/service',        icon: <TimelapseIcon fontSize="small" />,       indent: false },
+  { label: 'Members',      path: '/members',        icon: <PeopleIcon fontSize="small" />,          indent: false },
+  { label: 'Engagement',   path: '/members/email',  icon: <BarChartIcon fontSize="small" />,        indent: true  },
+  { label: 'Revenue',      path: '/revenue',        icon: <AttachMoneyIcon fontSize="small" />,     indent: false },
+  { label: 'Board',        path: '/board',          icon: <DashboardIcon fontSize="small" />,       indent: false },
+  { label: 'Admin',        path: '/admin',          icon: <TuneIcon fontSize="small" />,            indent: false },
+  { label: 'Onboarding',   path: '/onboarding',     icon: <PlaylistAddCheckIcon fontSize="small" />, indent: true  },
+  { label: 'Integrations', path: '/integrations',   icon: <HubIcon fontSize="small" />,             indent: true  },
+  { label: 'Settings',     path: '/settings',       icon: <SettingsIcon fontSize="small" />,        indent: true  },
 ]
 
 export default function LeftNav({ onNavigate }: { onNavigate?: () => void }) {
